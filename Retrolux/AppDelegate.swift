@@ -20,7 +20,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Override point for customization after application launch.
         [String: AnyObject]().isEmpty
         do {
-            let t = try Model(dictionary: [
+            let dictionary = [
                 "string": "Hello!",
                 "string_opt": NSNull(),
                 "failure_string": "",
@@ -36,47 +36,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 "date_dict_array": ["test": [["date": "2015-04-23T12:03:00Z"]]],
                 "craycray": ["stuff": ["more_stuff": ["even_more_stuff": [1, 2, 3]]]],
                 "person": [
-//                    "name": "Bob",
+                    "name": "Bob",
                     "whatever": true
                 ],
                 "friends": [
                     ["name": NSNull()],
                     ["name": "Jerry", "friend": ["name": "Ima Friend"]]
                 ]
-                ])
-            print(t)
-        } catch RetroluxException.DeserializationError(let message) {
-            print("exception:", message)
-        } catch {
-            print("Unknown exception")
-        }
-        
-        do {
-            let t = try Model(dictionary: [
-                "string": "Hello!",
-                "string_opt": NSNull(),
-                "failure_string": "",
-                "int": 23,
-                "float": 23.32,
-                "number_opt": NSNull(),
-                "list_anyobject": [23, ["SURPRISE!"], NSNull()],
-                "strings_2d": [["A", "B"], [2, "D"]],
-                "date": "2015-04-23T12:03:00Z",
-                "dates": ["2015-04-23T12:03:00Z", "2015-04-23T12:03:00Z"],
-                "date_dict": ["test": "2015-04-23T12:03:00Z", "test2": "2015-04-23T12:03:00Z"],
-                "date_dict_array": ["test": [["date": "2015-04-23T12:03:00Z"]]],
-                "craycray": ["stuff": ["more_stuff": ["even_more_stuff": [1, 2, 3]]]],
-                "person": [
-                    //                    "name": "Bob",
-                    "whatever": true
-                ],
-                "friends": [
-                    ["name": NSNull()],
-                    ["name": "Jerry"]
-                ]
-                ])
-            print(t)
-        } catch RetroluxException.DeserializationError(let message) {
+            ]
+            print(String(data: try! NSJSONSerialization.dataWithJSONObject(dictionary, options: []), encoding: NSUTF8StringEncoding)!)
+            let t = try Model(dictionary: dictionary)
+            let serialized = try t.toJSONString()
+            print("deserialized:", t)
+            print("serialized:", serialized)
+        } catch RetroluxException.SerializerError(let message) {
             print("exception:", message)
         } catch {
             print("Unknown exception")

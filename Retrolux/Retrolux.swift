@@ -82,16 +82,18 @@ indirect enum PropertyType: CustomStringConvertible {
     }
 }
 
-protocol RetroSerializable: class {
+protocol RetroSerializable: NSObjectProtocol {
     // Read/write properties
     func respondsToSelector(selector: Selector) -> Bool // To check if property can be bridged to Obj-C
-    func setValue(value: AnyObject?, forKey: String)
-    func valueForKey(key: String) -> AnyObject?
+    func setValue(value: AnyObject?, forKey: String) // For JSON -> Object deserialization
+    func valueForKey(key: String) -> AnyObject? // For Object -> JSON serialization
     
     // To/from dictionary
     init() // Required in order to provide default implementation for init(json:)
     init(dictionary: [String: AnyObject]) throws
-    func toDictionary() -> [String: AnyObject]
+    func toDictionary() throws -> [String: AnyObject]
+    func toJSONData() throws -> NSData
+    func toJSONString() throws -> String
     
     // TODO:
     //func copy() -> Self // Lower priority--this is primarily for copying/detaching database models
@@ -99,7 +101,7 @@ protocol RetroSerializable: class {
     //var hasChanges: Bool { get }
     //func resetChanges()
     
-    func validate() -> ErrorMessage? // Returns an error
+    func validate() -> ErrorMessage?
     static var ignoredProperties: [String] { get }
     static var optionalProperties: [String] { get }
     static var mappedProperties: [String: String] { get }
@@ -197,46 +199,68 @@ func getPropertyType(type: Any.Type) -> PropertyType? {
     return nil
 }
 
-func serializationProperties(forInstance instance: RetroSerializable) throws -> [Property] {
-    let ignored = Set(instance.dynamicType.ignoredProperties)
-    let optional = Set(instance.dynamicType.optionalProperties)
-    let mapped = instance.dynamicType.mappedProperties
-    
-    // Purposefully ignores labels that are nil
-    var properties = [Property]()
-    let mirrors: [(label: String, type: Any.Type)] = Mirror(reflecting: instance).children.flatMap({
+func getMirrorChildren(mirror: Mirror, parentMirror: Mirror?) throws -> [(label: String, valueType: Any.Type)] {
+    var children = [(label: String, valueType: Any.Type)]()
+    if let superMirror = mirror.superclassMirror() where superMirror.subjectType is RetroSerializable.Type {
+        children = try getMirrorChildren(superMirror, parentMirror: mirror)
+    } else if let parent = parentMirror
+        where parent.subjectType is RetroSerializable.Type && mirror.subjectType != SerializableObject.self {
+        throw RetroluxException.SerializerError(message: "Subclassing is not supported unless the base " +
+            "class is SerializableObject.")
+    }
+    return children + mirror.children.flatMap {
         guard let label = $0.label else {
             return nil
         }
-        return (label: label, type: $0.value.dynamicType)
-    })
-    let propertyNameSet: Set<String> = Set(mirrors.map({ $0.label }))
+        return (label, $0.value.dynamicType)
+    }
+}
+
+func serializationProperties(forInstance instance: RetroSerializable) throws -> [Property] {
+    var properties = [Property]()
+    let subjectType = instance.dynamicType
+    
+    let ignored = Set(subjectType.ignoredProperties)
+    let optional = Set(subjectType.optionalProperties)
+    let mapped = subjectType.mappedProperties
+    
+    // Purposefully ignores labels that are nil
+    let children = try getMirrorChildren(Mirror(reflecting: instance), parentMirror: nil)
+    print(children)
+    let propertyNameSet: Set<String> = Set(children.map({ $0.label }))
     
     if let ignoredButNotImplemented = ignored.subtract(propertyNameSet).first {
-        throw RetroluxException.DeserializationError(message: "Cannot ignore non-existent " +
-            "property \"\(ignoredButNotImplemented)\" on class \(instance.dynamicType)).")
+        throw RetroluxException.SerializerError(message: "Cannot ignore non-existent " +
+            "property \"\(ignoredButNotImplemented)\" on class \(subjectType)).")
     }
-    if let optionalButNotImplemented = ignored.subtract(propertyNameSet).first {
-        throw RetroluxException.DeserializationError(message: "Cannot make non-existent " +
-            "property \"\(optionalButNotImplemented)\" optional on class \(instance.dynamicType)).")
+    if let optionalButNotImplemented = optional.subtract(propertyNameSet).first {
+        throw RetroluxException.SerializerError(message: "Cannot make non-existent " +
+            "property \"\(optionalButNotImplemented)\" optional on class \(subjectType)).")
     }
     if let ignoredAndOptional = ignored.intersect(optional).first {
-        throw RetroluxException.DeserializationError(message: "Cannot make property " +
-        "\"\(ignoredAndOptional)\" on class \(instance.dynamicType) both ignored and optional.")
+        throw RetroluxException.SerializerError(message: "Cannot make property " +
+        "\"\(ignoredAndOptional)\" on class \(subjectType) both ignored and optional.")
     }
     if let mappedButNotImplemented = Set(mapped.keys).subtract(propertyNameSet).first {
-        throw RetroluxException.DeserializationError(message: "Cannot map non-existent " +
-            "property \"\(mappedButNotImplemented)\" on class \(instance.dynamicType)).")
+        throw RetroluxException.SerializerError(message: "Cannot map non-existent " +
+            "property \"\(mappedButNotImplemented)\" on class \(subjectType)).")
+    }
+    let excessivelyMapped = mapped.filter { k1, v1 in mapped.contains { v1 == $1 && k1 != $0 } }
+    if !excessivelyMapped.isEmpty {
+        let pickOne = excessivelyMapped.first!.1
+        let propertiesForIt = excessivelyMapped.filter { $1 == pickOne }.map { $0.0 }
+        throw RetroluxException.SerializerError(message: "Cannot map multiple properties, " +
+            "\(propertiesForIt), on class \(subjectType) to the same key, \"\(pickOne)\".")
     }
     
-    for (label, valueType) in mirrors {
+    for (label, valueType) in children {
         guard !ignored.contains(label) else {
             continue
         }
         guard let type = getPropertyType(valueType) else {
             // TODO: List supported types in error.
-            throw RetroluxException.DeserializationError(message: "Unsupported type " +
-                "\"\(valueType)\" for property \"\(label)\" on class \(instance.dynamicType).")
+            throw RetroluxException.SerializerError(message: "Unsupported type " +
+                "\"\(valueType)\" for property \"\(label)\" on class \(subjectType).")
         }
         
         guard instance.respondsToSelector(Selector(label)) else {
@@ -244,8 +268,8 @@ func serializationProperties(forInstance instance: RetroSerializable) throws -> 
             case .Optional(let wrapped):
                 switch wrapped {
                 case .Number:
-                    throw RetroluxException.DeserializationError(message: "Property \"\(label)\" on class " +
-                        "\(instance.dynamicType) cannot be an optional. Please make it non-optional or use an " +
+                    throw RetroluxException.SerializerError(message: "Property \"\(label)\" on class " +
+                        "\(subjectType) cannot be an optional. Please make it non-optional or use an " +
                         "NSNumber instead.")
                 default:
                     break
@@ -253,14 +277,14 @@ func serializationProperties(forInstance instance: RetroSerializable) throws -> 
             default:
                 break
             }
-            throw RetroluxException.DeserializationError(message: "Property \"\(label)\" on class " +
-                "\(instance.dynamicType) has an unsupported type, \(type). Make sure it can be bridged to " +
+            throw RetroluxException.SerializerError(message: "Property \"\(label)\" on class " +
+                "\(subjectType) has an unsupported type, \(type). Make sure it can be bridged to " +
                 "Objective-C by adding the \"dynamic\" keyword in front, or just add it to the list of ignored " +
                 "properties.")
         }
         guard !isReadOnly(property: label, instance: instance) else {
-            throw RetroluxException.DeserializationError(message: "Property \"\(label)\" on class " +
-                "\(instance.dynamicType) is read only. Please make it mutable or add it " +
+            throw RetroluxException.SerializerError(message: "Property \"\(label)\" on class " +
+                "\(subjectType) is read only. Please make it mutable or add it " +
                 "as an ignored property.")
         }
         properties.append(Property(
@@ -270,6 +294,7 @@ func serializationProperties(forInstance instance: RetroSerializable) throws -> 
             jsonKey: mapped[label] ?? label
             ))
     }
+    
     return properties
 }
 
@@ -287,7 +312,7 @@ extension Array: RetroTypeArray {
 }
 
 enum RetroluxException: ErrorType {
-    case DeserializationError(message: String)
+    case SerializerError(message: String)
 }
 
 var dateFormatters: [NSDateFormatter] = {
@@ -295,29 +320,30 @@ var dateFormatters: [NSDateFormatter] = {
     
     let f1 = NSDateFormatter()
     f1.locale = locale
-    f1.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ"
+    f1.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZZZZZ"
     
     let f2 = NSDateFormatter()
     f2.locale = locale
-    f2.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZZZZZ"
+    f2.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ"
     
-    let f3 = NSDateFormatter()
-    f3.locale = locale
-    f3.dateFormat = "yyyy-MM-dd"
-    
-    return [f1, f2, f3]
+    return [f1, f2]
 }()
 
-func transform(value: AnyObject, type: PropertyType) throws -> AnyObject {
+enum TransformDirection {
+    case ToJSON
+    case FromJSON
+}
+
+func transform(value: AnyObject, type: PropertyType, direction: TransformDirection) throws -> AnyObject {
     switch type {
     case .Optional(let wrapped):
-        return try transform(value, type: wrapped)
+        return try transform(value, type: wrapped, direction: direction)
     case .Array(let elementType):
         guard var array = value as? [AnyObject] else {
-            throw RetroluxException.DeserializationError(message: "Expected type Array, but got \(value.dynamicType)")
+            throw RetroluxException.SerializerError(message: "Expected type Array, but got \(value.dynamicType)")
         }
         for (index, element) in array.enumerate() {
-            let transformed = try transform(element, type: elementType)
+            let transformed = try transform(element, type: elementType, direction: direction)
             if transformed !== element {
                 array[index] = transformed
             }
@@ -325,38 +351,55 @@ func transform(value: AnyObject, type: PropertyType) throws -> AnyObject {
         return array
     case .Dictionary(let valueType):
         guard var dictionary = value as? [String: AnyObject] else {
-            throw RetroluxException.DeserializationError(message: "Expected type Dictionary, but got " +
+            throw RetroluxException.SerializerError(message: "Expected type Dictionary, but got " +
                 "\(value.dynamicType)")
         }
         for (key, value) in dictionary {
-            let transformed = try transform(value, type: valueType)
+            let transformed = try transform(value, type: valueType, direction: direction)
             if transformed !== value {
                 dictionary[key] = transformed
             }
         }
         return dictionary
     case .Date:
-        guard let string = value as? String else {
-            throw RetroluxException.DeserializationError(message: "Expected type String, but got \(value.dynamicType)")
-        }
-        for formatter in dateFormatters {
-            if let date = formatter.dateFromString(string) {
-                return date
+        switch direction {
+        case .FromJSON:
+            guard let string = value as? String else {
+                throw RetroluxException.SerializerError(message: "Expected type String, but got \(value.dynamicType)")
             }
+            for formatter in dateFormatters {
+                if let date = formatter.dateFromString(string) {
+                    return date
+                }
+            }
+            throw RetroluxException.SerializerError(message: "Failed to parse date string \"\(value)\"")
+        case .ToJSON:
+            if let date = value as? NSDate {
+                return dateFormatters.first!.stringFromDate(date)
+            }
+            return NSNull()
         }
-        throw RetroluxException.DeserializationError(message: "Failed to parse date string \"\(value)\"")
     case .Object(let type):
-        guard let dictionary = value as? [String: AnyObject] else {
-            throw RetroluxException.DeserializationError(message: "Expected type Dictionary, but got " +
-                "\(value.dynamicType)")
+        switch direction {
+        case .FromJSON:
+            guard let dictionary = value as? [String: AnyObject] else {
+                throw RetroluxException.SerializerError(message: "Expected type Dictionary, but got " +
+                    "\(value.dynamicType)")
+            }
+            return try type.init(dictionary: dictionary)
+        case .ToJSON:
+            guard let object = value as? RetroSerializable else {
+                throw RetroluxException.SerializerError(message: "Expected type \(RetroSerializable.self), but got " +
+                    "\(value.dynamicType)")
+            }
+            return try object.toDictionary()
         }
-        return try type.init(dictionary: dictionary)
     case .Bool:
         guard let number = value as? NSNumber else {
-            throw RetroluxException.DeserializationError(message: "Expected type Number, but got \(value.dynamicType)")
+            throw RetroluxException.SerializerError(message: "Expected type Number, but got \(value.dynamicType)")
         }
         guard number.objCType == NSNumber(bool: false).objCType || number.intValue == 0 || number.intValue == 1 else {
-            throw RetroluxException.DeserializationError(message: "Expected a boolean, but got a number.")
+            throw RetroluxException.SerializerError(message: "Expected a boolean, but got a number.")
         }
         return value
     default:
@@ -371,8 +414,8 @@ extension RetroSerializable {
         self.init()
         do {
             try setProperties(dictionary)
-        } catch RetroluxException.DeserializationError(let message) {
-            throw RetroluxException.DeserializationError(message: message)
+        } catch RetroluxException.SerializerError(let message) {
+            throw RetroluxException.SerializerError(message: message)
         } catch let error {
             throw error
         }
@@ -385,7 +428,7 @@ extension RetroSerializable {
                 guard property.required else {
                     continue
                 }
-                throw RetroluxException.DeserializationError(message: "Missing key \"\(property.name)\" in json for " +
+                throw RetroluxException.SerializerError(message: "Missing key \"\(property.name)\" in json for " +
                     "property \"\(property.name)\" on class \(self.dynamicType).")
             }
             
@@ -393,19 +436,19 @@ extension RetroSerializable {
                 guard property.required else {
                     continue
                 }
-                throw RetroluxException.DeserializationError(message: "Value " +
+                throw RetroluxException.SerializerError(message: "Value " +
                     "\(value) is not compatible with type \(property.type) for property " +
                     "\"\(property.name)\" on class \(self.dynamicType).")
             }
             
             if !(value is NSNull) {
                 do {
-                    value = try transform(value, type: property.type)
-                } catch RetroluxException.DeserializationError(let message) {
+                    value = try transform(value, type: property.type, direction: .FromJSON)
+                } catch RetroluxException.SerializerError(let message) {
                     guard property.required else {
                         continue
                     }
-                    throw RetroluxException.DeserializationError(message: "Failed to convert value for property " +
+                    throw RetroluxException.SerializerError(message: "Failed to convert value for property " +
                         "\"\(property.name)\" on class \(self.dynamicType) to a \(property.type): \(message)")
                 }
             }
@@ -414,12 +457,37 @@ extension RetroSerializable {
         }
         
         if let error = validate() {
-            throw RetroluxException.DeserializationError(message: "Object \(self) failed validation: \(error)")
+            throw RetroluxException.SerializerError(message: "Object \(self) failed validation: \(error)")
         }
     }
     
-    func toDictionary() -> [String: AnyObject] {
-        return [:]
+    func toDictionary() throws -> [String: AnyObject] {
+        var output = [String: AnyObject]()
+        for property in try getProperties(fromType: self.dynamicType) {
+            if let value = valueForKey(property.name) {
+                output[property.jsonKey] = try transform(value, type: property.type, direction: .ToJSON)
+            } else {
+                output[property.jsonKey] = NSNull()
+            }
+        }
+        return output
+    }
+    
+    func toJSONData() throws -> NSData {
+        do {
+            let dictionary = try toDictionary()
+            return try NSJSONSerialization.dataWithJSONObject(dictionary, options: [])
+        } catch RetroluxException.SerializerError(let message) {
+            throw RetroluxException.SerializerError(message: "Failed to convert \(self.dynamicType) to a JSON " +
+                "string: \(message)")
+        } catch let error as NSError {
+            throw RetroluxException.SerializerError(message: "Failed to convert \(self.dynamicType) to a JSON " +
+                "string: \(error.localizedDescription)")
+        }
+    }
+    
+    func toJSONString() throws -> String {
+        return String(data: try toJSONData(), encoding: NSUTF8StringEncoding)!
     }
     
     func validate() -> ErrorMessage? {
@@ -439,15 +507,37 @@ extension RetroSerializable {
     }
 }
 
+class SerializableObject: NSObject, RetroSerializable {
+    required override init() {
+        super.init()
+    }
+    
+    func validate() -> ErrorMessage? {
+        return nil
+    }
+    
+    class var ignoredProperties: [String] {
+        return []
+    }
+    
+    class var optionalProperties: [String] {
+        return []
+    }
+    
+    class var mappedProperties: [String: String] {
+        return [:]
+    }
+}
+
 class Person: NSObject, RetroSerializable {
     required override init() {
         super.init()
     }
     
-    var name: String = ""
+    var name: String? = ""
     var friend: Person?
     
-    static let optionalProperties = ["name", "friend"]
+    static let optionalProperties = ["friend"]
     
     override var description: String {
         if let f = friend {
@@ -458,11 +548,7 @@ class Person: NSObject, RetroSerializable {
     }
 }
 
-class Model: NSObject, RetroSerializable {
-    required override init() {
-        super.init()
-    }
-    
+class ModelBase: SerializableObject {
     var string = "(default value)"
     var string_opt: String? = "(default value)"
     var failure_string: String = "(default value)"
@@ -479,23 +565,30 @@ class Model: NSObject, RetroSerializable {
     var person: Person?
     var friends: [Person] = []
     
-    var thing_number: NSNumber?
-    var thing_string: String?
-    
-    var notSerializable: Bool? = nil
-    
-    static let ignoredProperties = ["notSerializable"]
-    static let optionalProperties = ["failure_string", "thing_number", "thing_string"]
-    static let mappedProperties = [
-        "thing_number": "thing",
-        "thing_string": "thing"
-    ]
-
-    func validate() -> ErrorMessage? {
-        if thing_number == nil && thing_string == nil {
-            return "missing thing"
+    var thing: AnyObject?
+    var thing_number: Int? {
+        get {
+            return thing as? Int
         }
-        return nil
+        set {
+            thing = newValue
+        }
+    }
+    var thing_string: String? {
+        get {
+            return thing as? String
+        }
+        set {
+            thing = newValue
+        }
+    }
+    
+    override class var optionalProperties: [String] {
+        return ["failure_string"]
+    }
+    
+    override class var ignoredProperties: [String] {
+        return []
     }
     
     override var description: String {
@@ -518,5 +611,13 @@ class Model: NSObject, RetroSerializable {
             "  thing_number: \(thing_number)\n" +
             "  thing_string: \(thing_string)\n" +
         "}"
+    }
+}
+
+class Model: ModelBase {
+    var notSerializable: Bool? = nil
+    
+    override class var ignoredProperties: [String] {
+        return ["notSerializable"]
     }
 }
