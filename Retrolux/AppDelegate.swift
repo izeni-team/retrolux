@@ -42,7 +42,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 "friends": [
                     ["name": NSNull()],
                     ["name": "Jerry", "friend": ["name": "Ima Friend"]]
-                ]
+                ],
+                "inherited": true
             ]
             print(String(data: try! NSJSONSerialization.dataWithJSONObject(dictionary, options: []), encoding: NSUTF8StringEncoding)!)
             let t = try Model(dictionary: dictionary)

@@ -407,87 +407,93 @@ func transform(value: AnyObject, type: PropertyType, direction: TransformDirecti
     }
 }
 
+func serializeToDictionary(instance: RetroSerializable) throws -> [String: AnyObject] {
+    var output = [String: AnyObject]()
+    for property in try getProperties(fromType: instance.dynamicType) {
+        if let value = instance.valueForKey(property.name) {
+            output[property.jsonKey] = try transform(value, type: property.type, direction: .ToJSON)
+        } else {
+            output[property.jsonKey] = NSNull()
+        }
+    }
+    return output
+}
+
+func serializeToJSONData(instance: RetroSerializable) throws -> NSData {
+    do {
+        let dictionary = try instance.toDictionary()
+        return try NSJSONSerialization.dataWithJSONObject(dictionary, options: [])
+    } catch RetroluxException.SerializerError(let message) {
+        throw RetroluxException.SerializerError(message: "Failed to convert \(instance.dynamicType) to a JSON " +
+            "string: \(message)")
+    } catch let error as NSError {
+        throw RetroluxException.SerializerError(message: "Failed to convert \(instance.dynamicType) to a JSON " +
+            "string: \(error.localizedDescription)")
+    }
+}
+
+func serializeToJSONString(instance: RetroSerializable) throws -> String {
+    return String(data: try instance.toJSONData(), encoding: NSUTF8StringEncoding)!
+}
+
+func setPropertiesFor(instance instance: RetroSerializable, fromDictionary dictionary: [String: AnyObject]) throws {
+    for property in try getProperties(fromType: instance.dynamicType) {
+        var value: AnyObject! = dictionary[property.jsonKey]
+        guard value != nil else {
+            guard property.required else {
+                continue
+            }
+            throw RetroluxException.SerializerError(message: "Missing key \"\(property.name)\" in json for " +
+                "property \"\(property.name)\" on class \(instance.dynamicType).")
+        }
+        
+        guard property.type.isCompatibleWith(value) else {
+            guard property.required else {
+                continue
+            }
+            throw RetroluxException.SerializerError(message: "Value " +
+                "\(value) is not compatible with type \(property.type) for property " +
+                "\"\(property.name)\" on class \(instance.dynamicType).")
+        }
+        
+        if !(value is NSNull) {
+            do {
+                value = try transform(value, type: property.type, direction: .FromJSON)
+            } catch RetroluxException.SerializerError(let message) {
+                guard property.required else {
+                    continue
+                }
+                throw RetroluxException.SerializerError(message: "Failed to convert value for property " +
+                    "\"\(property.name)\" on class \(instance.dynamicType) to a \(property.type): \(message)")
+            }
+        }
+        
+        instance.setValue(value is NSNull ? nil : value, forKey: property.name)
+    }
+    
+    if let error = instance.validate() {
+        throw RetroluxException.SerializerError(message: "Object \(instance) failed validation: \(error)")
+    }
+}
+
 typealias ErrorMessage = String
 
 extension RetroSerializable {
     init(dictionary: [String: AnyObject]) throws {
         self.init()
-        do {
-            try setProperties(dictionary)
-        } catch RetroluxException.SerializerError(let message) {
-            throw RetroluxException.SerializerError(message: message)
-        } catch let error {
-            throw error
-        }
-    }
-    
-    func setProperties(dictionary: [String: AnyObject]) throws {
-        for property in try getProperties(fromType: self.dynamicType) {
-            var value: AnyObject! = dictionary[property.jsonKey]
-            guard value != nil else {
-                guard property.required else {
-                    continue
-                }
-                throw RetroluxException.SerializerError(message: "Missing key \"\(property.name)\" in json for " +
-                    "property \"\(property.name)\" on class \(self.dynamicType).")
-            }
-            
-            guard property.type.isCompatibleWith(value) else {
-                guard property.required else {
-                    continue
-                }
-                throw RetroluxException.SerializerError(message: "Value " +
-                    "\(value) is not compatible with type \(property.type) for property " +
-                    "\"\(property.name)\" on class \(self.dynamicType).")
-            }
-            
-            if !(value is NSNull) {
-                do {
-                    value = try transform(value, type: property.type, direction: .FromJSON)
-                } catch RetroluxException.SerializerError(let message) {
-                    guard property.required else {
-                        continue
-                    }
-                    throw RetroluxException.SerializerError(message: "Failed to convert value for property " +
-                        "\"\(property.name)\" on class \(self.dynamicType) to a \(property.type): \(message)")
-                }
-            }
-            
-            setValue(value is NSNull ? nil : value, forKey: property.name)
-        }
-        
-        if let error = validate() {
-            throw RetroluxException.SerializerError(message: "Object \(self) failed validation: \(error)")
-        }
+        try setPropertiesFor(instance: self, fromDictionary: dictionary)
     }
     
     func toDictionary() throws -> [String: AnyObject] {
-        var output = [String: AnyObject]()
-        for property in try getProperties(fromType: self.dynamicType) {
-            if let value = valueForKey(property.name) {
-                output[property.jsonKey] = try transform(value, type: property.type, direction: .ToJSON)
-            } else {
-                output[property.jsonKey] = NSNull()
-            }
-        }
-        return output
+        return try serializeToDictionary(self)
     }
     
     func toJSONData() throws -> NSData {
-        do {
-            let dictionary = try toDictionary()
-            return try NSJSONSerialization.dataWithJSONObject(dictionary, options: [])
-        } catch RetroluxException.SerializerError(let message) {
-            throw RetroluxException.SerializerError(message: "Failed to convert \(self.dynamicType) to a JSON " +
-                "string: \(message)")
-        } catch let error as NSError {
-            throw RetroluxException.SerializerError(message: "Failed to convert \(self.dynamicType) to a JSON " +
-                "string: \(error.localizedDescription)")
-        }
+        return try serializeToJSONData(self)
     }
     
     func toJSONString() throws -> String {
-        return String(data: try toJSONData(), encoding: NSUTF8StringEncoding)!
+        return try serializeToJSONString(self)
     }
     
     func validate() -> ErrorMessage? {
@@ -510,6 +516,23 @@ extension RetroSerializable {
 class SerializableObject: NSObject, RetroSerializable {
     required override init() {
         super.init()
+    }
+    
+    required convenience init(dictionary: [String: AnyObject]) throws {
+        self.init()
+        try setPropertiesFor(instance: self, fromDictionary: dictionary)
+    }
+    
+    func toDictionary() throws -> [String: AnyObject] {
+        return try serializeToDictionary(self)
+    }
+    
+    func toJSONData() throws -> NSData {
+        return try serializeToJSONData(self)
+    }
+    
+    func toJSONString() throws -> String {
+        return try serializeToJSONString(self)
     }
     
     func validate() -> ErrorMessage? {
@@ -616,8 +639,13 @@ class ModelBase: SerializableObject {
 
 class Model: ModelBase {
     var notSerializable: Bool? = nil
+    var inherited: Bool = false
     
     override class var ignoredProperties: [String] {
         return ["notSerializable"]
+    }
+    
+    override var description: String {
+        return super.description + "inherited: \(inherited)"
     }
 }
