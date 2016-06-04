@@ -8,7 +8,103 @@
 
 import UIKit
 
+class Person: NSObject, Serializable {
+    required override init() {
+        super.init()
+    }
+    
+    var name: String? = ""
+    var friend: Person?
+    
+    static let optionalProperties = ["friend"]
+    
+    override var description: String {
+        if let f = friend {
+            return "Person{name: \(name), friend: \(f)}"
+        } else {
+            return "Person{name: \(name)}"
+        }
+    }
+}
 
+class ModelBase: RetroluxModel {
+    var string = "(default value)"
+    var string_opt: String? = "(default value)"
+    var failure_string: String = "(default value)"
+    var int = 0
+    var float = 0.0
+    var number_opt: NSNumber?
+    var list_anyobject: [AnyObject]? = []
+    var strings_2d: [[AnyObject]] = []
+    var date: NSDate?
+    var dates: [NSDate] = []
+    var date_dict: [String: NSDate] = [:]
+    var date_dict_array: [String: [[String: NSDate]]] = [:]
+    var craycray: [String: [String: [String: [Int]]]] = [:]
+    var person: Person?
+    var friends: [Person] = []
+    
+    var thing: AnyObject?
+    var thing_number: Int? {
+        get {
+            return thing as? Int
+        }
+        set {
+            thing = newValue
+        }
+    }
+    var thing_string: String? {
+        get {
+            return thing as? String
+        }
+        set {
+            thing = newValue
+        }
+    }
+    
+    override class var optionalProperties: [String] {
+        return ["failure_string"]
+    }
+    
+    override class var ignoredProperties: [String] {
+        return []
+    }
+    
+    override var description: String {
+        return "Model {\n" +
+            "  string: \(string)\n" +
+            "  string_opt: \(string_opt)\n" +
+            "  failure_string: \(failure_string)\n" +
+            "  int: \(int)\n" +
+            "  float: \(float)\n" +
+            "  number_opt: \(number_opt)\n" +
+            "  list_anyobject: \(list_anyobject)\n" +
+            "  strings_2d: \(strings_2d)\n" +
+            "  date: \(date)\n" +
+            "  dates: \(dates)\n" +
+            "  date_dict: \(date_dict)\n" +
+            "  date_dict_array: \(date_dict_array)\n" +
+            "  craycray: \(craycray)\n" +
+            "  person: \(person)\n" +
+            "  friends: \(friends)\n" +
+            "  thing_number: \(thing_number)\n" +
+            "  thing_string: \(thing_string)\n" +
+        "}"
+    }
+}
+
+class Model: ModelBase {
+    var notSerializable: Bool? = nil
+    var inherited: Bool = false
+    
+    override class var ignoredProperties: [String] {
+        return ["notSerializable"]
+    }
+    
+    override var description: String {
+        return super.description + "inherited: \(inherited)"
+    }
+}
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -18,7 +114,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         // Override point for customization after application launch.
-        [String: AnyObject]().isEmpty
+        
         do {
             let dictionary = [
                 "string": "Hello!",
