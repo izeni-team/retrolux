@@ -36,6 +36,80 @@ public protocol Serializable: NSObjectProtocol {
     static var mappedProperties: [String: String] { get }
 }
 
+extension Serializable {
+    public init(dictionary: [String: AnyObject]) throws {
+        self.init()
+        try Retrolux.serializer.setPropertiesFor(instance: self, fromDictionary: dictionary)
+    }
+    
+    public func toDictionary() throws -> [String: AnyObject] {
+        return try Retrolux.serializer.serializeToDictionary(self)
+    }
+    
+    public func toJSONData() throws -> NSData {
+        return try Retrolux.serializer.serializeToJSONData(self)
+    }
+    
+    public func toJSONString() throws -> String {
+        return try Retrolux.serializer.serializeToJSONString(self)
+    }
+    
+    public func validate() -> ErrorMessage? {
+        return nil
+    }
+    
+    public static var ignoredProperties: [String] {
+        return []
+    }
+    
+    public static var optionalProperties: [String] {
+        return []
+    }
+    
+    public static var mappedProperties: [String: String] {
+        return [:]
+    }
+}
+
+public class RetroluxModel: NSObject, Serializable {
+    public required override init() {
+        super.init()
+    }
+    
+    public required convenience init(dictionary: [String: AnyObject]) throws {
+        self.init()
+        try Retrolux.serializer.setPropertiesFor(instance: self, fromDictionary: dictionary)
+    }
+    
+    public func toDictionary() throws -> [String: AnyObject] {
+        return try Retrolux.serializer.serializeToDictionary(self)
+    }
+    
+    public func toJSONData() throws -> NSData {
+        return try Retrolux.serializer.serializeToJSONData(self)
+    }
+    
+    public func toJSONString() throws -> String {
+        return try Retrolux.serializer.serializeToJSONString(self)
+    }
+    
+    public func validate() -> ErrorMessage? {
+        return nil
+    }
+    
+    public class var ignoredProperties: [String] {
+        return []
+    }
+    
+    public class var optionalProperties: [String] {
+        return []
+    }
+    
+    public class var mappedProperties: [String: String] {
+        return [:]
+    }
+}
+
 public class Serializer {
     public enum TransformDirection {
         case ToJSON
@@ -214,11 +288,11 @@ public class Serializer {
         
         if let ignoredButNotImplemented = ignored.subtract(propertyNameSet).first {
             throw RetroluxException.SerializerError(message: "Cannot ignore non-existent " +
-                "property \"\(ignoredButNotImplemented)\" on class \(subjectType)).")
+                "property \"\(ignoredButNotImplemented)\" on class \(subjectType).")
         }
         if let optionalButNotImplemented = optional.subtract(propertyNameSet).first {
             throw RetroluxException.SerializerError(message: "Cannot make non-existent " +
-                "property \"\(optionalButNotImplemented)\" optional on class \(subjectType)).")
+                "property \"\(optionalButNotImplemented)\" optional on class \(subjectType).")
         }
         if let ignoredAndOptional = ignored.intersect(optional).first {
             throw RetroluxException.SerializerError(message: "Cannot make property " +
@@ -226,7 +300,7 @@ public class Serializer {
         }
         if let mappedButNotImplemented = Set(mapped.keys).subtract(propertyNameSet).first {
             throw RetroluxException.SerializerError(message: "Cannot map non-existent " +
-                "property \"\(mappedButNotImplemented)\" on class \(subjectType)).")
+                "property \"\(mappedButNotImplemented)\" on class \(subjectType).")
         }
         let excessivelyMapped = mapped.filter { k1, v1 in mapped.contains { v1 == $1 && k1 != $0 } }
         if !excessivelyMapped.isEmpty {
@@ -484,77 +558,3 @@ extension Float: SerializerNumberType {}
 extension Float64: SerializerNumberType {}
 extension Float80: SerializerNumberType {}
 extension NSNumber: SerializerNumberType {}
-
-extension Serializable {
-    public init(dictionary: [String: AnyObject]) throws {
-        self.init()
-        try Retrolux.serializer.setPropertiesFor(instance: self, fromDictionary: dictionary)
-    }
-    
-    public func toDictionary() throws -> [String: AnyObject] {
-        return try Retrolux.serializer.serializeToDictionary(self)
-    }
-    
-    public func toJSONData() throws -> NSData {
-        return try Retrolux.serializer.serializeToJSONData(self)
-    }
-    
-    public func toJSONString() throws -> String {
-        return try Retrolux.serializer.serializeToJSONString(self)
-    }
-    
-    public func validate() -> ErrorMessage? {
-        return nil
-    }
-    
-    public static var ignoredProperties: [String] {
-        return []
-    }
-    
-    public static var optionalProperties: [String] {
-        return []
-    }
-    
-    public static var mappedProperties: [String: String] {
-        return [:]
-    }
-}
-
-public class RetroluxModel: NSObject, Serializable {
-    public required override init() {
-        super.init()
-    }
-    
-    public required convenience init(dictionary: [String: AnyObject]) throws {
-        self.init()
-        try Retrolux.serializer.setPropertiesFor(instance: self, fromDictionary: dictionary)
-    }
-    
-    public func toDictionary() throws -> [String: AnyObject] {
-        return try Retrolux.serializer.serializeToDictionary(self)
-    }
-    
-    public func toJSONData() throws -> NSData {
-        return try Retrolux.serializer.serializeToJSONData(self)
-    }
-    
-    public func toJSONString() throws -> String {
-        return try Retrolux.serializer.serializeToJSONString(self)
-    }
-    
-    public func validate() -> ErrorMessage? {
-        return nil
-    }
-    
-    public class var ignoredProperties: [String] {
-        return []
-    }
-    
-    public class var optionalProperties: [String] {
-        return []
-    }
-    
-    public class var mappedProperties: [String: String] {
-        return [:]
-    }
-}
