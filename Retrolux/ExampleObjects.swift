@@ -75,7 +75,21 @@ class ExampleObjectBase: RetroluxObject {
         }
     }
     
-    // Any properties listed here will fallback to their default values if something goes wrong during parsing.
+    // Any properties listed here will fallback to their default values if an error is raised while assigning it
+    // a value from JSON. An error could be raised for over a dozen different reasons, including:
+    // - Property is read-only
+    // - Non-existant property can't be ignored
+    // - Non-existant property can't be marked optional
+    // - Missing key in JSON for property
+    // - Having a subclass that is Serializable but not a RetroluxObject
+    // - Marking a property as both ignored and optional
+    // - Mapping a non-existant property
+    // - Mapping multiple properties to the same JSON key
+    // - Unsupported property type (supported types are Numbers, Dates, Dictionaries, Arrays, Strings, and other Objects)
+    // - Having an optional primitive (i.e., Int?, Bool?) that can't be bridged to Objective-C
+    // - JSON validation error (types in JSON didn't match type for property)
+    // - Failing to convert a String into a Date
+    // - Failing custom validation via validate()
     override class var optionalProperties: [String] {
         return ["failure_string"]
     }
