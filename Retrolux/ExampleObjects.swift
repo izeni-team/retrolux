@@ -167,42 +167,43 @@ func createDictionary<T: Serializable>(fromObject object: T) -> [String: AnyObje
 }
 
 func runExample() {
-    func runExample() {
-        let exampleDictionary: [String: AnyObject] = [
-            "string": "Hello!",
-            "string_opt": NSNull(),
-            "failure_string": "",
-            "int": 23,
-            "float": 23.32,
-            "thing": 2,
-            "number_opt": NSNull(),
-            "list_anyobject": [23, ["SURPRISE!"], NSNull()],
-            "strings_2d": [["A", "B"], [2, "D"]],
-            "date": "2015-04-23T12:03:00Z",
-            "dates": ["2015-04-23T12:03:00Z", "2015-04-23T12:03:00Z"],
-            "date_dict": ["test": "2015-04-23T12:03:00Z", "test2": "2015-04-23T12:03:00Z"],
-            "date_dict_array": ["test": [["date": "2015-04-23T12:03:00Z"]]],
-            "craycray": ["stuff": ["more_stuff": ["even_more_stuff": [1, 2, 3]]]],
-            "person": [
-                "name": "Bob",
-                "whatever": true
-            ],
-            "friends": [
-                ["name": NSNull()],
-                ["name": "Jerry", "friend": ["name": "Ima Friend"]]
-            ],
-            "description": "Hello, this is a Model test",
-            "inherited": true
-        ]
+    let exampleDictionary: [String: AnyObject] = [
+        "string": "Hello!",
+        "string_opt": NSNull(),
+        "failure_string": "",
+        "int": 23,
+        "float": 23.32,
+        "thing": 2,
+        "number_opt": NSNull(),
+        "list_anyobject": [23, ["SURPRISE!"], NSNull()],
+        "strings_2d": [["A", "B"], [2, "D"]],
+        "date": "2015-04-23T12:03:00Z",
+        "dates": ["2015-04-23T12:03:00Z", "2015-04-23T12:03:00Z"],
+        "date_dict": ["test": "2015-04-23T12:03:00Z", "test2": "2015-04-23T12:03:00Z"],
+        "date_dict_array": ["test": [["date": "2015-04-23T12:03:00Z"]]],
+        "craycray": ["stuff": ["more_stuff": ["even_more_stuff": [1, 2, 3]]]],
+        "person": [
+            "name": "Bob",
+            "whatever": true
+        ],
+        "friends": [
+            ["name": NSNull()],
+            ["name": "Jerry", "friend": ["name": "Ima Friend"]]
+        ],
+        "description": "Hello, this is a Model test",
+        "inherited": true
+    ]
+    
+    if let exampleObj = createObject(ExampleObject.self, fromDictionary: exampleDictionary) {
+        print("exampleObj: \(exampleObj)")
         
-        if let exampleObj = createObject(ExampleObject.self, fromDictionary: exampleDictionary) {
-            print("exampleObj: \(exampleObj)")
-            
-            if let andBackToDictionary = createDictionary(fromObject: exampleObj) {
-                print("\n\nexampleObj.toDictionary(): \(andBackToDictionary)")
-            }
-        } else {
-            print("!testModel")
+        if let andBackToDictionary = createDictionary(fromObject: exampleObj) {
+            print("\n\nexampleObj.toDictionary(): \(andBackToDictionary)")
         }
+    } else {
+        print("!testModel")
     }
+    
+    let person = try! Person.fromNetworkResponse(["name": "Bob"])
+    print("\n\n", person)
 }

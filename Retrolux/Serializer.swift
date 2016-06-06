@@ -10,7 +10,11 @@ import Foundation
 
 public typealias ErrorMessage = String
 
-public protocol Serializable: NSObjectProtocol {
+public protocol NetworkResponseConvertible {
+    static func fromNetworkResponse(object: AnyObject) throws -> Any
+}
+
+public protocol Serializable: NSObjectProtocol, NetworkResponseConvertible {
     // Read/write properties
     func respondsToSelector(selector: Selector) -> Bool // To check if property can be bridged to Obj-C
     func setValue(value: AnyObject?, forKey: String) // For JSON -> Object deserialization
@@ -68,6 +72,13 @@ extension Serializable {
     
     public static var mappedProperties: [String: String] {
         return [:]
+    }
+    
+    public static func fromNetworkResponse(object: AnyObject) throws -> Any {
+        guard let dictionary = object as? [String: AnyObject] else {
+            throw RetroluxException.SerializerError(message: "Cannot convert response of type \(object.dynamicType) into a \(self.dynamicType).")
+        }
+        return try self.init(dictionary: dictionary)
     }
 }
 
@@ -207,10 +218,10 @@ public class Serializer {
     }
     
     public struct Property {
-        let type: PropertyType
-        let name: String
-        let required: Bool
-        let jsonKey: String
+        public let type: PropertyType
+        public let name: String
+        public let required: Bool
+        public let jsonKey: String
     }
     
     public var cache: [ObjectIdentifier: [Property]] = [:]
