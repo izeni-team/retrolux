@@ -283,7 +283,6 @@ public class Serializer {
         let mapped = subjectType.mappedProperties
         
         let children = try getMirrorChildren(Mirror(reflecting: instance), parentMirror: nil)
-        print(children)
         let propertyNameSet: Set<String> = Set(children.map({ $0.label }))
         
         if let ignoredButNotImplemented = ignored.subtract(propertyNameSet).first {
