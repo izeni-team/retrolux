@@ -555,5 +555,4 @@ extension UInt32: SerializerNumberType {}
 extension UInt64: SerializerNumberType {}
 extension Float: SerializerNumberType {}
 extension Float64: SerializerNumberType {}
-extension Float80: SerializerNumberType {}
 extension NSNumber: SerializerNumberType {}
