@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
   spec.name = 'Retrolux'
-  spec.version = '0.0.2'
+  spec.version = '0.0.3'
   spec.license = { :type => 'MIT' }
   spec.homepage = 'https://dev.izeni.net/bhenderson/retrolux'
   spec.authors = { 'Bryan Henderson' => 'bhenderson@izeni.com' }
