@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		34191B271D0396BF00553C20 /* Retrolux.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34191B261D0396BF00553C20 /* Retrolux.swift */; };
+		34344ED01D052D9E00616CC3 /* Endpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34344ECF1D052D9E00616CC3 /* Endpoint.swift */; };
+		34344ED21D0559EA00616CC3 /* ExampleObjects.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34344ED11D0559EA00616CC3 /* ExampleObjects.swift */; };
 		34F26CA41CFFE8A9008C3D9A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F26CA31CFFE8A9008C3D9A /* AppDelegate.swift */; };
 		34F26CA61CFFE8A9008C3D9A /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F26CA51CFFE8A9008C3D9A /* ViewController.swift */; };
 		34F26CA91CFFE8A9008C3D9A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 34F26CA71CFFE8A9008C3D9A /* Main.storyboard */; };
@@ -18,6 +20,8 @@
 
 /* Begin PBXFileReference section */
 		34191B261D0396BF00553C20 /* Retrolux.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Retrolux.swift; sourceTree = "<group>"; };
+		34344ECF1D052D9E00616CC3 /* Endpoint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Endpoint.swift; sourceTree = "<group>"; };
+		34344ED11D0559EA00616CC3 /* ExampleObjects.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExampleObjects.swift; sourceTree = "<group>"; };
 		34F26CA01CFFE8A9008C3D9A /* Retrolux.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Retrolux.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		34F26CA31CFFE8A9008C3D9A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		34F26CA51CFFE8A9008C3D9A /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -66,6 +70,8 @@
 				34F26CAF1CFFE8A9008C3D9A /* Info.plist */,
 				34F26CB51CFFE8F6008C3D9A /* Serializer.swift */,
 				34191B261D0396BF00553C20 /* Retrolux.swift */,
+				34344ECF1D052D9E00616CC3 /* Endpoint.swift */,
+				34344ED11D0559EA00616CC3 /* ExampleObjects.swift */,
 			);
 			path = Retrolux;
 			sourceTree = "<group>";
@@ -145,6 +151,8 @@
 				34F26CB61CFFE8F6008C3D9A /* Serializer.swift in Sources */,
 				34191B271D0396BF00553C20 /* Retrolux.swift in Sources */,
 				34F26CA41CFFE8A9008C3D9A /* AppDelegate.swift in Sources */,
+				34344ED21D0559EA00616CC3 /* ExampleObjects.swift in Sources */,
+				34344ED01D052D9E00616CC3 /* Endpoint.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

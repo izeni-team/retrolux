@@ -27,7 +27,7 @@ public protocol Serializable: NSObjectProtocol {
     //func copy() -> Self // Lower priority--this is primarily for copying/detaching database models
     //func changes() -> [String: AnyObject]
     //var hasChanges: Bool { get }
-    //func clearStoredChanges() resetChanges() markAsHavingNoChanges() What to name this thing?
+    //func clearChanges() resetChanges() markAsHavingNoChanges() What to name this thing?
     //func revertChanges() // MAYBE?
     
     func validate() -> ErrorMessage?
@@ -71,7 +71,7 @@ extension Serializable {
     }
 }
 
-public class RetroluxModel: NSObject, Serializable {
+public class RetroluxObject: NSObject, Serializable {
     public required override init() {
         super.init()
     }
@@ -260,9 +260,9 @@ public class Serializer {
         if let superMirror = mirror.superclassMirror() where superMirror.subjectType is Serializable.Type {
             children = try getMirrorChildren(superMirror, parentMirror: mirror)
         } else if let parent = parentMirror
-            where parent.subjectType is Serializable.Type && mirror.subjectType != RetroluxModel.self {
+            where parent.subjectType is Serializable.Type && mirror.subjectType != RetroluxObject.self {
             throw RetroluxException.SerializerError(message: "Subclassing is not supported unless the base " +
-                "class is \(RetroluxModel.self).")
+                "class is \(RetroluxObject.self).")
         }
         
         // Purposefully ignores labels that are nil

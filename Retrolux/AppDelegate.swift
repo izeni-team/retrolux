@@ -8,149 +8,15 @@
 
 import UIKit
 
-class Person: NSObject, Serializable {
-    required override init() {
-        super.init()
-    }
-    
-    var name: String? = ""
-    var friend: Person?
-    
-    static let optionalProperties = ["friend"]
-    
-    override var description: String {
-        if let f = friend {
-            return "Person{name: \(name), friend: \(f)}"
-        } else {
-            return "Person{name: \(name)}"
-        }
-    }
-}
-
-class ModelBase: RetroluxModel {
-    var string = "(default value)"
-    var string_opt: String? = "(default value)"
-    var failure_string: String = "(default value)"
-    var int = 0
-    var float = 0.0
-    var number_opt: NSNumber?
-    var list_anyobject: [AnyObject]? = []
-    var strings_2d: [[AnyObject]] = []
-    var date: NSDate?
-    var dates: [NSDate] = []
-    var date_dict: [String: NSDate] = [:]
-    var date_dict_array: [String: [[String: NSDate]]] = [:]
-    var craycray: [String: [String: [String: [Int]]]] = [:]
-    var person: Person?
-    var friends: [Person] = []
-    
-    var thing: AnyObject?
-    var thing_number: Int? {
-        get {
-            return thing as? Int
-        }
-        set {
-            thing = newValue
-        }
-    }
-    var thing_string: String? {
-        get {
-            return thing as? String
-        }
-        set {
-            thing = newValue
-        }
-    }
-    
-    override class var optionalProperties: [String] {
-        return ["failure_string"]
-    }
-    
-    override class var ignoredProperties: [String] {
-        return []
-    }
-    
-    override var description: String {
-        return "Model {\n" +
-            "  string: \(string)\n" +
-            "  string_opt: \(string_opt)\n" +
-            "  failure_string: \(failure_string)\n" +
-            "  int: \(int)\n" +
-            "  float: \(float)\n" +
-            "  number_opt: \(number_opt)\n" +
-            "  list_anyobject: \(list_anyobject)\n" +
-            "  strings_2d: \(strings_2d)\n" +
-            "  date: \(date)\n" +
-            "  dates: \(dates)\n" +
-            "  date_dict: \(date_dict)\n" +
-            "  date_dict_array: \(date_dict_array)\n" +
-            "  craycray: \(craycray)\n" +
-            "  person: \(person)\n" +
-            "  friends: \(friends)\n" +
-            "  thing_number: \(thing_number)\n" +
-            "  thing_string: \(thing_string)\n" +
-        "}"
-    }
-}
-
-class Model: ModelBase {
-    var notSerializable: Bool? = nil
-    var inherited: Bool = false
-    
-    override class var ignoredProperties: [String] {
-        return ["notSerializable"]
-    }
-    
-    override var description: String {
-        return super.description + "inherited: \(inherited)"
-    }
-}
-
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
-
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         // Override point for customization after application launch.
         
-        do {
-            let dictionary = [
-                "string": "Hello!",
-                "string_opt": NSNull(),
-                "failure_string": "",
-                "int": 23,
-                "float": 23.32,
-                "thing": 2,
-                "number_opt": NSNull(),
-                "list_anyobject": [23, ["SURPRISE!"], NSNull()],
-                "strings_2d": [["A", "B"], [2, "D"]],
-                "date": "2015-04-23T12:03:00Z",
-                "dates": ["2015-04-23T12:03:00Z", "2015-04-23T12:03:00Z"],
-                "date_dict": ["test": "2015-04-23T12:03:00Z", "test2": "2015-04-23T12:03:00Z"],
-                "date_dict_array": ["test": [["date": "2015-04-23T12:03:00Z"]]],
-                "craycray": ["stuff": ["more_stuff": ["even_more_stuff": [1, 2, 3]]]],
-                "person": [
-                    "name": "Bob",
-                    "whatever": true
-                ],
-                "friends": [
-                    ["name": NSNull()],
-                    ["name": "Jerry", "friend": ["name": "Ima Friend"]]
-                ],
-                "inherited": true
-            ]
-            print(String(data: try! NSJSONSerialization.dataWithJSONObject(dictionary, options: []), encoding: NSUTF8StringEncoding)!)
-            let t = try Model(dictionary: dictionary)
-            let serialized = try t.toJSONString()
-            print("deserialized:", t)
-            print("serialized:", serialized)
-        } catch RetroluxException.SerializerError(let message) {
-            print("exception:", message)
-        } catch {
-            print("Unknown exception")
-        }
+        runExample()
 
         return true
     }
