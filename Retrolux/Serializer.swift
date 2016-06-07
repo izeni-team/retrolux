@@ -10,7 +10,9 @@ import Foundation
 
 public typealias ErrorMessage = String
 
+@available(*, deprecated=1.0, message="Will be removed in v0.1.0")
 public protocol NetworkResponseConvertible {
+    @available(*, deprecated=1.0, message="Will be removed in v0.1.0")
     static func fromNetworkResponse(object: AnyObject) throws -> Any
 }
 
@@ -20,12 +22,17 @@ public protocol Serializable: NSObjectProtocol, NetworkResponseConvertible {
     func setValue(value: AnyObject?, forKey: String) // For JSON -> Object deserialization
     func valueForKey(key: String) -> AnyObject? // For Object -> JSON serialization
     
-    // To/from dictionary
     init() // Required in order to provide default implementation for init(json:)
+    
+    // To/from dictionary
+    @available(*, deprecated=1.0, message="Will be removed in v0.1.0")
     init(dictionary: [String: AnyObject]) throws
+    @available(*, deprecated=1.0, message="Will be removed in v0.1.0")
     func toDictionary() throws -> [String: AnyObject]
-    func toJSONData() throws -> NSData
-    func toJSONString() throws -> String
+    @available(*, deprecated=1.0, message="Will be removed in v0.1.0")
+    func toData() throws -> NSData
+    @available(*, deprecated=1.0, message="Will be removed in v0.1.0")
+    func toString() throws -> String
     
     // TODO:
     //func copy() -> Self // Lower priority--this is primarily for copying/detaching database models
@@ -36,7 +43,9 @@ public protocol Serializable: NSObjectProtocol, NetworkResponseConvertible {
     
     func validate() -> ErrorMessage?
     static var ignoredProperties: [String] { get }
+    @available(*, deprecated=1.0, renamed="ignoreErrorsForProperties", message="Will be removed in v0.1.0")
     static var optionalProperties: [String] { get }
+    static var ignoreErrorsForProperties: [String] { get }
     static var mappedProperties: [String: String] { get }
 }
 
@@ -50,12 +59,12 @@ extension Serializable {
         return try Retrolux.serializer.serializeToDictionary(self)
     }
     
-    public func toJSONData() throws -> NSData {
-        return try Retrolux.serializer.serializeToJSONData(self)
+    public func toData() throws -> NSData {
+        return try Retrolux.serializer.serializeToData(self)
     }
     
-    public func toJSONString() throws -> String {
-        return try Retrolux.serializer.serializeToJSONString(self)
+    public func toString() throws -> String {
+        return try Retrolux.serializer.serializeToString(self)
     }
     
     public func validate() -> ErrorMessage? {
@@ -67,6 +76,10 @@ extension Serializable {
     }
     
     public static var optionalProperties: [String] {
+        return ignoreErrorsForProperties
+    }
+    
+    public static var ignoreErrorsForProperties: [String] {
         return []
     }
     
@@ -74,6 +87,7 @@ extension Serializable {
         return [:]
     }
     
+    @available(*, deprecated=1.0, message="Will be removed in v0.1.0")
     public static func fromNetworkResponse(object: AnyObject) throws -> Any {
         guard let dictionary = object as? [String: AnyObject] else {
             throw RetroluxException.SerializerError(message: "Cannot convert response of type \(object.dynamicType) into a \(self.dynamicType).")
@@ -82,6 +96,11 @@ extension Serializable {
     }
 }
 
+// This class only exists to eliminate need of overriding init() and to aide in subclassing.
+// It's technically possible to subclass without subclassing RetroluxObject, but it was disabled to prevent
+// hard-to-find corner cases that might crop up. In particular, the issue where protocols with default implementations
+// and subclassing doesn't work well together (default implementation will be used in some cases where it might
+// come as a surprise).
 public class RetroluxObject: NSObject, Serializable {
     public required override init() {
         super.init()
@@ -96,12 +115,12 @@ public class RetroluxObject: NSObject, Serializable {
         return try Retrolux.serializer.serializeToDictionary(self)
     }
     
-    public func toJSONData() throws -> NSData {
-        return try Retrolux.serializer.serializeToJSONData(self)
+    public func toData() throws -> NSData {
+        return try Retrolux.serializer.serializeToData(self)
     }
     
-    public func toJSONString() throws -> String {
-        return try Retrolux.serializer.serializeToJSONString(self)
+    public func toString() throws -> String {
+        return try Retrolux.serializer.serializeToString(self)
     }
     
     public func validate() -> ErrorMessage? {
@@ -109,22 +128,30 @@ public class RetroluxObject: NSObject, Serializable {
     }
     
     public class var ignoredProperties: [String] {
-        return []
+        return ignoreErrorsForProperties
     }
     
-    public class var optionalProperties: [String] {
+    public class var ignoreErrorsForProperties: [String] {
         return []
     }
     
     public class var mappedProperties: [String: String] {
         return [:]
     }
+    
+    @available(*, deprecated=1.0, message="Will be removed in v0.1.0")
+    public class func fromNetworkResponse(object: AnyObject) throws -> Any {
+        guard let dictionary = object as? [String: AnyObject] else {
+            throw RetroluxException.SerializerError(message: "Cannot convert response of type \(object.dynamicType) into a \(self.dynamicType).")
+        }
+        return try self.init(dictionary: dictionary)
+    }
 }
 
 public class Serializer {
     public enum TransformDirection {
-        case ToJSON
-        case FromJSON
+        case ToDictionary
+        case FromDictionary
     }
     
     public static let sharedInstance = Serializer()
@@ -171,25 +198,19 @@ public class Serializer {
             case .Object:
                 return value is NSDictionary
             case .Array(let element):
-                if let array = value as? [Swift.AnyObject] {
-                    for innerValue in array {
-                        if !element.isCompatibleWith(innerValue) {
-                            return false
-                        }
-                    }
-                    return true
+                guard let array = value as? [Swift.AnyObject] else {
+                    return false
                 }
-                return false
+                return !array.contains {
+                    !element.isCompatibleWith($0)
+                }
             case .Dictionary(let valueType):
-                if let dictionary = value as? [Swift.String: Swift.AnyObject] {
-                    for innerValue in dictionary.values {
-                        if !valueType.isCompatibleWith(innerValue) {
-                            return false
-                        }
-                    }
-                    return true
+                guard let dictionary = value as? [Swift.String: Swift.AnyObject] else {
+                    return false
                 }
-                return false
+                return !dictionary.values.contains {
+                    !valueType.isCompatibleWith($0)
+                }
             }
         }
         
@@ -221,7 +242,7 @@ public class Serializer {
         public let type: PropertyType
         public let name: String
         public let required: Bool
-        public let jsonKey: String
+        public let dictionaryKey: String
     }
     
     public var cache: [ObjectIdentifier: [Property]] = [:]
@@ -290,7 +311,7 @@ public class Serializer {
         let subjectType = instance.dynamicType
         
         let ignored = Set(subjectType.ignoredProperties)
-        let optional = Set(subjectType.optionalProperties)
+        let ignoreErrorsFor = Set(subjectType.ignoreErrorsForProperties)
         let mapped = subjectType.mappedProperties
         
         let children = try getMirrorChildren(Mirror(reflecting: instance), parentMirror: nil)
@@ -300,11 +321,11 @@ public class Serializer {
             throw RetroluxException.SerializerError(message: "Cannot ignore non-existent " +
                 "property \"\(ignoredButNotImplemented)\" on class \(subjectType).")
         }
-        if let optionalButNotImplemented = optional.subtract(propertyNameSet).first {
+        if let optionalButNotImplemented = ignoreErrorsFor.subtract(propertyNameSet).first {
             throw RetroluxException.SerializerError(message: "Cannot make non-existent " +
                 "property \"\(optionalButNotImplemented)\" optional on class \(subjectType).")
         }
-        if let ignoredAndOptional = ignored.intersect(optional).first {
+        if let ignoredAndOptional = ignored.intersect(ignoreErrorsFor).first {
             throw RetroluxException.SerializerError(message: "Cannot make property " +
                 "\"\(ignoredAndOptional)\" on class \(subjectType) both ignored and optional.")
         }
@@ -334,6 +355,7 @@ public class Serializer {
                 switch type {
                 case .Optional(let wrapped):
                     switch wrapped {
+                    case .Bool: fallthrough
                     case .Number:
                         throw RetroluxException.SerializerError(message: "Property \"\(label)\" on class " +
                             "\(subjectType) cannot be an optional. Please make it non-optional or use an " +
@@ -357,8 +379,8 @@ public class Serializer {
             properties.append(Property(
                 type: type,
                 name: label,
-                required: !optional.contains(label),
-                jsonKey: mapped[label] ?? label
+                required: !ignoreErrorsFor.contains(label),
+                dictionaryKey: mapped[label] ?? label
                 ))
         }
         
@@ -401,7 +423,7 @@ public class Serializer {
             return dictionary
         case .Date:
             switch direction {
-            case .FromJSON:
+            case .FromDictionary:
                 guard let string = value as? String else {
                     throw RetroluxException.SerializerError(message: "Expected type String, but got " +
                         "\(value.dynamicType)")
@@ -412,7 +434,7 @@ public class Serializer {
                     }
                 }
                 throw RetroluxException.SerializerError(message: "Failed to parse date string \"\(value)\"")
-            case .ToJSON:
+            case .ToDictionary:
                 if let date = value as? NSDate {
                     return dateFormatters.first!.stringFromDate(date)
                 }
@@ -420,13 +442,13 @@ public class Serializer {
             }
         case .Object(let type):
             switch direction {
-            case .FromJSON:
+            case .FromDictionary:
                 guard let dictionary = value as? [String: AnyObject] else {
                     throw RetroluxException.SerializerError(message: "Expected type Dictionary, but got " +
                         "\(value.dynamicType)")
                 }
                 return try type.init(dictionary: dictionary)
-            case .ToJSON:
+            case .ToDictionary:
                 guard let object = value as? Serializable else {
                     throw RetroluxException.SerializerError(message: "Expected type \(Serializable.self), but got " +
                         "\(value.dynamicType)")
@@ -452,15 +474,15 @@ public class Serializer {
         var output = [String: AnyObject]()
         for property in try getProperties(fromType: instance.dynamicType) {
             if let value = instance.valueForKey(property.name) {
-                output[property.jsonKey] = try transform(value, type: property.type, direction: .ToJSON)
+                output[property.dictionaryKey] = try transform(value, type: property.type, direction: .ToDictionary)
             } else {
-                output[property.jsonKey] = NSNull()
+                output[property.dictionaryKey] = NSNull()
             }
         }
         return output
     }
     
-    public func serializeToJSONData(instance: Serializable) throws -> NSData {
+    public func serializeToData(instance: Serializable) throws -> NSData {
         do {
             let dictionary = try instance.toDictionary()
             return try NSJSONSerialization.dataWithJSONObject(dictionary, options: [])
@@ -473,13 +495,29 @@ public class Serializer {
         }
     }
     
-    public func serializeToJSONString(instance: Serializable) throws -> String {
-        return String(data: try instance.toJSONData(), encoding: NSUTF8StringEncoding)!
+    public func serializeToString(instance: Serializable) throws -> String {
+        return String(data: try instance.toData(), encoding: NSUTF8StringEncoding)!
+    }
+    
+    public func dictionaryFromData(data: NSData) throws -> [String: AnyObject] {
+        guard let dict = try NSJSONSerialization.JSONObjectWithData(data, options: []) as? [String: AnyObject] else {
+            throw RetroluxException.SerializerError(message: "Wrong type in JSON data for \(self.dynamicType)" +
+                "--expected dictionary.")
+        }
+        return dict
+    }
+    
+    public func arrayFromData(data: NSData) throws -> [[String: AnyObject]] {
+        guard let array = try NSJSONSerialization.JSONObjectWithData(data, options: []) as? [[String: AnyObject]] else {
+            throw RetroluxException.SerializerError(message: "Wrong type in JSON data for \(self.dynamicType)" +
+            "--expected dictionary")
+        }
+        return array
     }
     
     public func setPropertiesFor(instance instance: Serializable, fromDictionary dictionary: [String: AnyObject]) throws {
         for property in try getProperties(fromType: instance.dynamicType) {
-            var value: AnyObject! = dictionary[property.jsonKey]
+            var value: AnyObject! = dictionary[property.dictionaryKey]
             guard value != nil else {
                 guard property.required else {
                     continue
@@ -499,7 +537,7 @@ public class Serializer {
             
             if !(value is NSNull) {
                 do {
-                    value = try transform(value, type: property.type, direction: .FromJSON)
+                    value = try transform(value, type: property.type, direction: .FromDictionary)
                 } catch RetroluxException.SerializerError(let message) {
                     guard property.required else {
                         continue
