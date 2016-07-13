@@ -15,9 +15,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         // Override point for customization after application launch.
-        
-        runExample()
 
+//        let p = Person()
+//        let properties = try! RLObjectReflector().reflect(p)
+//        let dictionary =
+//        for property in properties {
+//            p.set
+//        }
+        
         return true
     }
 

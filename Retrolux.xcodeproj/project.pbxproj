@@ -9,19 +9,37 @@
 /* Begin PBXBuildFile section */
 		34191B271D0396BF00553C20 /* Retrolux.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34191B261D0396BF00553C20 /* Retrolux.swift */; };
 		34344ED01D052D9E00616CC3 /* Endpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34344ECF1D052D9E00616CC3 /* Endpoint.swift */; };
-		34344ED21D0559EA00616CC3 /* ExampleObjects.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34344ED11D0559EA00616CC3 /* ExampleObjects.swift */; };
 		34F26CA41CFFE8A9008C3D9A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F26CA31CFFE8A9008C3D9A /* AppDelegate.swift */; };
 		34F26CA61CFFE8A9008C3D9A /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F26CA51CFFE8A9008C3D9A /* ViewController.swift */; };
 		34F26CA91CFFE8A9008C3D9A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 34F26CA71CFFE8A9008C3D9A /* Main.storyboard */; };
 		34F26CAB1CFFE8A9008C3D9A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 34F26CAA1CFFE8A9008C3D9A /* Assets.xcassets */; };
 		34F26CAE1CFFE8A9008C3D9A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 34F26CAC1CFFE8A9008C3D9A /* LaunchScreen.storyboard */; };
 		34F26CB61CFFE8F6008C3D9A /* Serializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F26CB51CFFE8F6008C3D9A /* Serializer.swift */; };
+		4978AA7A1D35698900E1F1A5 /* PropertyConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4978AA791D35698900E1F1A5 /* PropertyConvertible.swift */; };
+		4978AA7C1D3569BE00E1F1A5 /* Property.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4978AA7B1D3569BE00E1F1A5 /* Property.swift */; };
+		4978AA7E1D356ADA00E1F1A5 /* RLObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4978AA7D1D356ADA00E1F1A5 /* RLObject.swift */; };
+		4978AA801D356B8900E1F1A5 /* RLObjectProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4978AA7F1D356B8900E1F1A5 /* RLObjectProtocol.swift */; };
+		4978AA821D358EE500E1F1A5 /* RLObjectReflector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4978AA811D358EE500E1F1A5 /* RLObjectReflector.swift */; };
+		4978AA841D3593DC00E1F1A5 /* PropertyType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4978AA831D3593DC00E1F1A5 /* PropertyType.swift */; };
+		4978AA8C1D35A11900E1F1A5 /* RetroluxTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4978AA8B1D35A11900E1F1A5 /* RetroluxTests.swift */; };
+		4978AA941D360F4800E1F1A5 /* RLObjectReflectorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4978AA931D360F4800E1F1A5 /* RLObjectReflectorTests.swift */; };
+		4978AA961D360F5300E1F1A5 /* PropertyTypeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4978AA951D360F5300E1F1A5 /* PropertyTypeTests.swift */; };
+		4978AA981D360FE300E1F1A5 /* RLObjectTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4978AA971D360FE300E1F1A5 /* RLObjectTests.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		4978AA8E1D35A11900E1F1A5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 34F26C981CFFE8A9008C3D9A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 34F26C9F1CFFE8A9008C3D9A;
+			remoteInfo = Retrolux;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		34191B261D0396BF00553C20 /* Retrolux.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Retrolux.swift; sourceTree = "<group>"; };
 		34344ECF1D052D9E00616CC3 /* Endpoint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Endpoint.swift; sourceTree = "<group>"; };
-		34344ED11D0559EA00616CC3 /* ExampleObjects.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExampleObjects.swift; sourceTree = "<group>"; };
 		34F26CA01CFFE8A9008C3D9A /* Retrolux.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Retrolux.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		34F26CA31CFFE8A9008C3D9A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		34F26CA51CFFE8A9008C3D9A /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -30,10 +48,29 @@
 		34F26CAD1CFFE8A9008C3D9A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		34F26CAF1CFFE8A9008C3D9A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		34F26CB51CFFE8F6008C3D9A /* Serializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Serializer.swift; sourceTree = "<group>"; };
+		4978AA791D35698900E1F1A5 /* PropertyConvertible.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PropertyConvertible.swift; sourceTree = "<group>"; };
+		4978AA7B1D3569BE00E1F1A5 /* Property.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Property.swift; sourceTree = "<group>"; };
+		4978AA7D1D356ADA00E1F1A5 /* RLObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RLObject.swift; sourceTree = "<group>"; };
+		4978AA7F1D356B8900E1F1A5 /* RLObjectProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RLObjectProtocol.swift; sourceTree = "<group>"; };
+		4978AA811D358EE500E1F1A5 /* RLObjectReflector.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RLObjectReflector.swift; sourceTree = "<group>"; };
+		4978AA831D3593DC00E1F1A5 /* PropertyType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PropertyType.swift; sourceTree = "<group>"; };
+		4978AA891D35A11900E1F1A5 /* RetroluxTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RetroluxTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		4978AA8B1D35A11900E1F1A5 /* RetroluxTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RetroluxTests.swift; sourceTree = "<group>"; };
+		4978AA8D1D35A11900E1F1A5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4978AA931D360F4800E1F1A5 /* RLObjectReflectorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RLObjectReflectorTests.swift; sourceTree = "<group>"; };
+		4978AA951D360F5300E1F1A5 /* PropertyTypeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PropertyTypeTests.swift; sourceTree = "<group>"; };
+		4978AA971D360FE300E1F1A5 /* RLObjectTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RLObjectTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		34F26C9D1CFFE8A9008C3D9A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4978AA861D35A11900E1F1A5 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -47,6 +84,7 @@
 			isa = PBXGroup;
 			children = (
 				34F26CA21CFFE8A9008C3D9A /* Retrolux */,
+				4978AA8A1D35A11900E1F1A5 /* RetroluxTests */,
 				34F26CA11CFFE8A9008C3D9A /* Products */,
 			);
 			sourceTree = "<group>";
@@ -55,6 +93,7 @@
 			isa = PBXGroup;
 			children = (
 				34F26CA01CFFE8A9008C3D9A /* Retrolux.app */,
+				4978AA891D35A11900E1F1A5 /* RetroluxTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -71,9 +110,26 @@
 				34F26CB51CFFE8F6008C3D9A /* Serializer.swift */,
 				34191B261D0396BF00553C20 /* Retrolux.swift */,
 				34344ECF1D052D9E00616CC3 /* Endpoint.swift */,
-				34344ED11D0559EA00616CC3 /* ExampleObjects.swift */,
+				4978AA791D35698900E1F1A5 /* PropertyConvertible.swift */,
+				4978AA7B1D3569BE00E1F1A5 /* Property.swift */,
+				4978AA7D1D356ADA00E1F1A5 /* RLObject.swift */,
+				4978AA7F1D356B8900E1F1A5 /* RLObjectProtocol.swift */,
+				4978AA811D358EE500E1F1A5 /* RLObjectReflector.swift */,
+				4978AA831D3593DC00E1F1A5 /* PropertyType.swift */,
 			);
 			path = Retrolux;
+			sourceTree = "<group>";
+		};
+		4978AA8A1D35A11900E1F1A5 /* RetroluxTests */ = {
+			isa = PBXGroup;
+			children = (
+				4978AA8B1D35A11900E1F1A5 /* RetroluxTests.swift */,
+				4978AA8D1D35A11900E1F1A5 /* Info.plist */,
+				4978AA931D360F4800E1F1A5 /* RLObjectReflectorTests.swift */,
+				4978AA951D360F5300E1F1A5 /* PropertyTypeTests.swift */,
+				4978AA971D360FE300E1F1A5 /* RLObjectTests.swift */,
+			);
+			path = RetroluxTests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -96,6 +152,24 @@
 			productReference = 34F26CA01CFFE8A9008C3D9A /* Retrolux.app */;
 			productType = "com.apple.product-type.application";
 		};
+		4978AA881D35A11900E1F1A5 /* RetroluxTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4978AA901D35A11900E1F1A5 /* Build configuration list for PBXNativeTarget "RetroluxTests" */;
+			buildPhases = (
+				4978AA851D35A11900E1F1A5 /* Sources */,
+				4978AA861D35A11900E1F1A5 /* Frameworks */,
+				4978AA871D35A11900E1F1A5 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				4978AA8F1D35A11900E1F1A5 /* PBXTargetDependency */,
+			);
+			name = RetroluxTests;
+			productName = RetroluxTests;
+			productReference = 4978AA891D35A11900E1F1A5 /* RetroluxTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -108,6 +182,10 @@
 				TargetAttributes = {
 					34F26C9F1CFFE8A9008C3D9A = {
 						CreatedOnToolsVersion = 7.3;
+					};
+					4978AA881D35A11900E1F1A5 = {
+						CreatedOnToolsVersion = 7.3.1;
+						TestTargetID = 34F26C9F1CFFE8A9008C3D9A;
 					};
 				};
 			};
@@ -125,6 +203,7 @@
 			projectRoot = "";
 			targets = (
 				34F26C9F1CFFE8A9008C3D9A /* Retrolux */,
+				4978AA881D35A11900E1F1A5 /* RetroluxTests */,
 			);
 		};
 /* End PBXProject section */
@@ -140,6 +219,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		4978AA871D35A11900E1F1A5 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -149,14 +235,38 @@
 			files = (
 				34F26CA61CFFE8A9008C3D9A /* ViewController.swift in Sources */,
 				34F26CB61CFFE8F6008C3D9A /* Serializer.swift in Sources */,
+				4978AA7E1D356ADA00E1F1A5 /* RLObject.swift in Sources */,
 				34191B271D0396BF00553C20 /* Retrolux.swift in Sources */,
 				34F26CA41CFFE8A9008C3D9A /* AppDelegate.swift in Sources */,
-				34344ED21D0559EA00616CC3 /* ExampleObjects.swift in Sources */,
+				4978AA801D356B8900E1F1A5 /* RLObjectProtocol.swift in Sources */,
+				4978AA7A1D35698900E1F1A5 /* PropertyConvertible.swift in Sources */,
+				4978AA841D3593DC00E1F1A5 /* PropertyType.swift in Sources */,
+				4978AA7C1D3569BE00E1F1A5 /* Property.swift in Sources */,
 				34344ED01D052D9E00616CC3 /* Endpoint.swift in Sources */,
+				4978AA821D358EE500E1F1A5 /* RLObjectReflector.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4978AA851D35A11900E1F1A5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4978AA961D360F5300E1F1A5 /* PropertyTypeTests.swift in Sources */,
+				4978AA941D360F4800E1F1A5 /* RLObjectReflectorTests.swift in Sources */,
+				4978AA981D360FE300E1F1A5 /* RLObjectTests.swift in Sources */,
+				4978AA8C1D35A11900E1F1A5 /* RetroluxTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		4978AA8F1D35A11900E1F1A5 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 34F26C9F1CFFE8A9008C3D9A /* Retrolux */;
+			targetProxy = 4978AA8E1D35A11900E1F1A5 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		34F26CA71CFFE8A9008C3D9A /* Main.storyboard */ = {
@@ -290,6 +400,30 @@
 			};
 			name = Release;
 		};
+		4978AA911D35A11900E1F1A5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				INFOPLIST_FILE = RetroluxTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.bryan.RetroluxTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Retrolux.app/Retrolux";
+			};
+			name = Debug;
+		};
+		4978AA921D35A11900E1F1A5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				INFOPLIST_FILE = RetroluxTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.bryan.RetroluxTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Retrolux.app/Retrolux";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -310,6 +444,14 @@
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
+		};
+		4978AA901D35A11900E1F1A5 /* Build configuration list for PBXNativeTarget "RetroluxTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4978AA911D35A11900E1F1A5 /* Debug */,
+				4978AA921D35A11900E1F1A5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
 		};
 /* End XCConfigurationList section */
 	};
