@@ -13,11 +13,6 @@ import Foundation
 //    case SerializerError(message: String)
 //}
 
-//public class Retrolux {
-//    public static let sharedInstance = Retrolux()
-//    public var serializer = Serializer()
-//    
-//    public class var serializer: Serializer {
-//        return sharedInstance.serializer
-//    }
-//}
+public class Retrolux {
+    public static let sharedInstance = Retrolux()
+}

@@ -25,5 +25,5 @@ public class Property: Hashable, Equatable {
 }
 
 public func ==(lhs: Property, rhs: Property) -> Bool {
-    return lhs.name == rhs.name
+    return lhs.name == rhs.name && lhs.type == rhs.type && lhs.required == rhs.required && lhs.mappedTo == rhs.mappedTo
 }

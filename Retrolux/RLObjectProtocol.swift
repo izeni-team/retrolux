@@ -25,6 +25,11 @@ internal func rlobj_setProperty(property: Property, value: Any?, instance: RLObj
     instance.setValue(screened as? AnyObject, forKey: property.name)
 }
 
+internal func rlobj_propertiesFor(instance: RLObjectProtocol) throws -> [Property] {
+    // TODO: Cache reflection
+    return try RLObjectReflector().reflect(instance)
+}
+
 public protocol RLObjectProtocol: NSObjectProtocol, PropertyConvertible {
     // Read/write properties
     func respondsToSelector(selector: Selector) -> Bool // To check if property can be bridged to Obj-C
@@ -47,6 +52,10 @@ public protocol RLObjectProtocol: NSObjectProtocol, PropertyConvertible {
 }
 
 extension RLObjectProtocol {
+    public func properties() throws -> [Property] {
+        return try rlobj_propertiesFor(self)
+    }
+    
     public func set(value value: Any?, forProperty property: Property) throws {
         try rlobj_setProperty(property, value: value, instance: self)
     }

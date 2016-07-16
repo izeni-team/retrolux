@@ -29,9 +29,7 @@ public enum RLObjectReflectionError: ErrorType {
 }
 
 public class RLObjectReflector {
-    public init() {
-        
-    }
+    public init() {}
     
     private func getMirrorChildren(mirror: Mirror, parentMirror: Mirror?) throws -> [(label: String, valueType: Any.Type)] {
         var children = [(label: String, valueType: Any.Type)]()

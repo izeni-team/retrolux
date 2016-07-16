@@ -23,6 +23,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 //            p.set
 //        }
         
+        let URL = NSURL(string: "http://jsonplaceholder.typicode.com/posts")!
+        let body = "{\"echo\": \"hi\"}".dataUsingEncoding(NSUTF8StringEncoding)!
+        let headers = ["content-type": "application/json"]
+        let response: HTTPClientResponseData = HTTPClient().makeSynchronousRequest("POST", URL: URL, body: body, headers: headers)
+        print(response)
+        
         return true
     }
 

@@ -18,14 +18,26 @@ extension Array: RLArrayType {
     }
 }
 
-public protocol RLDictionaryType {
+extension NSArray: RLArrayType {
+    private static func type() -> PropertyType? {
+        return .anyObject
+    }
+}
+
+private protocol RLDictionaryType {
     static func type() -> PropertyType?
 }    
 
 extension Dictionary: RLDictionaryType {
-    public static func type() -> PropertyType? {
+    private static func type() -> PropertyType? {
         assert(String.self is Key.Type, "Dictionaries must have strings as keys")
         return PropertyType.from(Value)
+    }
+}
+
+extension NSDictionary: RLDictionaryType {
+    private static func type() -> PropertyType? {
+        return .anyObject
     }
 }
 

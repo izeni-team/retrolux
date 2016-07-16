@@ -11,6 +11,22 @@ import Retrolux
 import XCTest
 
 extension RetroluxTests {
+    func testRLObjectProperties() {
+        class Model: RLObject {
+            dynamic var name = ""
+            dynamic var yolo = false
+        }
+        
+        do {
+            let properties = try Model().properties()
+            let properties2 = try RLObjectReflector().reflect(Model())
+            let properties3 = try Model().properties() // Just in case caching is miserably broken
+            XCTAssert(Set(properties) == Set(properties2) && Set(properties2) == Set(properties3))
+        } catch let error {
+            XCTFail("\(error)")
+        }
+    }
+    
     func setPropertiesHelper(properties: [Property], dictionary: [String: AnyObject], instance: RLObjectProtocol) {
         XCTAssert(Set(properties.map({ $0.name })) == Set(dictionary.keys))
         
@@ -39,7 +55,7 @@ extension RetroluxTests {
             dynamic var model: Model?
         }
         
-        var dictionary = [
+        let dictionary = [
             "name": "Bryan",
             "age": 23,
             "whatever": true,
@@ -54,18 +70,71 @@ extension RetroluxTests {
             let model = Model()
             let properties = try RLObjectReflector().reflect(model)
             setPropertiesHelper(properties, dictionary: dictionary, instance: model)
-            XCTAssert(model.name == dictionary["name"])
-            XCTAssert(model.age == dictionary["age"])
-            XCTAssert(model.meta == dictionary["meta"])
-            XCTAssert(model.whatever == dictionary["whatever"])
-            XCTAssert(model.model == nil && dictionary["model"] == NSNull())
         }
         catch let error {
             XCTFail("\(error)")
         }
     }
     
-    // TODO: Test ignored, ignored errors, and mapped.
+    func testRLObjectIgnoredProperties() {
+        class Object: RLObject {
+            dynamic var name = ""
+            dynamic var age = 0
+            
+            override class var ignoredProperties: [String] {
+                return ["name"]
+            }
+        }
+        
+        do {
+            let properties = try RLObjectReflector().reflect(Object())
+            XCTAssert(Set(properties.map({ $0.name })) == Set(["age"]))
+        } catch let error {
+            XCTFail("\(error)")
+        }
+    }
+    
+    func testRLObjectIgnoredErrorsForProperties() {
+        class Object: RLObject {
+            dynamic var name = "default_value"
+            dynamic var age = 0
+            
+            override class var ignoreErrorsForProperties: [String] {
+                return ["name"]
+            }
+        }
+        
+        do {
+            let object = Object()
+            let properties = try RLObjectReflector().reflect(object)
+            guard let nameProp = properties.filter({ $0.name == "name" }).first else {
+                XCTFail("Name property was missing")
+                return
+            }
+            try object.set(value: NSNull(), forProperty: nameProp)
+            XCTAssert(object.name == "default_value")
+        } catch let error {
+            XCTFail("\(error)")
+        }
+    }
+    
+    func testRLObjectMappedProperties() {
+        class Object: RLObject {
+            dynamic var description_ = ""
+            
+            override class var mappedProperties: [String: String] {
+                return ["description_": "description"]
+            }
+        }
+        
+        do {
+            let properties = try RLObjectReflector().reflect(Object())
+            let prop = properties.first
+            XCTAssert(properties.count == 1 && prop?.mappedTo == "description" && prop?.name == "description_")
+        } catch let error {
+            XCTFail("\(error)")
+        }
+    }
     
     /*
      Tests that inheritance is properly supported when the base class is RLObject.
@@ -75,12 +144,10 @@ extension RetroluxTests {
             dynamic var bad = ""
             
             override func set(value value: Any?, forProperty property: Property) throws {
-                // TODO: Avoid duplication?
                 try super.set(value: "bad", forProperty: property)
             }
             
             override func valueFor(property: Property) -> Any? {
-                // TODO: Avoid duplication?
                 return "bad"
             }
             
@@ -103,12 +170,10 @@ extension RetroluxTests {
         
         class Problematic: Plain {
             override func set(value value: Any?, forProperty property: Property) throws {
-                // TODO: Avoid duplication?
                 try super.set(value: "good", forProperty: property)
             }
             
             override func valueFor(property: Property) -> Any? {
-                // TODO: Avoid duplication?
                 return "good"
             }
             

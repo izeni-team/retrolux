@@ -25,6 +25,11 @@
 		4978AA941D360F4800E1F1A5 /* RLObjectReflectorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4978AA931D360F4800E1F1A5 /* RLObjectReflectorTests.swift */; };
 		4978AA961D360F5300E1F1A5 /* PropertyTypeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4978AA951D360F5300E1F1A5 /* PropertyTypeTests.swift */; };
 		4978AA981D360FE300E1F1A5 /* RLObjectTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4978AA971D360FE300E1F1A5 /* RLObjectTests.swift */; };
+		4978AA9A1D36A41E00E1F1A5 /* TransformerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4978AA991D36A41E00E1F1A5 /* TransformerProtocol.swift */; };
+		498BCF601D39F89F00345E9F /* HTTPClientProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498BCF5F1D39F89F00345E9F /* HTTPClientProtocol.swift */; };
+		498BCF621D39F9B100345E9F /* HTTPTaskProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498BCF611D39F9B100345E9F /* HTTPTaskProtocol.swift */; };
+		498BCF661D39FC5E00345E9F /* HTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498BCF651D39FC5E00345E9F /* HTTPClient.swift */; };
+		49E3BDFE1D36DC07003C2460 /* TransformerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49E3BDFD1D36DC07003C2460 /* TransformerTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -60,6 +65,11 @@
 		4978AA931D360F4800E1F1A5 /* RLObjectReflectorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RLObjectReflectorTests.swift; sourceTree = "<group>"; };
 		4978AA951D360F5300E1F1A5 /* PropertyTypeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PropertyTypeTests.swift; sourceTree = "<group>"; };
 		4978AA971D360FE300E1F1A5 /* RLObjectTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RLObjectTests.swift; sourceTree = "<group>"; };
+		4978AA991D36A41E00E1F1A5 /* TransformerProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransformerProtocol.swift; sourceTree = "<group>"; };
+		498BCF5F1D39F89F00345E9F /* HTTPClientProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HTTPClientProtocol.swift; sourceTree = "<group>"; };
+		498BCF611D39F9B100345E9F /* HTTPTaskProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HTTPTaskProtocol.swift; sourceTree = "<group>"; };
+		498BCF651D39FC5E00345E9F /* HTTPClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HTTPClient.swift; sourceTree = "<group>"; };
+		49E3BDFD1D36DC07003C2460 /* TransformerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransformerTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -116,6 +126,10 @@
 				4978AA7F1D356B8900E1F1A5 /* RLObjectProtocol.swift */,
 				4978AA811D358EE500E1F1A5 /* RLObjectReflector.swift */,
 				4978AA831D3593DC00E1F1A5 /* PropertyType.swift */,
+				4978AA991D36A41E00E1F1A5 /* TransformerProtocol.swift */,
+				498BCF5F1D39F89F00345E9F /* HTTPClientProtocol.swift */,
+				498BCF651D39FC5E00345E9F /* HTTPClient.swift */,
+				498BCF611D39F9B100345E9F /* HTTPTaskProtocol.swift */,
 			);
 			path = Retrolux;
 			sourceTree = "<group>";
@@ -128,6 +142,7 @@
 				4978AA931D360F4800E1F1A5 /* RLObjectReflectorTests.swift */,
 				4978AA951D360F5300E1F1A5 /* PropertyTypeTests.swift */,
 				4978AA971D360FE300E1F1A5 /* RLObjectTests.swift */,
+				49E3BDFD1D36DC07003C2460 /* TransformerTests.swift */,
 			);
 			path = RetroluxTests;
 			sourceTree = "<group>";
@@ -234,11 +249,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				34F26CA61CFFE8A9008C3D9A /* ViewController.swift in Sources */,
+				498BCF601D39F89F00345E9F /* HTTPClientProtocol.swift in Sources */,
+				4978AA9A1D36A41E00E1F1A5 /* TransformerProtocol.swift in Sources */,
 				34F26CB61CFFE8F6008C3D9A /* Serializer.swift in Sources */,
 				4978AA7E1D356ADA00E1F1A5 /* RLObject.swift in Sources */,
 				34191B271D0396BF00553C20 /* Retrolux.swift in Sources */,
 				34F26CA41CFFE8A9008C3D9A /* AppDelegate.swift in Sources */,
 				4978AA801D356B8900E1F1A5 /* RLObjectProtocol.swift in Sources */,
+				498BCF621D39F9B100345E9F /* HTTPTaskProtocol.swift in Sources */,
+				498BCF661D39FC5E00345E9F /* HTTPClient.swift in Sources */,
 				4978AA7A1D35698900E1F1A5 /* PropertyConvertible.swift in Sources */,
 				4978AA841D3593DC00E1F1A5 /* PropertyType.swift in Sources */,
 				4978AA7C1D3569BE00E1F1A5 /* Property.swift in Sources */,
@@ -252,6 +271,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4978AA961D360F5300E1F1A5 /* PropertyTypeTests.swift in Sources */,
+				49E3BDFE1D36DC07003C2460 /* TransformerTests.swift in Sources */,
 				4978AA941D360F4800E1F1A5 /* RLObjectReflectorTests.swift in Sources */,
 				4978AA981D360FE300E1F1A5 /* RLObjectTests.swift in Sources */,
 				4978AA8C1D35A11900E1F1A5 /* RetroluxTests.swift in Sources */,
@@ -452,6 +472,7 @@
 				4978AA921D35A11900E1F1A5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

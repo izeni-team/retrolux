@@ -18,6 +18,10 @@ public class RLObject: NSObject, RLObjectProtocol {
         super.init()
     }
     
+    public func properties() throws -> [Property] {
+        return try rlobj_propertiesFor(self)
+    }
+    
     public func set(value value: Any?, forProperty property: Property) throws {
         try rlobj_setProperty(property, value: value, instance: self)
     }
@@ -31,7 +35,7 @@ public class RLObject: NSObject, RLObjectProtocol {
     }
     
     public class var ignoredProperties: [String] {
-        return ignoreErrorsForProperties
+        return []
     }
     
     public class var ignoreErrorsForProperties: [String] {
