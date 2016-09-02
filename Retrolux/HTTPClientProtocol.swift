@@ -8,22 +8,20 @@
 
 import Foundation
 
-public typealias HTTPClientResponseData = (data: NSData?, status: Int?, headers: [String: String]?, error: NSError?)
-
-public protocol HTTPClientProtocol: class {
-    func makeAsynchronousRequest(method: String, URL: NSURL, body: NSData?, headers: [String: String], callback: HTTPClientResponseData -> Void) -> HTTPTaskProtocol
+public struct HTTPClientResponseData {
+    public let data: NSData?
+    public let status: Int?
+    public let headers: [String: String]?
+    public let error: NSError?
+    
+    public init(data: NSData?, status: Int?, headers: [String: String]?, error: NSError?) {
+        self.data = data
+        self.status = status
+        self.headers = headers
+        self.error = error
+    }
 }
 
-extension HTTPClientProtocol {
-    // Converts async call into synchronous call.
-    public func makeSynchronousRequest(method: String, URL: NSURL, body: NSData?, headers: [String: String]) -> HTTPClientResponseData {
-        var response: HTTPClientResponseData?
-        let semaphore = dispatch_semaphore_create(0)
-        makeAsynchronousRequest(method, URL: URL, body: body, headers: headers, callback: { (data: NSData?, status: Int?, headers: [String: String]?, error: NSError?) -> Void in
-            response = (data: data, status: status, headers: headers, error: error)
-            dispatch_semaphore_signal(semaphore)
-        }).resume()
-        dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
-        return response!
-    }
+public protocol HTTPClientProtocol: class {
+    func makeAsynchronousRequest(method: String, URL: NSURL, body: NSData?, headers: [String: String], callback: (httpResponse: HTTPClientResponseData) -> Void) -> HTTPTaskProtocol
 }

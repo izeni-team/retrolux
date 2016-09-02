@@ -9,34 +9,49 @@
 import XCTest
 import Retrolux
 
-protocol HTTPClient {
-}
-
-protocol HTTPTask {
-    func cancel()
-}
-
-struct MockHTTPTask: HTTPTask {
-    let mockResponse: (data: NSData?, status: Int?, error: NSError?)
-    var callback: (data: NSData?, status: Int?, error: NSError?) -> Void
+struct MockHTTPTask: HTTPTaskProtocol {
+    let mockResponse: HTTPClientResponseData
+    var callback: HTTPClientResponseData -> Void
     
-    init(mockResponse: (data: NSData?, status: Int?, error: NSError?), callback: (data: NSData?, status: Int?, error: NSError?) -> Void) {
+    init(mockResponse: HTTPClientResponseData, callback: HTTPClientResponseData -> Void) {
         self.mockResponse = mockResponse
         self.callback = callback
     }
     
     func cancel() {}
+    func resume() {}
 }
 
-class MockHTTPClient: HTTPClient {
-    var mockResponse: (data: NSData?, status: Int?, error: NSError?)!
+class MockHTTPClient: HTTPClientProtocol {
+    var mockResponse: HTTPClientResponseData?
+    var args: (method: String, URL: NSURL, body: NSData?, headers: [String: String])?
     
-    func makeRequest(method: String, url: NSURL, body: NSData?, headers: [String: String], callback: (data: NSData?, status: Int?, error: NSError?) -> Void) ->HTTPTask {
-        let task = MockHTTPTask(mockResponse: mockResponse, callback: callback)
+    func makeAsynchronousRequest(method: String, URL: NSURL, body: NSData?, headers: [String : String], callback: (httpResponse: HTTPClientResponseData) -> Void) -> HTTPTaskProtocol {
+        args = (method: method, URL: URL, body: body, headers: headers)
+        let task = MockHTTPTask(mockResponse: mockResponse!, callback: callback)
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0)) {
-            task.callback(data: task.mockResponse.data, status: task.mockResponse.status, error: task.mockResponse.error)
+            task.callback(HTTPClientResponseData(data: task.mockResponse.data, status: task.mockResponse.status, headers: task.mockResponse.headers, error: task.mockResponse.error))
         }
         return task
+    }
+}
+
+enum MockError: ErrorType {
+    case notADictionary
+}
+
+class MockSerializer: SerializerProtocol {
+    var deserializeArgs: (data: NSData, output: Any.Type)?
+    var serializeArg: Any?
+    
+    func deserializeData(data: NSData, output: Any.Type) throws -> Any {
+        deserializeArgs = (data: data, output: output)
+        return String(data: data, encoding: NSUTF8StringEncoding)
+    }
+    
+    func serializeToData(object: Any) throws -> NSData {
+        serializeArg = object
+        return (object as? String ?? "").dataUsingEncoding(NSUTF8StringEncoding)!
     }
 }
 
@@ -56,40 +71,39 @@ class RetroluxTests: XCTestCase {
         super.tearDown()
     }
     
-    func testGET() {
-//        class Person: RLObject {
-//            dynamic var name = ""
-//            dynamic var age = 0
-//            dynamic var friends = [Person]()
-//        }
-//        
-//        let manager = Retrolux(baseURL: NSURL(string: "https://www.doesnotmatter.com")!)
-//        let mockClient = MockHTTPClient()
-//        manager.client = mockClient
-//        manager.serializer = JSONSerializer()
-//        
-//        let jsonData = "{\"name\":\"Bryan\",\"age\":23,\"friends\":[{{\"name\":\"Bryan\",\"age\":23,\"friends\":[]}}]}".dataUsingEncoding(NSUTF8StringEncoding)
-//        mockClient.mockResponse = (jsonData, 200, nil)
-//        let task = manager.GET("/api/people/", output: Person.self)
-//        let response = task.perform()
-//        switch response {
-//        case .Success(let result):
-//            print(result.value)
-//            let json = try! NSJSONSerialization.JSONObjectWithData(jsonData!, options: [])
-//            let person = result.value
-//            XCTAssert(person.name == json["name"])
-//            XCTAssert(person.age == json["age"])
-//            XCTAssert(person.friends.count == 1)
-//            guard let friend = person.friends.first, friendsJSON = json["friends"] as? [[String: AnyObject]], friendJSON = friendsJSON.first else {
-//                XCTFail("Failed to find friend")
-//                return
-//            }
-//            XCTAssert(friend.name == friendJSON["name"])
-//            XCTAssert(friend.age == friendJSON["age"])
-//            XCTAssert(friend.friends == [])
-//            XCTAssert(result.status == 200)
-//        case .Error(let error):
-//            XCTFail("\(error)")
-//        }
+    func testRetroluxSerializerInteraction() {
+        let client = MockHTTPClient()
+        let expectedResponseBody = "response"
+        let sendBody = "post_body"
+        client.mockResponse = HTTPClientResponseData(data: expectedResponseBody.dataUsingEncoding(NSUTF8StringEncoding), status: 200, headers: ["content-type": "application/json"], error: nil)
+        let serializer = MockSerializer()
+        let r = Retrolux(baseURL: NSURL(string: "https://www.google.com")!, serializer: serializer, httpClient: client)
+        let call = r.POST("/some_endpoint/", body: sendBody, output: String.self)
+        call.perform()
+        
+        guard let serializationArgument = serializer.serializeArg else {
+            XCTFail("Serializer wasn't called.")
+            return
+        }
+        guard let serializationArgString = serializationArgument as? String else {
+            XCTFail("Invalid type of object passed into serializer.")
+            return
+        }
+        XCTAssert(serializationArgString == sendBody, "Wrong data passed to serializer.")
+        
+        guard let deserializationArgs = serializer.deserializeArgs else {
+            XCTFail("Serializer's deserialize function wasn't called.")
+            return
+        }
+        guard let deserializationString = String(data: deserializationArgs.data, encoding: NSUTF8StringEncoding) else {
+            XCTFail("Serializer data appears to have been corrupted somewhere")
+            return
+        }
+        XCTAssert(deserializationString == expectedResponseBody, "Wrong data returned passed into serializer.")
+    }
+    
+    func testRetroluxHTTPClientInteraction() {
+        let client = MockHTTPClient()
+        
     }
 }

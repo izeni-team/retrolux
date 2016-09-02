@@ -8,7 +8,7 @@
 
 import Foundation
 
-public protocol HTTPTaskProtocol: class {
+public protocol HTTPTaskProtocol {
     func resume()
     func cancel()
 }

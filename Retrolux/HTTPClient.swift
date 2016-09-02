@@ -21,7 +21,7 @@ class HTTPClient: HTTPClientProtocol {
         session = NSURLSession(configuration: configuration)
     }
     
-    func makeAsynchronousRequest(method: String, URL: NSURL, body: NSData?, headers: [String : String], callback: HTTPClientResponseData -> Void) -> HTTPTaskProtocol {
+    func makeAsynchronousRequest(method: String, URL: NSURL, body: NSData?, headers: [String : String], callback: (httpResponse: HTTPClientResponseData) -> Void) -> HTTPTaskProtocol {
         let request = NSMutableURLRequest()
         request.HTTPMethod = method
         request.HTTPBody = body
@@ -31,7 +31,7 @@ class HTTPClient: HTTPClientProtocol {
             let httpResponse = (response as? NSHTTPURLResponse)
             let status = httpResponse?.statusCode
             let headers = httpResponse?.allHeaderFields as? [String: String]
-            callback(data: data, status: status, headers: headers, error: error)
+            callback(httpResponse: HTTPClientResponseData(data: data, status: status, headers: headers, error: error))
         }
         return task
     }
