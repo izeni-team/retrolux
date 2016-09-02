@@ -2,6 +2,8 @@
 
 Retrolux is a Swift alternative to [Square's Retrofit](https://github.com/square/retrofit) for Android. *It is currently in the early stages of development.*
 
+Development is currently taking place on the `feature/refactor` branch.
+
 Goals:
 - Feature parity with Retrofit.
 - Safe, simple, and familiar API.
