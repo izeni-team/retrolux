@@ -51,7 +51,6 @@ public class Call<ResponseBody> {
     public let url: NSURL
     public let body: NSData?
     public let headers: [String: String]
-    var callback: (response: Response<ResponseBody>) -> Void
     
     // TODO: Add support for file uploading in background as multipart?
     public init(
@@ -87,10 +86,10 @@ public class Call<ResponseBody> {
     }
 }
 
-func test() {
-    let r = Retrolux.sharedInstance
-    let newUser = User()
-    r.POST("/api/v1/users/", body: newUser, output: User.self)
+func testbed() {
+    //let r = Retrolux.sharedInstance
+    //let newUser = User()
+    //r.POST("/api/v1/users/", body: newUser, output: User.self)
 }
 
 public class Retrolux {
@@ -106,18 +105,5 @@ public class Retrolux {
         self.serializer = serializer
         self.httpClient = httpClient
         self.headers = [:]
-    }
-    
-    public func POST<Body, ResponseBody>(endpoint: String, body: Body, output: ResponseBody.Type) -> Call<ResponseBody> {
-        return createCall("POST", endpoint: endpoint, body: nil, output: ResponseBody.self)
-    }
-    
-    private func createCall<ResponseBody>(method: String, endpoint: String, body: NSData?, output: ResponseBody.Type) -> Call<ResponseBody> {
-        let url = baseURL.URLByAppendingPathComponent(endpoint)
-        return Call(httpClient: HTTPClient(), serializer: serializer, method: method, url: url, body: body, headers: headers, callbackHandler: { (httpResponse, callback) in
-            if (200...299).contains(httpResponse.status ?? 0) {
-                callback(response: Response<ResponseBody>.Success(body: <#T##Body#>))
-            }
-        })
     }
 }

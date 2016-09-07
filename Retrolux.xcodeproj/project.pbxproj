@@ -8,13 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		34191B271D0396BF00553C20 /* Retrolux.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34191B261D0396BF00553C20 /* Retrolux.swift */; };
-		34344ED01D052D9E00616CC3 /* Endpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34344ECF1D052D9E00616CC3 /* Endpoint.swift */; };
 		34F26CA41CFFE8A9008C3D9A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F26CA31CFFE8A9008C3D9A /* AppDelegate.swift */; };
 		34F26CA61CFFE8A9008C3D9A /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F26CA51CFFE8A9008C3D9A /* ViewController.swift */; };
 		34F26CA91CFFE8A9008C3D9A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 34F26CA71CFFE8A9008C3D9A /* Main.storyboard */; };
 		34F26CAB1CFFE8A9008C3D9A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 34F26CAA1CFFE8A9008C3D9A /* Assets.xcassets */; };
 		34F26CAE1CFFE8A9008C3D9A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 34F26CAC1CFFE8A9008C3D9A /* LaunchScreen.storyboard */; };
-		34F26CB61CFFE8F6008C3D9A /* Serializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F26CB51CFFE8F6008C3D9A /* Serializer.swift */; };
 		4978AA7A1D35698900E1F1A5 /* PropertyConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4978AA791D35698900E1F1A5 /* PropertyConvertible.swift */; };
 		4978AA7C1D3569BE00E1F1A5 /* Property.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4978AA7B1D3569BE00E1F1A5 /* Property.swift */; };
 		4978AA7E1D356ADA00E1F1A5 /* RLObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4978AA7D1D356ADA00E1F1A5 /* RLObject.swift */; };
@@ -43,7 +41,6 @@
 
 /* Begin PBXFileReference section */
 		34191B261D0396BF00553C20 /* Retrolux.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Retrolux.swift; sourceTree = "<group>"; };
-		34344ECF1D052D9E00616CC3 /* Endpoint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Endpoint.swift; sourceTree = "<group>"; };
 		34F26CA01CFFE8A9008C3D9A /* Retrolux.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Retrolux.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		34F26CA31CFFE8A9008C3D9A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		34F26CA51CFFE8A9008C3D9A /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -51,7 +48,6 @@
 		34F26CAA1CFFE8A9008C3D9A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		34F26CAD1CFFE8A9008C3D9A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		34F26CAF1CFFE8A9008C3D9A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		34F26CB51CFFE8F6008C3D9A /* Serializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Serializer.swift; sourceTree = "<group>"; };
 		4978AA791D35698900E1F1A5 /* PropertyConvertible.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PropertyConvertible.swift; sourceTree = "<group>"; };
 		4978AA7B1D3569BE00E1F1A5 /* Property.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Property.swift; sourceTree = "<group>"; };
 		4978AA7D1D356ADA00E1F1A5 /* RLObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RLObject.swift; sourceTree = "<group>"; };
@@ -115,9 +111,7 @@
 				34F26CAA1CFFE8A9008C3D9A /* Assets.xcassets */,
 				34F26CAC1CFFE8A9008C3D9A /* LaunchScreen.storyboard */,
 				34F26CAF1CFFE8A9008C3D9A /* Info.plist */,
-				34F26CB51CFFE8F6008C3D9A /* Serializer.swift */,
 				34191B261D0396BF00553C20 /* Retrolux.swift */,
-				34344ECF1D052D9E00616CC3 /* Endpoint.swift */,
 				4978AA791D35698900E1F1A5 /* PropertyConvertible.swift */,
 				4978AA7B1D3569BE00E1F1A5 /* Property.swift */,
 				4978AA7D1D356ADA00E1F1A5 /* RLObject.swift */,
@@ -247,7 +241,6 @@
 			files = (
 				34F26CA61CFFE8A9008C3D9A /* ViewController.swift in Sources */,
 				498BCF601D39F89F00345E9F /* HTTPClientProtocol.swift in Sources */,
-				34F26CB61CFFE8F6008C3D9A /* Serializer.swift in Sources */,
 				4978AA7E1D356ADA00E1F1A5 /* RLObject.swift in Sources */,
 				34191B271D0396BF00553C20 /* Retrolux.swift in Sources */,
 				34F26CA41CFFE8A9008C3D9A /* AppDelegate.swift in Sources */,
@@ -257,7 +250,6 @@
 				4978AA7A1D35698900E1F1A5 /* PropertyConvertible.swift in Sources */,
 				4978AA841D3593DC00E1F1A5 /* PropertyType.swift in Sources */,
 				4978AA7C1D3569BE00E1F1A5 /* Property.swift in Sources */,
-				34344ED01D052D9E00616CC3 /* Endpoint.swift in Sources */,
 				4978AA821D358EE500E1F1A5 /* RLObjectReflector.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

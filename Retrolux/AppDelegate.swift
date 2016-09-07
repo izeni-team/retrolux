@@ -15,24 +15,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         // Override point for customization after application launch.
-
-//        let p = Person()
-//        let properties = try! RLObjectReflector().reflect(p)
-//        let dictionary =
-//        for property in properties {
-//            p.set
-//        }
-        
-//        let URL = NSURL(string: "http://jsonplaceholder.typicode.com/posts")!
-//        let body = "{\"echo\": \"hi\"}".dataUsingEncoding(NSUTF8StringEncoding)!
-//        let headers = ["content-type": "application/json"]
-//        let response: HTTPClientResponseData = HTTPClient().makeSynchronousRequest("POST", URL: URL, body: body, headers: headers)
-//        print("response 1:\n\(response)\n")
-        
-//        let r = Retrolux(baseURL: URL, serializer: Serializer(), httpClient: HTTPClient())
-//        let response2 = r.POST("", body: ["echo": "hi"], output: [String: AnyObject].self).perform()
-//        print("response 2:\n\(response2)")
-        
         return true
     }
 
