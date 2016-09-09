@@ -56,7 +56,7 @@ extension RetroluxTests {
         }
         
         let dictionary = [
-            "name": "Bryan",
+            "name": "Brian",
             "age": 23,
             "whatever": true,
             "meta": [

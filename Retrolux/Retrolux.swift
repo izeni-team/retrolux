@@ -34,6 +34,7 @@ public class Serializer: SerializerProtocol {
     }
     
     public func serializeToData(object: Any) throws -> NSData {
+        // TODO: Force-casting Any to AnyObject is not safe.
         return try NSJSONSerialization.dataWithJSONObject(object as! AnyObject, options: [])
     }
     
@@ -41,8 +42,6 @@ public class Serializer: SerializerProtocol {
 //        return type == [String: AnyObject].self
 //    }
 }
-
-class User {}
 
 // TODO: How to support return types for ReactiveCocoa?
 public class Call<ResponseBody> {
@@ -78,11 +77,11 @@ public class Call<ResponseBody> {
         var response: Response<ResponseBody>!
         let semaphore = dispatch_semaphore_create(0)
         enqueue { (asyncResponse) in
-            dispatch_semaphore_signal(semaphore)
             response = asyncResponse
+            dispatch_semaphore_signal(semaphore)
         }
         dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
-        return response!
+        return response
     }
 }
 
