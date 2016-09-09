@@ -15,6 +15,7 @@ extension NSURLSessionDataTask: HTTPTaskProtocol {}
 // TODO: Add support for ignoring SSL errors.
 class HTTPClient: HTTPClientProtocol {
     let session: NSURLSession
+    var interceptor: ((NSMutableURLRequest) -> Void)?
     
     init() {
         let configuration = NSURLSessionConfiguration.defaultSessionConfiguration()
@@ -27,6 +28,9 @@ class HTTPClient: HTTPClientProtocol {
         request.HTTPBody = body
         request.allHTTPHeaderFields = headers
         request.URL = URL
+        
+        self.interceptor?(request)
+        
         let task = session.dataTaskWithRequest(request) { (data: NSData?, response: NSURLResponse?, error: NSError?) in
             let httpResponse = (response as? NSHTTPURLResponse)
             let status = httpResponse?.statusCode

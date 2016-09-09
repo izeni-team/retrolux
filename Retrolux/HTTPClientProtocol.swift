@@ -23,5 +23,7 @@ public struct HTTPClientResponseData {
 }
 
 public protocol HTTPClientProtocol: class {
+    var interceptor: ((NSMutableURLRequest) -> Void)? { get set }
+    
     func makeAsynchronousRequest(method: String, URL: NSURL, body: NSData?, headers: [String: String], callback: (httpResponse: HTTPClientResponseData) -> Void) -> HTTPTaskProtocol
 }

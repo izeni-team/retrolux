@@ -27,6 +27,7 @@
 		498BCF621D39F9B100345E9F /* HTTPTaskProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498BCF611D39F9B100345E9F /* HTTPTaskProtocol.swift */; };
 		498BCF661D39FC5E00345E9F /* HTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498BCF651D39FC5E00345E9F /* HTTPClient.swift */; };
 		49E3BDFE1D36DC07003C2460 /* TransformerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49E3BDFD1D36DC07003C2460 /* TransformerTests.swift */; };
+		F3251C251D83186E00D62722 /* HTTPClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3251C241D83186E00D62722 /* HTTPClientTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -64,6 +65,7 @@
 		498BCF611D39F9B100345E9F /* HTTPTaskProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HTTPTaskProtocol.swift; sourceTree = "<group>"; };
 		498BCF651D39FC5E00345E9F /* HTTPClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HTTPClient.swift; sourceTree = "<group>"; };
 		49E3BDFD1D36DC07003C2460 /* TransformerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransformerTests.swift; sourceTree = "<group>"; };
+		F3251C241D83186E00D62722 /* HTTPClientTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HTTPClientTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -106,21 +108,21 @@
 			isa = PBXGroup;
 			children = (
 				34F26CA31CFFE8A9008C3D9A /* AppDelegate.swift */,
-				34F26CA51CFFE8A9008C3D9A /* ViewController.swift */,
-				34F26CA71CFFE8A9008C3D9A /* Main.storyboard */,
 				34F26CAA1CFFE8A9008C3D9A /* Assets.xcassets */,
-				34F26CAC1CFFE8A9008C3D9A /* LaunchScreen.storyboard */,
+				498BCF651D39FC5E00345E9F /* HTTPClient.swift */,
+				498BCF5F1D39F89F00345E9F /* HTTPClientProtocol.swift */,
+				498BCF611D39F9B100345E9F /* HTTPTaskProtocol.swift */,
 				34F26CAF1CFFE8A9008C3D9A /* Info.plist */,
-				34191B261D0396BF00553C20 /* Retrolux.swift */,
-				4978AA791D35698900E1F1A5 /* PropertyConvertible.swift */,
+				34F26CAC1CFFE8A9008C3D9A /* LaunchScreen.storyboard */,
+				34F26CA71CFFE8A9008C3D9A /* Main.storyboard */,
 				4978AA7B1D3569BE00E1F1A5 /* Property.swift */,
+				4978AA791D35698900E1F1A5 /* PropertyConvertible.swift */,
+				4978AA831D3593DC00E1F1A5 /* PropertyType.swift */,
+				34191B261D0396BF00553C20 /* Retrolux.swift */,
 				4978AA7D1D356ADA00E1F1A5 /* RLObject.swift */,
 				4978AA7F1D356B8900E1F1A5 /* RLObjectProtocol.swift */,
 				4978AA811D358EE500E1F1A5 /* RLObjectReflector.swift */,
-				4978AA831D3593DC00E1F1A5 /* PropertyType.swift */,
-				498BCF5F1D39F89F00345E9F /* HTTPClientProtocol.swift */,
-				498BCF651D39FC5E00345E9F /* HTTPClient.swift */,
-				498BCF611D39F9B100345E9F /* HTTPTaskProtocol.swift */,
+				34F26CA51CFFE8A9008C3D9A /* ViewController.swift */,
 			);
 			path = Retrolux;
 			sourceTree = "<group>";
@@ -134,6 +136,7 @@
 				4978AA951D360F5300E1F1A5 /* PropertyTypeTests.swift */,
 				4978AA971D360FE300E1F1A5 /* RLObjectTests.swift */,
 				49E3BDFD1D36DC07003C2460 /* TransformerTests.swift */,
+				F3251C241D83186E00D62722 /* HTTPClientTests.swift */,
 			);
 			path = RetroluxTests;
 			sourceTree = "<group>";
@@ -260,6 +263,7 @@
 			files = (
 				4978AA961D360F5300E1F1A5 /* PropertyTypeTests.swift in Sources */,
 				49E3BDFE1D36DC07003C2460 /* TransformerTests.swift in Sources */,
+				F3251C251D83186E00D62722 /* HTTPClientTests.swift in Sources */,
 				4978AA941D360F4800E1F1A5 /* RLObjectReflectorTests.swift in Sources */,
 				4978AA981D360FE300E1F1A5 /* RLObjectTests.swift in Sources */,
 				4978AA8C1D35A11900E1F1A5 /* RetroluxTests.swift in Sources */,
