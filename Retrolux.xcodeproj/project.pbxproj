@@ -29,6 +29,7 @@
 		49E3BDFE1D36DC07003C2460 /* TransformerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49E3BDFD1D36DC07003C2460 /* TransformerTests.swift */; };
 		F3251C251D83186E00D62722 /* HTTPClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3251C241D83186E00D62722 /* HTTPClientTests.swift */; };
 		F3251C271D83443D00D62722 /* Call.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3251C261D83443D00D62722 /* Call.swift */; };
+		F3A3D0111D875C7A0067D03C /* Response.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3A3D0101D875C7A0067D03C /* Response.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -68,6 +69,7 @@
 		49E3BDFD1D36DC07003C2460 /* TransformerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransformerTests.swift; sourceTree = "<group>"; };
 		F3251C241D83186E00D62722 /* HTTPClientTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HTTPClientTests.swift; sourceTree = "<group>"; };
 		F3251C261D83443D00D62722 /* Call.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Call.swift; sourceTree = "<group>"; };
+		F3A3D0101D875C7A0067D03C /* Response.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Response.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -126,6 +128,7 @@
 				4978AA811D358EE500E1F1A5 /* RLObjectReflector.swift */,
 				34F26CA51CFFE8A9008C3D9A /* ViewController.swift */,
 				F3251C261D83443D00D62722 /* Call.swift */,
+				F3A3D0101D875C7A0067D03C /* Response.swift */,
 			);
 			path = Retrolux;
 			sourceTree = "<group>";
@@ -251,6 +254,7 @@
 				34191B271D0396BF00553C20 /* Retrolux.swift in Sources */,
 				F3251C271D83443D00D62722 /* Call.swift in Sources */,
 				34F26CA41CFFE8A9008C3D9A /* AppDelegate.swift in Sources */,
+				F3A3D0111D875C7A0067D03C /* Response.swift in Sources */,
 				4978AA801D356B8900E1F1A5 /* RLObjectProtocol.swift in Sources */,
 				498BCF621D39F9B100345E9F /* HTTPTaskProtocol.swift in Sources */,
 				498BCF661D39FC5E00345E9F /* HTTPClient.swift in Sources */,
