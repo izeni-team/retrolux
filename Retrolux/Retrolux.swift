@@ -43,48 +43,6 @@ public class Serializer: SerializerProtocol {
 //    }
 }
 
-// TODO: How to support return types for ReactiveCocoa?
-public class Call<ResponseBody> {
-    private let startCall: (call: Call<ResponseBody>) -> Void
-    public let method: String
-    public let url: NSURL
-    public let body: NSData?
-    public let headers: [String: String]
-    
-    // TODO: Add support for file uploading in background as multipart?
-    public init(
-        method: String,
-        url: NSURL,
-        body: NSData?,
-        headers: [String: String],
-        startCall: (call: Call<ResponseBody>) -> Void
-        )
-    {
-        self.method = method
-        self.url = url
-        self.body = body
-        self.headers = headers
-        self.startCall = startCall
-    }
-    
-    // TODO: Should we prevent calling this twice? What should the lifecycle of a call be?
-    public func enqueue(callback: (response: Response<ResponseBody>) -> Void) -> Self {
-        startCall(call: self)
-        return self
-    }
-    
-    public func perform() -> Response<ResponseBody> {
-        var response: Response<ResponseBody>!
-        let semaphore = dispatch_semaphore_create(0)
-        enqueue { (asyncResponse) in
-            response = asyncResponse
-            dispatch_semaphore_signal(semaphore)
-        }
-        dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
-        return response
-    }
-}
-
 func testbed() {
     //let r = Retrolux.sharedInstance
     //let newUser = User()
