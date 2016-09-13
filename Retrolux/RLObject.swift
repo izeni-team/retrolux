@@ -13,36 +13,36 @@ import Foundation
 // hard-to-find corner cases that might crop up. In particular, the issue where protocols with default implementations
 // and subclassing doesn't work well together (default implementation will be used in some cases even if you provide
 // your own implementation later down the road).
-public class RLObject: NSObject, RLObjectProtocol {
+open class RLObject: NSObject, RLObjectProtocol {
     public required override init() {
         super.init()
     }
-    
-    public func properties() throws -> [Property] {
+
+    open func properties() throws -> [Property] {
         return try rlobj_propertiesFor(self)
     }
     
-    public func set(value value: Any?, forProperty property: Property) throws {
+    open func set(value: Any?, forProperty property: Property) throws {
         try rlobj_setProperty(property, value: value, instance: self)
     }
     
-    public func valueFor(property: Property) -> Any? {
-        return valueForKey(property.name)
+    open func value(for property: Property) -> Any? {
+        return value(forKey: property.name)
     }
     
-    public func validate() -> String? {
+    open func validate() -> String? {
         return nil
     }
     
-    public class var ignoredProperties: [String] {
+    open class var ignoredProperties: [String] {
         return []
     }
     
-    public class var ignoreErrorsForProperties: [String] {
+    open class var ignoreErrorsForProperties: [String] {
         return []
     }
     
-    public class var mappedProperties: [String: String] {
+    open class var mappedProperties: [String: String] {
         return [:]
     }
 }

@@ -27,12 +27,14 @@ extension RetroluxTests {
         }
     }
     
-    func setPropertiesHelper(properties: [Property], dictionary: [String: AnyObject], instance: RLObjectProtocol) {
+    func setPropertiesHelper(_ properties: [Property], dictionary: [String: Any], instance: RLObjectProtocol) {
         XCTAssert(Set(properties.map({ $0.name })) == Set(dictionary.keys))
         
         for property in properties {
             do {
-                try instance.set(value: dictionary[property.name], forProperty: property)
+                print("BEFORE")
+                try instance.set(value: dictionary[property.name], for: property)
+                print("AFTER")
             } catch let error {
                 XCTFail("\(error)")
             }
@@ -42,7 +44,7 @@ extension RetroluxTests {
             print(property.mappedTo)
             let isNSNull = dictionary[property.mappedTo] is NSNull
             let screened: NSObject? = isNSNull ? nil : dictionary[property.mappedTo] as? NSObject
-            XCTAssert(instance.valueFor(property) as? NSObject == screened || !property.required)
+            XCTAssert(instance.value(for: property) as? NSObject == screened || !property.required)
         }
     }
     
@@ -64,7 +66,7 @@ extension RetroluxTests {
                 "height": "5' 7\""
             ],
             "model": NSNull()
-        ]
+        ] as [String : Any]
         
         do {
             let model = Model()
@@ -143,11 +145,11 @@ extension RetroluxTests {
         class Plain: RLObject {
             dynamic var bad = ""
             
-            override func set(value value: Any?, forProperty property: Property) throws {
+            override func set(value: Any?, forProperty property: Property) throws {
                 try super.set(value: "bad", forProperty: property)
             }
             
-            override func valueFor(property: Property) -> Any? {
+            override func value(for property: Property) -> Any? {
                 return "bad"
             }
             
@@ -169,11 +171,11 @@ extension RetroluxTests {
         }
         
         class Problematic: Plain {
-            override func set(value value: Any?, forProperty property: Property) throws {
+            override func set(value: Any?, forProperty property: Property) throws {
                 try super.set(value: "good", forProperty: property)
             }
             
-            override func valueFor(property: Property) -> Any? {
+            override func value(for property: Property) -> Any? {
                 return "good"
             }
             
@@ -200,8 +202,8 @@ extension RetroluxTests {
         XCTAssert(proto.mappedProperties == ["good": "good"])
         let instance = proto.init()
         let property = Property(type: .string, name: "bad", required: true, mappedTo: "bad")
-        try! instance.set(value: "bad", forProperty: property)
-        XCTAssert(instance.valueFor(property) as? String == "good")
+        try! instance.set(value: "bad", for: property)
+        XCTAssert(instance.value(for: property) as? String == "good")
         XCTAssert(proto.init().validate() == "good")
     }
 }

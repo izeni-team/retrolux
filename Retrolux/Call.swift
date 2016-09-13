@@ -10,27 +10,26 @@ import Foundation
 
 
 class Call<T> {
-    var request: NSURLRequest?
+    var request: NSMutableURLRequest?
+    //var task: HTTP
     
-    private var executed: Bool = false
+    fileprivate(set) var isExecuted: Bool = false
+    fileprivate(set) var isCancelled = false
 
-    func enqueue(callback: (() -> T)!) {
-        if callback == nil {
-            // TODO: Handle/Throw Error for callback == nil
-            return
+    func enqueue(_ callback: (_ response: RLResponse<T>) -> Void) -> Call<T> {
+        assert(!isExecuted, "Cannot execute call more than once.")
+        isExecuted = true
+        
+        guard !isCancelled else {
+            return self
         }
         
-        if executed {
-            // TODO: Handle/Throw Error for executed == true
-            return
-        }
-        executed = true
-        callback()
-    }
-  
-    
-    func isExecuted() -> Bool {
-        return executed
+        //callback()
+        return self
     }
     
-   }
+    func cancel() {
+        isCancelled = true
+        fatalError("TODO: Cancel HTTP task")
+    }
+}

@@ -9,12 +9,12 @@
 import Foundation
 
 public struct HTTPClientResponseData {
-    public let data: NSData?
+    public let data: Data?
     public let status: Int?
     public let headers: [String: String]?
-    public let error: NSError?
+    public let error: Error?
     
-    public init(data: NSData?, status: Int?, headers: [String: String]?, error: NSError?) {
+    public init(data: Data?, status: Int?, headers: [String : String]?, error: Error?) {
         self.data = data
         self.status = status
         self.headers = headers
@@ -23,7 +23,7 @@ public struct HTTPClientResponseData {
 }
 
 public protocol HTTPClientProtocol: class {
-    var interceptor: ((NSMutableURLRequest) -> Void)? { get set }
+    var interceptor: ((inout URLRequest) -> Void)? { get set }
     
-    func makeAsynchronousRequest(method: String, URL: NSURL, body: NSData?, headers: [String: String], callback: (httpResponse: HTTPClientResponseData) -> Void) -> HTTPTaskProtocol
+    func makeAsynchronousRequest(_ method: String, url: URL, body: Data?, headers: [String: String], callback: @escaping (_ httpResponse: HTTPClientResponseData) -> Void) -> HTTPTaskProtocol
 }

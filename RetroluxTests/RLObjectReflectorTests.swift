@@ -23,7 +23,7 @@ extension RetroluxTests {
         // Inheriting object 1 should fail
         do {
             _ = try RLObjectReflector().reflect(Object2())
-        } catch RLObjectReflectionError.UnsupportedBaseClass(let type) {
+        } catch RLObjectReflectionError.unsupportedBaseClass(let type) {
             // TODO: Return enum values instead of strings
             XCTAssert(type == Object1.self)
         } catch let error {
@@ -52,7 +52,7 @@ extension RetroluxTests {
         let object = Object1()
         do {
             _ = try RLObjectReflector().reflect(object)
-        } catch RLObjectReflectionError.CannotIgnoreErrorsForNonExistantProperty(propertyName: let propertyName, forClass: let classType) {
+        } catch RLObjectReflectionError.cannotIgnoreErrorsForNonExistantProperty(propertyName: let propertyName, forClass: let classType) {
             // TODO: Return enum values instead of strings
             XCTAssert(propertyName == "does_not_exist")
             XCTAssert(classType == Object1.self)
@@ -73,7 +73,7 @@ extension RetroluxTests {
         let object = Object1()
         do {
             _ = try RLObjectReflector().reflect(object)
-        } catch RLObjectReflectionError.CannotIgnoreErrorsForNonExistantProperty(propertyName: let propertyName, forClass: let classType) {
+        } catch RLObjectReflectionError.cannotIgnoreErrorsForNonExistantProperty(propertyName: let propertyName, forClass: let classType) {
             // TODO: Return enum values instead of strings
             XCTAssert(propertyName == "does_not_exist")
             XCTAssert(classType == Object1.self)
@@ -98,7 +98,7 @@ extension RetroluxTests {
         let object = Object1()
         do {
             _ = try RLObjectReflector().reflect(object)
-        } catch RLObjectReflectionError.CannotIgnoreErrorsAndIgnoreProperty(propertyName: let propertyName, forClass: let classType) {
+        } catch RLObjectReflectionError.cannotIgnoreErrorsAndIgnoreProperty(propertyName: let propertyName, forClass: let classType) {
             // TODO: Return enum values instead of strings
             XCTAssert(propertyName == "someProperty")
             XCTAssert(classType == Object1.self)
@@ -119,7 +119,7 @@ extension RetroluxTests {
         let object = Object1()
         do {
             _ = try RLObjectReflector().reflect(object)
-        } catch RLObjectReflectionError.CannotMapNonExistantProperty(propertyName: let propertyName, forClass: let classType) {
+        } catch RLObjectReflectionError.cannotMapNonExistantProperty(propertyName: let propertyName, forClass: let classType) {
             // TODO: Return enum values instead of strings
             XCTAssert(propertyName == "does_not_exist")
             XCTAssert(classType == Object1.self)
@@ -145,7 +145,7 @@ extension RetroluxTests {
         let object = Object1()
         do {
             _ = try RLObjectReflector().reflect(object)
-        } catch RLObjectReflectionError.MappedPropertyConflict(properties: let properties, conflictKey: let conflict, forClass: let classType) {
+        } catch RLObjectReflectionError.mappedPropertyConflict(properties: let properties, conflictKey: let conflict, forClass: let classType) {
             // TODO: Return enum values instead of strings
             XCTAssert(Set(properties) == Set(["test1", "test2"]))
             XCTAssert(conflict == "conflict_test")
@@ -157,7 +157,7 @@ extension RetroluxTests {
     
     func testRLObjectReflectionError_UnsupportedPropertyValueType() {
         class Object1: NSObject, RLObjectProtocol {
-            var test = NSData()
+            var test = Data()
             required override init() {
                 super.init()
             }
@@ -166,10 +166,10 @@ extension RetroluxTests {
         let object = Object1()
         do {
             _ = try RLObjectReflector().reflect(object)
-        } catch RLObjectReflectionError.UnsupportedPropertyValueType(property: let property, valueType: let valueType, forClass: let classType) {
+        } catch RLObjectReflectionError.unsupportedPropertyValueType(property: let property, valueType: let valueType, forClass: let classType) {
             // TODO: Return enum values instead of strings
             XCTAssert(property == "test")
-            XCTAssert(valueType is NSData.Type) // Can't just check via == because it could be _NSZeroData or something not NSData
+            XCTAssert(valueType is Data.Type) // Can't just check via == because it could be _NSZeroData or something not NSData
             XCTAssert(classType == Object1.self)
         } catch let error {
             XCTFail("\(error)")
@@ -187,7 +187,7 @@ extension RetroluxTests {
         let object = Object1()
         do {
             _ = try RLObjectReflector().reflect(object)
-        } catch RLObjectReflectionError.OptionalPrimitiveNumberNotBridgable(property: let property, forClass: let classType) {
+        } catch RLObjectReflectionError.optionalPrimitiveNumberNotBridgable(property: let property, forClass: let classType) {
             // TODO: Return enum values instead of strings
             XCTAssert(property == "test")
             XCTAssert(classType == Object1.self)
@@ -208,7 +208,7 @@ extension RetroluxTests {
         let object = Object1()
         do {
             _ = try RLObjectReflector().reflect(object)
-        } catch RLObjectReflectionError.PropertyNotBridgable(property: let property, valueType: let valueType, forClass: let classType) {
+        } catch RLObjectReflectionError.propertyNotBridgable(property: let property, valueType: let valueType, forClass: let classType) {
             // TODO: Return enum values instead of strings
             XCTAssert(property == "test")
             XCTAssert(valueType == Bool.self)
@@ -230,7 +230,7 @@ extension RetroluxTests {
         let object = Object1()
         do {
             _ = try RLObjectReflector().reflect(object)
-        } catch RLObjectReflectionError.ReadOnlyProperty(property: let property, forClass: let classType) {
+        } catch RLObjectReflectionError.readOnlyProperty(property: let property, forClass: let classType) {
             // TODO: Return enum values instead of strings
             XCTAssert(property == "test")
             XCTAssert(classType == Object1.self)

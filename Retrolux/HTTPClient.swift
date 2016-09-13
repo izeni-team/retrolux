@@ -10,33 +10,31 @@ import Foundation
 
 // WARNING: This isn't public, it's internal!
 // Extensions declaring protocol conformance cannot be made public (at least in <= Swift 2.2).
-extension NSURLSessionDataTask: HTTPTaskProtocol {}
+extension URLSessionDataTask: HTTPTaskProtocol {}
 
 // TODO: Add support for ignoring SSL errors.
 class HTTPClient: HTTPClientProtocol {
-    let session: NSURLSession
-    var interceptor: ((NSMutableURLRequest) -> Void)?
+    let session: URLSession
+    var interceptor: ((inout URLRequest) -> Void)?
     
     init() {
-        let configuration = NSURLSessionConfiguration.defaultSessionConfiguration()
-        session = NSURLSession(configuration: configuration)
+        let configuration = URLSessionConfiguration.default
+        session = URLSession(configuration: configuration)
     }
-    
-    func makeAsynchronousRequest(method: String, URL: NSURL, body: NSData?, headers: [String : String], callback: (httpResponse: HTTPClientResponseData) -> Void) -> HTTPTaskProtocol {
-        let request = NSMutableURLRequest()
-        request.HTTPMethod = method
-        request.HTTPBody = body
+    func makeAsynchronousRequest(_ method: String, url: URL, body: Data?, headers: [String : String], callback: @escaping (_ httpResponse: HTTPClientResponseData) -> Void) -> HTTPTaskProtocol {
+        var request = URLRequest(url: url)
+        request.httpMethod = method
+        request.httpBody = body
         request.allHTTPHeaderFields = headers
-        request.URL = URL
         
-        self.interceptor?(request)
+        self.interceptor?(&request)
         
-        let task = session.dataTaskWithRequest(request) { (data: NSData?, response: NSURLResponse?, error: NSError?) in
-            let httpResponse = (response as? NSHTTPURLResponse)
+        let task = session.dataTask(with: request, completionHandler: { (data: Data?, response: URLResponse?, error: Error?) in
+            let httpResponse = (response as? HTTPURLResponse)
             let status = httpResponse?.statusCode
-            let headers = httpResponse?.allHeaderFields as? [String: String]
-            callback(httpResponse: HTTPClientResponseData(data: data, status: status, headers: headers, error: error))
-        }
+            let headers = httpResponse?.allHeaderFields as? [String : String]
+            callback(HTTPClientResponseData(data: data, status: status, headers: headers, error: error))
+        }) 
         return task
     }
 }

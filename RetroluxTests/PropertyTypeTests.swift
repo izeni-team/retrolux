@@ -22,13 +22,13 @@ extension RetroluxTests {
         XCTAssert(PropertyType.from([String: Int?]) == .dictionary(type: .optional(wrapped: .number)))
         XCTAssert(PropertyType.from(NSDictionary) == .dictionary(type: .anyObject))
         XCTAssert(PropertyType.from(NSMutableDictionary) == .dictionary(type: .anyObject))
-        let jsonDictionaryData = "{\"test\": true}".dataUsingEncoding(NSUTF8StringEncoding)!
-        let jsonDictionaryType: AnyObject.Type = try! NSJSONSerialization.JSONObjectWithData(jsonDictionaryData, options: []).dynamicType
+        let jsonDictionaryData = "{\"test\": true}".data(using: String.Encoding.utf8)!
+        let jsonDictionaryType: Any.Type = try! type(of: (JSONSerialization.jsonObject(with: jsonDictionaryData, options: [])))
         XCTAssert(PropertyType.from(jsonDictionaryType) == .dictionary(type: .anyObject))
         XCTAssert(PropertyType.from(NSArray) == .array(type: .anyObject))
         XCTAssert(PropertyType.from(NSMutableArray) == .array(type: .anyObject))
-        let jsonArrayData = "[1, 2, 3]".dataUsingEncoding(NSUTF8StringEncoding)!
-        let jsonArrayType: AnyObject.Type = try! NSJSONSerialization.JSONObjectWithData(jsonArrayData, options: []).dynamicType
+        let jsonArrayData = "[1, 2, 3]".data(using: String.Encoding.utf8)!
+        let jsonArrayType: Any.Type = try! type(of: (JSONSerialization.jsonObject(with: jsonArrayData, options: [])))
         XCTAssert(PropertyType.from(jsonArrayType) == .array(type: .anyObject))
         
         class Object2: RLObject {}

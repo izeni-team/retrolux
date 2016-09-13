@@ -9,15 +9,15 @@
 import Foundation
 
 struct RLError {
-    var rawResponse: NSData?
+    var rawResponse: Data?
 }
 
 struct RLResponse<T> {
     // Do we want the NSURLRequest or NSHTTPURLResponse?
-    let request: NSURLRequest?
-    let response: NSHTTPURLResponse?
+    let request: URLRequest?
+    let response: HTTPURLResponse?
     
-    let rawResponse: NSData?
+    let rawResponse: Data?
     let result: RLResult<T>
     
     var error: RLError? {

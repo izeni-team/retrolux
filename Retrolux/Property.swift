@@ -8,12 +8,12 @@
 
 import Foundation
 
-public class Property: Hashable, Equatable {
-    public let type: PropertyType
-    public let name: String
-    public let required: Bool
-    public let mappedTo: String
-    public let hashValue: Int
+open class Property: Hashable, Equatable {
+    open let type: PropertyType
+    open let name: String
+    open let required: Bool
+    open let mappedTo: String
+    open let hashValue: Int
     
     public init(type: PropertyType, name: String, required: Bool, mappedTo: String) {
         self.type = type

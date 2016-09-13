@@ -18,24 +18,24 @@ public struct ErrorResponse {
 }
 
 public enum Response<Body> {
-    case Success(body: Body)
-    case Failure(error: ErrorResponse)
+    case success(body: Body)
+    case failure(error: ErrorResponse)
 }
 
 public protocol SerializerProtocol {
-    func deserializeData(data: NSData, output: Any.Type) throws -> Any
-    func serializeToData(object: Any) throws -> NSData
+    func deserialize(_ data: Data, output: Any.Type) throws -> Any
+    func serialize(_ object: Any) throws -> Data
 //    func supportsType(type: Any.Type) -> Bool // TODO: Implement this and pass in more info
 }
 
-public class Serializer: SerializerProtocol {
-    public func deserializeData(data: NSData, output: Any.Type) throws -> Any {
-        return try NSJSONSerialization.JSONObjectWithData(data, options: [])
+open class Serializer: SerializerProtocol {
+    open func deserialize(_ data: Data, output: Any.Type) throws -> Any {
+        return try JSONSerialization.jsonObject(with: data, options: [])
     }
     
-    public func serializeToData(object: Any) throws -> NSData {
+    open func serialize(_ object: Any) throws -> Data {
         // TODO: Force-casting Any to AnyObject is not safe.
-        return try NSJSONSerialization.dataWithJSONObject(object as! AnyObject, options: [])
+        return try JSONSerialization.data(withJSONObject: object as AnyObject, options: [])
     }
     
 //    public func supportsType(type: Any.Type) -> Bool {
@@ -49,15 +49,15 @@ func testbed() {
     //r.POST("/api/v1/users/", body: newUser, output: User.self)
 }
 
-public class Retrolux {
-    public static let sharedInstance = Retrolux(baseURL: NSURL(string: "https://www.google.com/")!, serializer: Serializer(), httpClient: HTTPClient())
+open class Retrolux {
+    open static let sharedInstance = Retrolux(baseURL: URL(string: "https://www.google.com/")!, serializer: Serializer(), httpClient: HTTPClient())
     
-    public let baseURL: NSURL
-    public let serializer: SerializerProtocol
-    public let httpClient: HTTPClientProtocol
-    public let headers: [String: String]
+    open let baseURL: URL
+    open let serializer: SerializerProtocol
+    open let httpClient: HTTPClientProtocol
+    open let headers: [String: String]
     
-    public init(baseURL: NSURL, serializer: SerializerProtocol, httpClient: HTTPClientProtocol) {
+    public init(baseURL: URL, serializer: SerializerProtocol, httpClient: HTTPClientProtocol) {
         self.baseURL = baseURL
         self.serializer = serializer
         self.httpClient = httpClient

@@ -10,6 +10,6 @@ import Foundation
 
 public protocol PropertyConvertible {
     func properties() throws -> [Property]
-    func set(value value: Any?, forProperty: Property) throws
-    func valueFor(property: Property) -> Any?
+    func set(value: Any?, for property: Property) throws
+    func value(for property: Property) -> Any?
 }

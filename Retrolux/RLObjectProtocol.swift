@@ -8,33 +8,33 @@
 
 import Foundation
 
-public enum RLObjectError: ErrorType {
-    case TypeMismatch(expected: PropertyType, got: Any.Type?, property: String, forClass: Any.Type)
-    case MissingDataKey(requiredProperty: String, forClass: Any.Type)
+public enum RLObjectError: Error {
+    case typeMismatch(expected: PropertyType, got: Any.Type?, property: String, forClass: Any.Type)
+    case missingDataKey(requiredProperty: String, forClass: Any.Type)
 }
 
-internal func rlobj_setProperty(property: Property, value: Any?, instance: RLObjectProtocol) throws {
-    guard property.type.isCompatibleWith(value) else {
+internal func rlobj_setProperty(_ property: Property, value: Any?, instance: RLObjectProtocol) throws {
+    guard property.type.isCompatible(with: value) else {
         guard property.required else {
             // TODO: Set to empty value?
             return
         }
-        throw RLObjectError.TypeMismatch(expected: property.type, got: value?.dynamicType, property: property.name, forClass: instance.dynamicType)
+        throw RLObjectError.typeMismatch(expected: property.type, got: type(of: value), property: property.name, forClass: type(of: instance))
     }
     let screened = value is NSNull ? nil : value
-    instance.setValue(screened as? AnyObject, forKey: property.name)
+    instance.setValue(screened, forKey: property.name)
 }
 
-internal func rlobj_propertiesFor(instance: RLObjectProtocol) throws -> [Property] {
+internal func rlobj_propertiesFor(_ instance: RLObjectProtocol) throws -> [Property] {
     // TODO: Cache reflection
     return try RLObjectReflector().reflect(instance)
 }
 
 public protocol RLObjectProtocol: NSObjectProtocol, PropertyConvertible {
     // Read/write properties
-    func respondsToSelector(selector: Selector) -> Bool // To check if property can be bridged to Obj-C
-    func setValue(value: AnyObject?, forKey: String) // For JSON -> Object deserialization
-    func valueForKey(key: String) -> AnyObject? // For Object -> JSON serialization
+    func responds(to aSelector: Selector!) -> Bool // To check if property can be bridged to Obj-C
+    func setValue(_ value: Any?, forKey key: String) // For JSON -> Object deserialization
+    func value(forKey key: String) -> Any? // For Object -> JSON serialization
     
     init() // Required for proper reflection support
     
@@ -56,12 +56,12 @@ extension RLObjectProtocol {
         return try rlobj_propertiesFor(self)
     }
     
-    public func set(value value: Any?, forProperty property: Property) throws {
+    public func set(value: Any?, for property: Property) throws {
         try rlobj_setProperty(property, value: value, instance: self)
     }
     
-    public func valueFor(property: Property) -> Any? {
-        return valueForKey(property.name)
+    public func value(for property: Property) -> Any? {
+        return value(forKey: property.name)
     }
 
     // TODO: This isn't internationalizable.

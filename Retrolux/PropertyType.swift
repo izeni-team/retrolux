@@ -13,13 +13,13 @@ private protocol RLArrayType {
 }
 
 extension Array: RLArrayType {
-    private static func type() -> PropertyType? {
+    fileprivate static func type() -> PropertyType? {
         return PropertyType.from(Element)
     }
 }
 
 extension NSArray: RLArrayType {
-    private static func type() -> PropertyType? {
+    fileprivate static func type() -> PropertyType? {
         return .anyObject
     }
 }
@@ -29,14 +29,14 @@ private protocol RLDictionaryType {
 }    
 
 extension Dictionary: RLDictionaryType {
-    private static func type() -> PropertyType? {
+    fileprivate static func type() -> PropertyType? {
         assert(String.self is Key.Type, "Dictionaries must have strings as keys")
         return PropertyType.from(Value)
     }
 }
 
 extension NSDictionary: RLDictionaryType {
-    private static func type() -> PropertyType? {
+    fileprivate static func type() -> PropertyType? {
         return .anyObject
     }
 }
@@ -46,7 +46,7 @@ private protocol RLOptionalType {
 }
 
 extension Optional: RLOptionalType {
-    private static func type() -> PropertyType? {
+    fileprivate static func type() -> PropertyType? {
         return PropertyType.from(Wrapped)
     }
 }
@@ -81,7 +81,7 @@ public indirect enum PropertyType: CustomStringConvertible, Equatable {
     case dictionary(type: PropertyType)
     
     // Making a custom init didn't compile, so it's a static func
-    public static func from(type: Any.Type) -> PropertyType? {
+    public static func from(_ type: Any.Type) -> PropertyType? {
         if type == Bool.self {
             return PropertyType.bool
         } else if type == AnyObject.self {
@@ -90,25 +90,25 @@ public indirect enum PropertyType: CustomStringConvertible, Equatable {
             return PropertyType.string
         } else if type is RLNumberType.Type {
             return PropertyType.number
-        } else if let arr = type as? RLArrayType.Type, innerType = arr.type() {
+        } else if let arr = type as? RLArrayType.Type, let innerType = arr.type() {
             return PropertyType.array(type: innerType)
         } else if let t = type as? RLObjectProtocol.Type {
             return PropertyType.object(type: t)
-        } else if let opt = type as? RLOptionalType.Type, wrapped = opt.type() {
+        } else if let opt = type as? RLOptionalType.Type, let wrapped = opt.type() {
             return PropertyType.optional(wrapped: wrapped)
-        } else if let dict = type as? RLDictionaryType.Type, innerType = dict.type() {
+        } else if let dict = type as? RLDictionaryType.Type, let innerType = dict.type() {
             return PropertyType.dictionary(type: innerType)
         } else {
             return nil
         }
     }
     
-    public func isCompatibleWith(value: Any?) -> Swift.Bool {
+    public func isCompatible(with value: Any?) -> Bool {
         switch self {
         case .anyObject:
             return true
         case .optional(let wrapped):
-            return value is NSNull || value == nil || wrapped.isCompatibleWith(value)
+            return value is NSNull || value == nil || wrapped.isCompatible(with: value)
         case .bool:
             return value is NSNumber
         case .number:
@@ -118,23 +118,23 @@ public indirect enum PropertyType: CustomStringConvertible, Equatable {
         case .object:
             return value is NSDictionary
         case .array(let element):
-            guard let array = value as? [Swift.AnyObject] else {
+            guard let array = value as? [AnyObject] else {
                 return false
             }
             return !array.contains {
-                !element.isCompatibleWith($0)
+                !element.isCompatible(with: $0)
             }
         case .dictionary(let valueType):
-            guard let dictionary = value as? [Swift.String: Swift.AnyObject] else {
+            guard let dictionary = value as? [String : AnyObject] else {
                 return false
             }
             return !dictionary.values.contains {
-                !valueType.isCompatibleWith($0)
+                !valueType.isCompatible(with: $0)
             }
         }
     }
     
-    public var description: Swift.String {
+    public var description: String {
         switch self {
         case .anyObject: return "anyObject"
         case .dictionary(let innerType): return "dictionary<\(innerType)>"
