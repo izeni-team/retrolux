@@ -8,6 +8,6 @@
 
 import Foundation
 
-public protocol SelfApplyingArg: Arg {
+public protocol SelfApplyingArg {
     func apply(to request: inout URLRequest)
 }

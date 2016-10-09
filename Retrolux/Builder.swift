@@ -14,48 +14,60 @@ protocol Builder {
     var callFactory: CallFactory { get }
     var serializer: Serializer { get }
     func makeRequest<A, T>(method: Method, endpoint: String, args: A, response: Body<T>) -> (A) -> Call<T>
-    
-//    func post<A, T>(_ endpoint: String, args: A, response: T.Type)
 }
 
 extension Builder {
-    func makeRequest<A, T>(method: Method, endpoint: String, args: A, response: Body<T>) -> (A) -> Call<T> {
-        return { args in
-            
-            let url = self.baseURL.appendingPathComponent(endpoint)
-            var request = URLRequest(url: url)
-            request.httpMethod = method.rawValue
-            
-            if let arg = args as? SelfApplyingArg {
-                arg.apply(to: &request)
-            } else if let body = args as? BodyValues {
-                assert(self.serializer.supports(type: body.type), "Unsupported type: \(body.type)")
-                try! self.serializer.deserialize(from: args, modify: &request)
-            } else {
-                let mirror = Mirror(reflecting: args)
-                for child in mirror.children {
-                    if let arg = child.value as? SelfApplyingArg {
-                        arg.apply(to: &request)
-                    } else if let body = child.value as? BodyValues {
-                        assert(self.serializer.supports(type: body.type), "Unsupported type: \(body.type)")
-                        try! self.serializer.deserialize(from: body.value, modify: &request)
-                    } else {
-                        fatalError("Unsupported argument type: \(type(of: child.value))")
-                    }
-                }
-            }
-            
+    func isArg(arg: Any) -> Bool {
+        if arg is AlignedSelfApplyingArg {
+            return true
+        } else if arg is SelfApplyingArg {
+            return true
+        } else if arg is BodyValues {
+            return true
+        }
+        
+        return false
+    }
+    
+    func normalizeArgs<A>(args: A) -> [Any] {
+        if isArg(arg: args) {
+            return [args]
+        } else {
+            return Mirror(reflecting: args).children.map { $0.value }
+        }
+    }
+    
+    func makeRequest<A, T>(method: Method, endpoint: String, args creationArgs: A, response: Body<T>) -> (A) -> Call<T> {
+        return { startingArgs in
             var task: Task?
             var cancelled = false
-            
-            print("URL:", request.url)
-            print("Method:", request.httpMethod)
-            print("Headers:", request.allHTTPHeaderFields)
-            print("Body:", String(data: request.httpBody!, encoding: .utf8)!)
             
             let start: (@escaping (Response<T>) -> Void) -> Void = { (callback) in
                 if cancelled {
                     return
+                }
+                
+                let url = self.baseURL.appendingPathComponent(endpoint)
+                var request = URLRequest(url: url)
+                request.httpMethod = method.rawValue
+                
+                let normalizedCreationArgs = self.normalizeArgs(args: creationArgs)
+                let normalizedStartingArgs = self.normalizeArgs(args: startingArgs)
+                
+                for (index, arg) in normalizedStartingArgs.enumerated() {
+                    if let arg = arg as? AlignedSelfApplyingArg {
+                        let alignedArg = normalizedCreationArgs[index]
+                        print("BEFORE:", request.url!.absoluteString)
+                        arg.apply(to: &request, with: alignedArg)
+                        print("AFTER:", request.url!.absoluteString)
+                    } else if let arg = arg as? SelfApplyingArg {
+                        arg.apply(to: &request)
+                    } else if let body = arg as? BodyValues {
+                        assert(self.serializer.supports(type: body.type), "Unsupported type: \(body.type)")
+                        try! self.serializer.deserialize(from: body.value, modify: &request)
+                    } else {
+                        fatalError("Unsupported argument type: \(type(of: arg))")
+                    }
                 }
                 
                 task = self.client.makeAsynchronousRequest(request: request, callback: { (httpResponse) in

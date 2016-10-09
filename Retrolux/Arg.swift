@@ -7,7 +7,3 @@
 //
 
 import Foundation
-
-public protocol Arg {
-    init()
-}

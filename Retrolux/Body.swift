@@ -8,7 +8,7 @@
 
 import Foundation
 
-class Body<T>: BodyValues, BodyInitializers {
+struct Body<T>: BodyValues, BodyInitializers {
     var type: Any.Type {
         return T.self
     }
@@ -18,11 +18,11 @@ class Body<T>: BodyValues, BodyInitializers {
         return _value!
     }
     
-    required init() {
+    init() {
         
     }
     
-    required init(_ value: T) {
+    init(_ value: T) {
         self._value = value
     }
 }

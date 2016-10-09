@@ -40,6 +40,8 @@
 		49DE43461DAAA34D00D41572 /* BodyInitializers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49DE43451DAAA34D00D41572 /* BodyInitializers.swift */; };
 		49DE43481DAAA54C00D41572 /* SelfApplyingArg.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49DE43471DAAA54C00D41572 /* SelfApplyingArg.swift */; };
 		49DE434A1DAAA57C00D41572 /* BodyValues.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49DE43491DAAA57C00D41572 /* BodyValues.swift */; };
+		49DE434C1DAAD82100D41572 /* Path.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49DE434B1DAAD82100D41572 /* Path.swift */; };
+		49DE434E1DAAE01800D41572 /* AlignedSelfApplyingArg.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49DE434D1DAAE01800D41572 /* AlignedSelfApplyingArg.swift */; };
 		49E3BDFE1D36DC07003C2460 /* TransformerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49E3BDFD1D36DC07003C2460 /* TransformerTests.swift */; };
 		F3251C251D83186E00D62722 /* HTTPClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3251C241D83186E00D62722 /* HTTPClientTests.swift */; };
 		F3A3D0111D875C7A0067D03C /* Response.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3A3D0101D875C7A0067D03C /* Response.swift */; };
@@ -93,6 +95,8 @@
 		49DE43451DAAA34D00D41572 /* BodyInitializers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BodyInitializers.swift; sourceTree = "<group>"; };
 		49DE43471DAAA54C00D41572 /* SelfApplyingArg.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SelfApplyingArg.swift; sourceTree = "<group>"; };
 		49DE43491DAAA57C00D41572 /* BodyValues.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BodyValues.swift; sourceTree = "<group>"; };
+		49DE434B1DAAD82100D41572 /* Path.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Path.swift; sourceTree = "<group>"; };
+		49DE434D1DAAE01800D41572 /* AlignedSelfApplyingArg.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlignedSelfApplyingArg.swift; sourceTree = "<group>"; };
 		49E3BDFD1D36DC07003C2460 /* TransformerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransformerTests.swift; sourceTree = "<group>"; };
 		F3251C241D83186E00D62722 /* HTTPClientTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HTTPClientTests.swift; sourceTree = "<group>"; };
 		F3A3D0101D875C7A0067D03C /* Response.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Response.swift; sourceTree = "<group>"; };
@@ -177,6 +181,7 @@
 				498BCF611D39F9B100345E9F /* Task.swift */,
 				49DE43471DAAA54C00D41572 /* SelfApplyingArg.swift */,
 				4990617A1DA9AFE30047F553 /* Serializer.swift */,
+				49DE434D1DAAE01800D41572 /* AlignedSelfApplyingArg.swift */,
 			);
 			name = Abstract;
 			sourceTree = "<group>";
@@ -206,6 +211,7 @@
 				4990617C1DA9B1D20047F553 /* HTTPCallFactory.swift */,
 				4990617E1DA9B39F0047F553 /* JSONSerializer.swift */,
 				49DE43431DAAA0C000D41572 /* Body.swift */,
+				49DE434B1DAAD82100D41572 /* Path.swift */,
 			);
 			name = Concrete;
 			sourceTree = "<group>";
@@ -329,12 +335,14 @@
 				4990617B1DA9AFE30047F553 /* Serializer.swift in Sources */,
 				49DE43481DAAA54C00D41572 /* SelfApplyingArg.swift in Sources */,
 				4999F8FB1DA8CD5B00E4C556 /* Call.swift in Sources */,
+				49DE434E1DAAE01800D41572 /* AlignedSelfApplyingArg.swift in Sources */,
 				49C1925A1DA96D4500823A55 /* Method.swift in Sources */,
 				4978AA801D356B8900E1F1A5 /* RLObjectProtocol.swift in Sources */,
 				498BCF621D39F9B100345E9F /* Task.swift in Sources */,
 				4999F9081DA8CF6800E4C556 /* HTTPTask.swift in Sources */,
 				4990617F1DA9B39F0047F553 /* JSONSerializer.swift in Sources */,
 				49DE434A1DAAA57C00D41572 /* BodyValues.swift in Sources */,
+				49DE434C1DAAD82100D41572 /* Path.swift in Sources */,
 				498BCF661D39FC5E00345E9F /* HTTPClient.swift in Sources */,
 				4978AA7A1D35698900E1F1A5 /* PropertyConvertible.swift in Sources */,
 				4978AA841D3593DC00E1F1A5 /* PropertyType.swift in Sources */,

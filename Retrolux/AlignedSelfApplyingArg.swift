@@ -1,5 +1,5 @@
 //
-//  BodyType.swift
+//  AlignedArg.swift
 //  Retrolux
 //
 //  Created by Christopher Bryan Henderson on 10/9/16.
@@ -8,7 +8,6 @@
 
 import Foundation
 
-public protocol BodyInitializers {
-    associatedtype T
-    init(_ value: T)
+protocol AlignedSelfApplyingArg {
+    func apply(to request: inout URLRequest, with alignedArg: Any)
 }

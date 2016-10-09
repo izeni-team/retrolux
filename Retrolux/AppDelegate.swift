@@ -48,50 +48,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         let person = Diplomat()
         
-        print("\n\n\n")
-        
-        print("before: \(person)")
-        do {
-            let properties = try RLObjectReflector().reflect(person)
-            
-            let json: [String: Any] = [
-                "name": NSNull(),
-                "country": "USA",
-                "friend_ages": [
-                    "Bob": "asdf",
-                    "Alice": 55,
-                    "Roy": 144
-                ]
-            ]
-            
-            for property in properties {
-                try person.set(value: json[property.mappedTo], for: property)
-            }
-        } catch let error {
-            print("Error converting from JSON: \(error)")
-        }
-        
-        print("after: \(person)")
-        
-//        do {
-//            let properties = try RLObjectReflector().reflect(person)
-//            
-//            var output = [String: Any]()
-//            for property in properties {
-//                output[property.mappedTo] = person.value(for: property) ?? NSNull()
-//            }
-//            
-//            print("output JSON dictionary: \(output)")
-//            
-//            let data = try JSONSerialization.data(withJSONObject: output, options: [])
-//            let string = String(data: data, encoding: .utf8)!
-//            print("output JSON string: \(string)")
-//        } catch let error {
-//            print("Error converting to JSON: \(error)")
-//        }
-        
-        print("\n\n\n")
-        
         class MyBuilder: Builder {
             var baseURL: URL
             var client: Client
@@ -122,8 +78,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 self.username = username
                 self.password = password
             }
+        }
+        
+        class User: RLObject {
+            var id = ""
+            var first_name = ""
+            var last_name = ""
             
-            static let arg = LoginBody()
+            var name: String {
+                return [first_name, last_name].flatMap { $0 }.joined(separator: " ")
+            }
         }
         
         // Seek server problems:
@@ -133,18 +97,70 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let login = requestBuilder.makeRequest(
             method: .post,
             endpoint: "api-token-auth/",
-            args: (post: Body<LoginBody>(), extra: Header()),
+            args: Body<LoginBody>(),
             response: Body<LoginResponse>()
         )
         
-        let body = LoginBody(username: "bhenderson@izeni.com", password: "a45d8f47-0e93-42a5-9efe-2ce59001eb97")
-        login((Body(body), Header(key: "Key", value: "Value"))).enqueue { response in
-            switch response.result {
-            case .success(let loginResponse):
-                print("id:", loginResponse.id, "token:", loginResponse.token)
-            case .error(let error):
-                print("error:", error)
+        let getUser = requestBuilder.makeRequest(
+            method: .get,
+            endpoint: "api/users/{id}/",
+            args: Path("id"),
+            response: Body<User>()
+        )
+        
+        var token: String? {
+            get {
+                return UserDefaults.standard.value(forKey: "token") as? String
             }
+            set {
+                UserDefaults.standard.setValue(newValue, forKey: "token")
+            }
+        }
+        
+        var userID: String? {
+            get {
+                return UserDefaults.standard.value(forKey: "user_id") as? String
+            }
+            set {
+                UserDefaults.standard.setValue(newValue, forKey: "user_id")
+            }
+        }
+        
+        requestBuilder.client.interceptor = { urlRequest in
+            if let token = token {
+                urlRequest.setValue("Token \(token)", forHTTPHeaderField: "Authorization")
+            }
+        }
+        
+        let afterLogin = { () -> Void in
+            getUser(Path(userID!)).enqueue { response in
+                switch response.result {
+                case .success(let value):
+                    print("User: \(value.name), \(value.id)")
+                case .error(let error):
+                    print("Get users error:", error)
+                }
+            }
+        }
+        
+        if token == nil || userID == nil {
+            let credentials = LoginBody(
+                username: "bhenderson@izeni.com",
+                password: "a45d8f47-0e93-42a5-9efe-2ce59001eb97"
+            )
+            
+            login(Body(credentials)).enqueue { response in
+                switch response.result {
+                case .success(let value):
+                    userID = value.id
+                    token = value.token
+                    afterLogin()
+                case .error(let error):
+                    print("Login error:", error)
+                }
+            }
+        } else {
+            afterLogin()
         }
         
         return true
