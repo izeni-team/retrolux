@@ -8,6 +8,6 @@
 
 import Foundation
 
-protocol AlignedSelfApplyingArg {
+public protocol AlignedSelfApplyingArg {
     func apply(to request: inout URLRequest, with alignedArg: Any)
 }

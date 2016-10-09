@@ -90,6 +90,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
         
+        class NewUser: RLObject {
+            var email = ""
+            var password = ""
+            
+            convenience init(email: String, password: String) {
+                self.init()
+                self.email = email
+                self.password = password
+            }
+        }
+        
         // Seek server problems:
         // - Password reset doesn't work using the app
         // - URL on admin should be USER_ID/password/, not USER_ID/change/password/
@@ -107,6 +118,37 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             args: Path("id"),
             response: Body<User>()
         )
+        
+        let patchUser = requestBuilder.makeRequest(
+            method: .patch,
+            endpoint: "api/users/{id}/",
+            args: (Path("id"), Body<User>()),
+            response: Body<User>()
+        )
+        
+        let createUser = requestBuilder.makeRequest(
+            method: .post,
+            endpoint: "api/users/",
+            args: Body<NewUser>(),
+            response: Body<User>()
+        )
+        
+        let deleteUser = requestBuilder.makeRequest(
+            method: .delete,
+            endpoint: "api/users/{id}/",
+            args: Path("id"),
+            response: Body<Void>()
+        )
+        
+        deleteUser(Path("asdf")).enqueue { response in
+            print(response)
+            switch response.result {
+            case .success:
+                break
+            case .error(let error):
+                break
+            }
+        }
         
         var token: String? {
             get {
@@ -132,11 +174,41 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
         
+        let create = false
+        if create {
+            let newUser = NewUser(
+                email: "bhenderson+rl002@izeni.com",
+                password: "a45d8f47-0e93-42a5-9efe-2ce59001eb97"
+            )
+            createUser(Body(newUser)).enqueue { createResponse in
+                switch createResponse.result {
+                case .success(let value):
+                    print("New user created")
+                    print(value.first_name, value.last_name, value.id)
+                case .error(let error):
+                    print("Error creating new user: \(error)")
+                }
+            }
+        }
+        
         let afterLogin = { () -> Void in
             getUser(Path(userID!)).enqueue { response in
                 switch response.result {
                 case .success(let value):
                     print("User: \(value.name), \(value.id)")
+                    
+                    let modified = value
+                    modified.first_name = "ALICE"
+                    
+                    patchUser((Path(value.id), Body(modified))).enqueue { patchResponse in
+                        switch patchResponse.result {
+                        case .success(let patchedUser):
+                            print("Patched user was successful.")
+                            print("User's name is now: \(patchedUser.first_name)")
+                        case .error(let error):
+                            print("Error patching: \(error)")
+                        }
+                    }
                 case .error(let error):
                     print("Get users error:", error)
                 }
@@ -145,7 +217,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         if token == nil || userID == nil {
             let credentials = LoginBody(
-                username: "bhenderson@izeni.com",
+                username: "bhenderson+rl002@izeni.com",
                 password: "a45d8f47-0e93-42a5-9efe-2ce59001eb97"
             )
             

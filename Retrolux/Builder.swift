@@ -13,7 +13,7 @@ protocol Builder {
     var client: Client { get }
     var callFactory: CallFactory { get }
     var serializer: Serializer { get }
-    func makeRequest<A, T>(method: Method, endpoint: String, args: A, response: Body<T>) -> (A) -> Call<T>
+    func makeRequest<A, T>(method: HTTPMethod, endpoint: String, args: A, response: Body<T>) -> (A) -> Call<T>
 }
 
 extension Builder {
@@ -37,7 +37,7 @@ extension Builder {
         }
     }
     
-    func makeRequest<A, T>(method: Method, endpoint: String, args creationArgs: A, response: Body<T>) -> (A) -> Call<T> {
+    func makeRequest<A, T>(method: HTTPMethod, endpoint: String, args creationArgs: A, response: Body<T>) -> (A) -> Call<T> {
         return { startingArgs in
             var task: Task?
             var cancelled = false
@@ -70,10 +70,10 @@ extension Builder {
                     }
                 }
                 
-                task = self.client.makeAsynchronousRequest(request: request, callback: { (httpResponse) in
-                    print("Status: \(httpResponse.status)")
+                task = self.client.makeAsynchronousRequest(request: request, callback: { (response) in
+                    print("Status: \((response.response as? HTTPURLResponse)?.statusCode)")
                     let body: String
-                    if let data = httpResponse.data {
+                    if let data = response.data {
                         body = String(data: data, encoding: .utf8)!
                     } else {
                         body = "<no_body>"
@@ -81,12 +81,17 @@ extension Builder {
                     print("Body: \(body)")
                     
                     do {
-                        let result = Result<T>.success(value: try self.serializer.serialize(from: httpResponse))
+                        let result: Result<T>
+                        if T.self == Void.self {
+                            result = Result<T>.success(value: () as! T)
+                        } else {
+                            result = Result<T>.success(value: try self.serializer.serialize(from: response))
+                        }
                         let response = Response(request: request, response: nil, rawResponse: nil, result: result)
                         callback(response)
                     } catch let error {
                         print("Error serializing response: \(error)")
-                        callback(Response(request: request, response: nil, rawResponse: httpResponse.data, result: Result.error(error: ErrorResponse(rawResponse: httpResponse.data))))
+                        callback(Response(request: request, response: nil, rawResponse: response.data, result: Result.error(error: ErrorResponse(rawResponse: response.data))))
                     }
                 })
                 task!.resume()

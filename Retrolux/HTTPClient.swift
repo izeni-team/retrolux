@@ -20,7 +20,7 @@ class HTTPClient: Client {
     
     func makeAsynchronousRequest(
         request inputRequest: URLRequest,
-        callback: @escaping (_ httpResponse: ClientResponse) -> Void
+        callback: @escaping (_ response: ClientResponse) -> Void
         ) -> Task
     {
         var request = inputRequest
@@ -29,11 +29,7 @@ class HTTPClient: Client {
         print("\(request.httpMethod!) \(request.url!)")
         
         let task = session.dataTask(with: request, completionHandler: { (data: Data?, response: URLResponse?, error: Error?) in
-            let httpResponse = (response as? HTTPURLResponse)
-            let status = httpResponse?.statusCode
-            print("HTTP Status: \(status)")
-            let headers = httpResponse?.allHeaderFields as? [String : String]
-            callback(ClientResponse(data: data, status: status, headers: headers, error: error))
+            callback(ClientResponse(data: data, response: response, error: error))
         }) 
         return HTTPTask(task: task)
     }

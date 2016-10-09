@@ -8,26 +8,26 @@
 
 import Foundation
 
-struct Path: AlignedSelfApplyingArg, ExpressibleByStringLiteral {
-    let value: String
+public struct Path: AlignedSelfApplyingArg, ExpressibleByStringLiteral {
+    public let value: String
     
-    init(stringLiteral value: String) {
+    public init(stringLiteral value: String) {
         self.value = value
     }
     
-    init(extendedGraphemeClusterLiteral value: String) {
+    public init(extendedGraphemeClusterLiteral value: String) {
         self.value = value
     }
     
-    init(unicodeScalarLiteral value: String) {
+    public init(unicodeScalarLiteral value: String) {
         self.value = value
     }
     
-    init(_ value: String) {
+    public init(_ value: String) {
         self.value = value
     }
     
-    func apply(to request: inout URLRequest, with alignedArg: Any) {
+    public func apply(to request: inout URLRequest, with alignedArg: Any) {
         // TODO: Don't replace escaped variant. There has to be a better way...
         let token = "%7B" + (alignedArg as! Path).value + "%7D"
         request.url = URL(string: request.url!.absoluteString.replacingOccurrences(of: token, with: value))!

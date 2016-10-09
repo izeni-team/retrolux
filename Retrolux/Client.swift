@@ -8,14 +8,17 @@
 
 import Foundation
 
-public typealias ClientResponse = (
-    data: Data?,
-    status: Int?,
-    headers: [String: String]?,
-    error: Error?
-)
+public struct ClientResponse {
+    let data: Data?
+    let response: URLResponse?
+    let error: Error?
+    
+    var status: Int? {
+        return (response as? HTTPURLResponse)?.statusCode
+    }
+}
 
 public protocol Client: class {
     var interceptor: ((inout URLRequest) -> Void)? { get set }
-    func makeAsynchronousRequest(request: URLRequest, callback: @escaping (_ httpResponse: ClientResponse) -> Void) -> Task
+    func makeAsynchronousRequest(request: URLRequest, callback: @escaping (_ response: ClientResponse) -> Void) -> Task
 }
