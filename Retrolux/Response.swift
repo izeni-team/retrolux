@@ -8,19 +8,19 @@
 
 import Foundation
 
-struct RLError {
+struct ErrorResponse {
     var rawResponse: Data?
 }
 
-struct RLResponse<T> {
+public struct Response<T> {
     // Do we want the NSURLRequest or NSHTTPURLResponse?
     let request: URLRequest?
     let response: HTTPURLResponse?
     
     let rawResponse: Data?
-    let result: RLResult<T>
+    let result: Result<T>
     
-    var error: RLError? {
+    var error: ErrorResponse? {
         return result.error
     }
     
@@ -35,11 +35,11 @@ struct RLResponse<T> {
     
 }
 
-enum RLResult<T> {
+enum Result<T> {
     case success(value: T)
-    case error(error: RLError)
+    case error(error: ErrorResponse)
     
-    var error: RLError? {
+    var error: ErrorResponse? {
         if case .error(let error) = self {
             return error
         }
