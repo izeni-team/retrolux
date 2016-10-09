@@ -13,8 +13,6 @@ enum RLObjectJSONSerializerError: Error {
     case invalidJSON
 }
 
-extension RLObject: Body {}
-
 class RLObjectJSONSerializer: Serializer {
     func supports(type: Any.Type) -> Bool {
         return type is RLObjectProtocol.Type

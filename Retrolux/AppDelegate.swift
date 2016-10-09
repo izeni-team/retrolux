@@ -111,7 +111,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             var token = ""
         }
         
-        let b = MyBuilder(baseURL: URL(string: "https://seek.izeni.net/")!, client: HTTPClient(), callFactory: HTTPCallFactory(), serializer: RLObjectJSONSerializer())
+        let requestBuilder = MyBuilder(baseURL: URL(string: "https://seek.izeni.net/")!, client: HTTPClient(), callFactory: HTTPCallFactory(), serializer: RLObjectJSONSerializer())
         
         class LoginBody: RLObject {
             var username = ""
@@ -130,16 +130,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // - Password reset doesn't work using the app
         // - URL on admin should be USER_ID/password/, not USER_ID/change/password/
         
-        let login = b.makeRequest(method: .post, endpoint: "api-token-auth/", args: LoginBody.arg, response: LoginResponse.self)
+        let login = requestBuilder.makeRequest(
+            method: .post,
+            endpoint: "api-token-auth/",
+            args: (post: Body<LoginBody>(), extra: Header()),
+            response: Body<LoginResponse>()
+        )
+        
         let body = LoginBody(username: "bhenderson@izeni.com", password: "a45d8f47-0e93-42a5-9efe-2ce59001eb97")
-        login(body).enqueue { response in
-            print(response)
-            
+        login((Body(body), Header(key: "Key", value: "Value"))).enqueue { response in
             switch response.result {
             case .success(let loginResponse):
                 print("id:", loginResponse.id, "token:", loginResponse.token)
             case .error(let error):
-                break
+                print("error:", error)
             }
         }
         

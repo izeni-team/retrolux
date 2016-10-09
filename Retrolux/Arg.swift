@@ -9,5 +9,5 @@
 import Foundation
 
 public protocol Arg {
-    func apply(to request: inout URLRequest)
+    init()
 }

@@ -13,30 +13,32 @@ protocol Builder {
     var client: Client { get }
     var callFactory: CallFactory { get }
     var serializer: Serializer { get }
-    func makeRequest<A, T>(method: Method, endpoint: String, args: A, response: T.Type) -> (A) -> Call<T>
+    func makeRequest<A, T>(method: Method, endpoint: String, args: A, response: Body<T>) -> (A) -> Call<T>
     
 //    func post<A, T>(_ endpoint: String, args: A, response: T.Type)
 }
 
 extension Builder {
-    func makeRequest<A, T>(method: Method, endpoint: String, args: A, response: T.Type) -> (A) -> Call<T> {
+    func makeRequest<A, T>(method: Method, endpoint: String, args: A, response: Body<T>) -> (A) -> Call<T> {
         return { args in
             
             let url = self.baseURL.appendingPathComponent(endpoint)
             var request = URLRequest(url: url)
             request.httpMethod = method.rawValue
             
-            if let arg = args as? Arg {
+            if let arg = args as? SelfApplyingArg {
                 arg.apply(to: &request)
-            } else if self.serializer.supports(type: type(of: args)) {
+            } else if let body = args as? BodyValues {
+                assert(self.serializer.supports(type: body.type), "Unsupported type: \(body.type)")
                 try! self.serializer.deserialize(from: args, modify: &request)
             } else {
                 let mirror = Mirror(reflecting: args)
                 for child in mirror.children {
-                    if let arg = child.value as? Arg {
+                    if let arg = child.value as? SelfApplyingArg {
                         arg.apply(to: &request)
-                    } else if self.serializer.supports(type: type(of: child.value)) {
-                        try! self.serializer.deserialize(from: child.value, modify: &request)
+                    } else if let body = child.value as? BodyValues {
+                        assert(self.serializer.supports(type: body.type), "Unsupported type: \(body.type)")
+                        try! self.serializer.deserialize(from: body.value, modify: &request)
                     } else {
                         fatalError("Unsupported argument type: \(type(of: child.value))")
                     }

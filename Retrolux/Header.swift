@@ -8,11 +8,14 @@
 
 import Foundation
 
-struct Header: Arg {
+struct Header: SelfApplyingArg {
     let key: String
     let value: String
     
-    static let arg = Header(key: "", value: "")
+    init() {
+        self.key = ""
+        self.value = ""
+    }
     
     init(key: String, value: String) {
         self.key = key

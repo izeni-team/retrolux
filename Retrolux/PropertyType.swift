@@ -14,7 +14,7 @@ private protocol RLArrayType {
 
 extension Array: RLArrayType {
     fileprivate static func type() -> PropertyType? {
-        return PropertyType.from(Element)
+        return PropertyType.from(Element.self)
     }
 }
 
@@ -31,7 +31,7 @@ private protocol RLDictionaryType {
 extension Dictionary: RLDictionaryType {
     fileprivate static func type() -> PropertyType? {
         assert(String.self is Key.Type, "Dictionaries must have strings as keys")
-        return PropertyType.from(Value)
+        return PropertyType.from(Value.self)
     }
 }
 
@@ -47,7 +47,7 @@ private protocol RLOptionalType {
 
 extension Optional: RLOptionalType {
     fileprivate static func type() -> PropertyType? {
-        return PropertyType.from(Wrapped)
+        return PropertyType.from(Wrapped.self)
     }
 }
 
