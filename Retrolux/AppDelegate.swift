@@ -40,6 +40,57 @@ class Diplomat: Person {
     }
 }
 
+enum InterpretedResponse<T> {
+    case success(value: T)
+    case failure(error: InterpretedError)
+}
+
+struct InterpretedError {
+    let message: String
+    
+    init(response: ClientResponse?, serializerError: Error?) {
+        self.message = "TODO"
+    }
+    
+    func presentError(on viewController: UIViewController, errorTitle: String) {
+        let alert = UIAlertController(title: errorTitle, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        viewController.present(alert, animated: false, completion: nil)
+    }
+}
+
+extension Response {
+    var interpreted: InterpretedResponse<T> {
+//        if let error = self.rawResponse.error {
+            return .failure(error: InterpretedError(response: rawResponse, serializerError: result.error))
+//        }
+//
+//
+//        let status = rawResponse.status ?? 0
+//        switch status {
+//        case 200...299:
+//            switch result {
+//            case .success(let value):
+//                return .success(value: value)
+//            case .failure(let error):
+//                return .failure(error: InterpretedError(response: response, serializerError: error))
+//            }
+//        case 300...399:
+//            let userInfo = [NSLocalizedDescriptionKey: ""]
+//            return .failure(error: ErrorResponse(error: NSError(domain: "retrolux", code: 300, userInfo: userInfo)))
+//        case 400...499:
+//            let userInfo = [NSLocalizedDescriptionKey: ""]
+//            return .failure(error: ErrorResponse(error: NSError(domain: "retrolux", code: 400, userInfo: userInfo)))
+//        case 500...599:
+//            let userInfo = [NSLocalizedDescriptionKey: ""]
+//            return .failure(error: ErrorResponse(error: NSError(domain: "retrolux", code: 500, userInfo: userInfo)))
+//        default:
+//            let userInfo = [NSLocalizedDescriptionKey: ""]
+//            return .failure(error: ErrorResponse(error: NSError(domain: "retrolux", code: 1, userInfo: userInfo)))
+//        }
+    }
+}
+
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
@@ -140,13 +191,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             response: Body<Void>()
         )
         
+        let getUsers = requestBuilder.makeRequest(
+            method: .get,
+            endpoint: "api/users/",
+            args: (),
+            response: Body<[User]>()
+        )
+        
         deleteUser(Path("asdf")).enqueue { response in
             print(response)
-            switch response.result {
-            case .success:
-                break
-            case .error(let error):
-                break
+            switch response.interpreted {
+            case .success(let value):
+                print("Deleted user successfully.")
+            case .failure(let error):
+                print("Failed to delete user: \(error)")
             }
         }
         
@@ -174,6 +232,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
         
+        getUsers().enqueue { response in
+            switch response.result {
+            case .success(let values):
+                print("Got users: \(values.count)")
+            case .failure(let error):
+                print("Failed to get list of users: \(error)")
+            }
+        }
+        
         let create = false
         if create {
             let newUser = NewUser(
@@ -185,7 +252,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 case .success(let value):
                     print("New user created")
                     print(value.first_name, value.last_name, value.id)
-                case .error(let error):
+                case .failure(let error):
                     print("Error creating new user: \(error)")
                 }
             }
@@ -205,11 +272,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                         case .success(let patchedUser):
                             print("Patched user was successful.")
                             print("User's name is now: \(patchedUser.first_name)")
-                        case .error(let error):
+                        case .failure(let error):
                             print("Error patching: \(error)")
                         }
                     }
-                case .error(let error):
+                case .failure(let error):
                     print("Get users error:", error)
                 }
             }
@@ -227,7 +294,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     userID = value.id
                     token = value.token
                     afterLogin()
-                case .error(let error):
+                case .failure(let error):
                     print("Login error:", error)
                 }
             }

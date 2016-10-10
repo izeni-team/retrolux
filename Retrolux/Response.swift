@@ -9,39 +9,37 @@
 import Foundation
 
 struct ErrorResponse {
-    var rawResponse: Data?
+    let error: Error?
 }
 
 public struct Response<T> {
     // Do we want the NSURLRequest or NSHTTPURLResponse?
-    let request: URLRequest?
-    let response: HTTPURLResponse?
-    
-    let rawResponse: Data?
+    let request: URLRequest
+    let rawResponse: ClientResponse
     let result: Result<T>
-    
-    var error: ErrorResponse? {
-        return result.error
-    }
     
     var body: T? {
         switch result {
         case .success(let value):
             return value
-        case .error(_):
+        case .failure(_):
             return nil
         }
     }
     
+    var isSuccessful: Bool {
+        let status = rawResponse.status ?? 0
+        return (200...299).contains(status)
+    }
 }
 
 enum Result<T> {
     case success(value: T)
-    case error(error: ErrorResponse)
+    case failure(error: ErrorResponse)
     
-    var error: ErrorResponse? {
-        if case .error(let error) = self {
-            return error
+    var error: Error? {
+        if case .failure(let error) = self {
+            return error.error
         }
         return nil
     }
