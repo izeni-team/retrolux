@@ -23,6 +23,7 @@ extension RetroluxTests {
         // Inheriting object 1 should fail
         do {
             _ = try RLObjectReflector().reflect(Object2())
+            XCTFail("Operation should not have succeeded.")
         } catch RLObjectReflectionError.unsupportedBaseClass(let type) {
             // TODO: Return enum values instead of strings
             XCTAssert(type == Object1.self)
@@ -52,6 +53,7 @@ extension RetroluxTests {
         let object = Object1()
         do {
             _ = try RLObjectReflector().reflect(object)
+            XCTFail("Operation should not have succeeded.")
         } catch RLObjectReflectionError.cannotIgnoreErrorsForNonExistantProperty(propertyName: let propertyName, forClass: let classType) {
             // TODO: Return enum values instead of strings
             XCTAssert(propertyName == "does_not_exist")
@@ -73,6 +75,7 @@ extension RetroluxTests {
         let object = Object1()
         do {
             _ = try RLObjectReflector().reflect(object)
+            XCTFail("Operation should not have succeeded.")
         } catch RLObjectReflectionError.cannotIgnoreErrorsForNonExistantProperty(propertyName: let propertyName, forClass: let classType) {
             // TODO: Return enum values instead of strings
             XCTAssert(propertyName == "does_not_exist")
@@ -98,6 +101,7 @@ extension RetroluxTests {
         let object = Object1()
         do {
             _ = try RLObjectReflector().reflect(object)
+            XCTFail("Operation should not have succeeded.")
         } catch RLObjectReflectionError.cannotIgnoreErrorsAndIgnoreProperty(propertyName: let propertyName, forClass: let classType) {
             // TODO: Return enum values instead of strings
             XCTAssert(propertyName == "someProperty")
@@ -119,6 +123,7 @@ extension RetroluxTests {
         let object = Object1()
         do {
             _ = try RLObjectReflector().reflect(object)
+            XCTFail("Operation should not have succeeded.")
         } catch RLObjectReflectionError.cannotMapNonExistantProperty(propertyName: let propertyName, forClass: let classType) {
             // TODO: Return enum values instead of strings
             XCTAssert(propertyName == "does_not_exist")
@@ -145,6 +150,7 @@ extension RetroluxTests {
         let object = Object1()
         do {
             _ = try RLObjectReflector().reflect(object)
+            XCTFail("Operation should not have succeeded.")
         } catch RLObjectReflectionError.mappedPropertyConflict(properties: let properties, conflictKey: let conflict, forClass: let classType) {
             // TODO: Return enum values instead of strings
             XCTAssert(Set(properties) == Set(["test1", "test2"]))
@@ -166,6 +172,7 @@ extension RetroluxTests {
         let object = Object1()
         do {
             _ = try RLObjectReflector().reflect(object)
+            XCTFail("Operation should not have succeeded.")
         } catch RLObjectReflectionError.unsupportedPropertyValueType(property: let property, valueType: let valueType, forClass: let classType) {
             // TODO: Return enum values instead of strings
             XCTAssert(property == "test")
@@ -187,6 +194,7 @@ extension RetroluxTests {
         let object = Object1()
         do {
             _ = try RLObjectReflector().reflect(object)
+            XCTFail("Operation should not have succeeded.")
         } catch RLObjectReflectionError.optionalPrimitiveNumberNotBridgable(property: let property, forClass: let classType) {
             // TODO: Return enum values instead of strings
             XCTAssert(property == "test")
@@ -208,6 +216,7 @@ extension RetroluxTests {
         let object = Object1()
         do {
             _ = try RLObjectReflector().reflect(object)
+            XCTFail("Operation should not have succeeded.")
         } catch RLObjectReflectionError.propertyNotBridgable(property: let property, valueType: let valueType, forClass: let classType) {
             // TODO: Return enum values instead of strings
             XCTAssert(property == "test")
@@ -230,6 +239,7 @@ extension RetroluxTests {
         let object = Object1()
         do {
             _ = try RLObjectReflector().reflect(object)
+            XCTFail("Operation should not have succeeded.")
         } catch RLObjectReflectionError.readOnlyProperty(property: let property, forClass: let classType) {
             // TODO: Return enum values instead of strings
             XCTAssert(property == "test")
