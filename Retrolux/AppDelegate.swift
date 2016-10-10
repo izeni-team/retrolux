@@ -118,7 +118,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             var token = ""
         }
         
-        let requestBuilder = MyBuilder(baseURL: URL(string: "https://seek.izeni.net/")!, client: HTTPClient(), callFactory: HTTPCallFactory(), serializer: RLObjectJSONSerializer())
+        let requestBuilder = MyBuilder(
+            baseURL: URL(string: "https://seek.izeni.net/")!,
+            client: HTTPClient(),
+            callFactory: HTTPCallFactory(),
+            serializer: RLObjectJSONSerializer()
+        )
         
         class LoginBody: RLObject {
             var username = ""

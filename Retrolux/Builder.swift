@@ -88,12 +88,18 @@ extension Builder {
                             result = Result<T>.success(value: try self.serializer.serialize(from: response))
                         }
                         let response = Response(request: request, rawResponse: response, result: result)
-                        callback(response)
+                        
+                        DispatchQueue.main.async {
+                            callback(response)
+                        }
                     } catch let error {
                         print("Error serializing response: \(error)")
                         let result = Result<T>.failure(error: ErrorResponse(error: error))
                         let response = Response(request: request, rawResponse: response, result: result)
-                        callback(response)
+                        
+                        DispatchQueue.main.async {
+                            callback(response)
+                        }
                     }
                 })
                 task!.resume()
