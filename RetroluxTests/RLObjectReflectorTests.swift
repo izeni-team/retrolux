@@ -47,14 +47,14 @@ extension RetroluxTests {
                 super.init()
             }
             
-            static let ignoreProperties = ["does_not_exist"]
+            static let ignoredProperties = ["does_not_exist"]
         }
         
         let object = Object1()
         do {
             _ = try RLObjectReflector().reflect(object)
             XCTFail("Operation should not have succeeded.")
-        } catch RLObjectReflectionError.cannotIgnoreErrorsForNonExistantProperty(propertyName: let propertyName, forClass: let classType) {
+        } catch RLObjectReflectionError.cannotIgnoreNonExistantProperty(propertyName: let propertyName, forClass: let classType) {
             // TODO: Return enum values instead of strings
             XCTAssert(propertyName == "does_not_exist")
             XCTAssert(classType == Object1.self)
@@ -102,6 +102,7 @@ extension RetroluxTests {
         do {
             _ = try RLObjectReflector().reflect(object)
             XCTFail("Operation should not have succeeded.")
+            
         } catch RLObjectReflectionError.cannotIgnoreErrorsAndIgnoreProperty(propertyName: let propertyName, forClass: let classType) {
             // TODO: Return enum values instead of strings
             XCTAssert(propertyName == "someProperty")
