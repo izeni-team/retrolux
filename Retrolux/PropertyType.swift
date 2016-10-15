@@ -80,7 +80,7 @@ public indirect enum PropertyType: CustomStringConvertible, Equatable {
     case array(type: PropertyType)
     case dictionary(type: PropertyType)
     
-    // Making a custom init didn't compile, so it's a static func
+    // TODO: How to make this a custom initializer instead of a static function?
     public static func from(_ type: Any.Type) -> PropertyType? {
         if type == Bool.self {
             return PropertyType.bool

@@ -15,11 +15,10 @@ public enum RLObjectError: Error {
 
 internal func rlobj_setProperty(_ property: Property, value: Any?, instance: RLObjectProtocol) throws {
     guard property.type.isCompatible(with: value) else {
-        guard property.required else {
-            // TODO: Set to empty value?
-            return
+        if property.required {
+            throw RLObjectError.typeMismatch(expected: property.type, got: type(of: value), property: property.name, forClass: type(of: instance))
         }
-        throw RLObjectError.typeMismatch(expected: property.type, got: type(of: value), property: property.name, forClass: type(of: instance))
+        return
     }
     let screened = value is NSNull ? nil : value
     instance.setValue(screened, forKey: property.name)

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3484545C1DB2C37700032ACC /* RLObjectJSONSerializerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3484545B1DB2C37700032ACC /* RLObjectJSONSerializerTests.swift */; };
 		34F26CA41CFFE8A9008C3D9A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F26CA31CFFE8A9008C3D9A /* AppDelegate.swift */; };
 		34F26CA61CFFE8A9008C3D9A /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F26CA51CFFE8A9008C3D9A /* ViewController.swift */; };
 		34F26CA91CFFE8A9008C3D9A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 34F26CA71CFFE8A9008C3D9A /* Main.storyboard */; };
@@ -58,6 +59,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		3484545B1DB2C37700032ACC /* RLObjectJSONSerializerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RLObjectJSONSerializerTests.swift; sourceTree = "<group>"; };
 		34F26CA01CFFE8A9008C3D9A /* Retrolux.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Retrolux.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		34F26CA31CFFE8A9008C3D9A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		34F26CA51CFFE8A9008C3D9A /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -164,6 +166,7 @@
 				4978AA971D360FE300E1F1A5 /* RLObjectTests.swift */,
 				49E3BDFD1D36DC07003C2460 /* TransformerTests.swift */,
 				F3251C241D83186E00D62722 /* HTTPClientTests.swift */,
+				3484545B1DB2C37700032ACC /* RLObjectJSONSerializerTests.swift */,
 			);
 			path = RetroluxTests;
 			sourceTree = "<group>";
@@ -357,6 +360,7 @@
 			files = (
 				4978AA961D360F5300E1F1A5 /* PropertyTypeTests.swift in Sources */,
 				49E3BDFE1D36DC07003C2460 /* TransformerTests.swift in Sources */,
+				3484545C1DB2C37700032ACC /* RLObjectJSONSerializerTests.swift in Sources */,
 				F3251C251D83186E00D62722 /* HTTPClientTests.swift in Sources */,
 				4978AA941D360F4800E1F1A5 /* RLObjectReflectorTests.swift in Sources */,
 				4978AA981D360FE300E1F1A5 /* RLObjectTests.swift in Sources */,

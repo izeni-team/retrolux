@@ -55,7 +55,6 @@ extension RetroluxTests {
             _ = try RLObjectReflector().reflect(object)
             XCTFail("Operation should not have succeeded.")
         } catch RLObjectReflectionError.cannotIgnoreNonExistantProperty(propertyName: let propertyName, forClass: let classType) {
-            // TODO: Return enum values instead of strings
             XCTAssert(propertyName == "does_not_exist")
             XCTAssert(classType == Object1.self)
         } catch let error {
@@ -77,7 +76,6 @@ extension RetroluxTests {
             _ = try RLObjectReflector().reflect(object)
             XCTFail("Operation should not have succeeded.")
         } catch RLObjectReflectionError.cannotIgnoreErrorsForNonExistantProperty(propertyName: let propertyName, forClass: let classType) {
-            // TODO: Return enum values instead of strings
             XCTAssert(propertyName == "does_not_exist")
             XCTAssert(classType == Object1.self)
         } catch let error {
@@ -85,26 +83,23 @@ extension RetroluxTests {
         }
     }
     
-    func testRLObjectReflectorError_CannotIgnoreErrorsAndIgnoreProperty() {
+    func testRLObjectReflectorError_CannotMapAndIgnoreProperty() {
         class Object1: NSObject, RLObjectProtocol {
-            // Dynamic keyword is required because Swift removes dynamic dispatch for performance reasons
-            dynamic var someProperty = false
+            var someProperty = false
             
             required override init() {
                 super.init()
             }
             
-            static let mappedProperties = ["someProperty"]
-            static let ignoreErrorsForProperties = ["someProperty"]
+            static let mappedProperties = ["someProperty": "someProperty"]
+            static let ignoredProperties = ["someProperty"]
         }
         
         let object = Object1()
         do {
             _ = try RLObjectReflector().reflect(object)
             XCTFail("Operation should not have succeeded.")
-            
-        } catch RLObjectReflectionError.cannotIgnoreErrorsAndIgnoreProperty(propertyName: let propertyName, forClass: let classType) {
-            // TODO: Return enum values instead of strings
+        } catch RLObjectReflectionError.cannotMapAndIgnoreProperty(propertyName: let propertyName, forClass: let classType) {
             XCTAssert(propertyName == "someProperty")
             XCTAssert(classType == Object1.self)
         } catch let error {
@@ -126,7 +121,6 @@ extension RetroluxTests {
             _ = try RLObjectReflector().reflect(object)
             XCTFail("Operation should not have succeeded.")
         } catch RLObjectReflectionError.cannotMapNonExistantProperty(propertyName: let propertyName, forClass: let classType) {
-            // TODO: Return enum values instead of strings
             XCTAssert(propertyName == "does_not_exist")
             XCTAssert(classType == Object1.self)
         } catch let error {
@@ -137,7 +131,7 @@ extension RetroluxTests {
     func testRLObjectReflectionError_MappedPropertyConflict() {
         class Object1: NSObject, RLObjectProtocol {
             var test1 = ""
-            var test2 = ""
+            var test2: [Any] = []
             required override init() {
                 super.init()
             }
@@ -153,7 +147,6 @@ extension RetroluxTests {
             _ = try RLObjectReflector().reflect(object)
             XCTFail("Operation should not have succeeded.")
         } catch RLObjectReflectionError.mappedPropertyConflict(properties: let properties, conflictKey: let conflict, forClass: let classType) {
-            // TODO: Return enum values instead of strings
             XCTAssert(Set(properties) == Set(["test1", "test2"]))
             XCTAssert(conflict == "conflict_test")
             XCTAssert(classType == Object1.self)
@@ -175,9 +168,8 @@ extension RetroluxTests {
             _ = try RLObjectReflector().reflect(object)
             XCTFail("Operation should not have succeeded.")
         } catch RLObjectReflectionError.unsupportedPropertyValueType(property: let property, valueType: let valueType, forClass: let classType) {
-            // TODO: Return enum values instead of strings
             XCTAssert(property == "test")
-            XCTAssert(valueType is Data.Type) // Can't just check via == because it could be _NSZeroData or something not NSData
+            XCTAssert(valueType is Data.Type)
             XCTAssert(classType == Object1.self)
         } catch let error {
             XCTFail("\(error)")
@@ -197,7 +189,6 @@ extension RetroluxTests {
             _ = try RLObjectReflector().reflect(object)
             XCTFail("Operation should not have succeeded.")
         } catch RLObjectReflectionError.optionalPrimitiveNumberNotBridgable(property: let property, forClass: let classType) {
-            // TODO: Return enum values instead of strings
             XCTAssert(property == "test")
             XCTAssert(classType == Object1.self)
         } catch let error {
@@ -207,7 +198,7 @@ extension RetroluxTests {
     
     func testRLObjectReflectionError_PropertyNotBridgable() {
         class Object1: NSObject, RLObjectProtocol {
-            var test = false // Swift optimizes away Obj-C compatibility here without dynamic or @objc
+            @nonobjc var test = false
             
             required override init() {
                 super.init()
@@ -219,7 +210,6 @@ extension RetroluxTests {
             _ = try RLObjectReflector().reflect(object)
             XCTFail("Operation should not have succeeded.")
         } catch RLObjectReflectionError.propertyNotBridgable(property: let property, valueType: let valueType, forClass: let classType) {
-            // TODO: Return enum values instead of strings
             XCTAssert(property == "test")
             XCTAssert(valueType == Bool.self)
             XCTAssert(classType == Object1.self)
@@ -230,7 +220,7 @@ extension RetroluxTests {
     
     func testRLObjectReflectionError_ReadOnlyProperty() {
         class Object1: NSObject, RLObjectProtocol {
-            dynamic let test = "" // Without dynamic keyword, falls back to PropertyNotBridgable
+            let test = false
             
             required override init() {
                 super.init()
@@ -242,7 +232,6 @@ extension RetroluxTests {
             _ = try RLObjectReflector().reflect(object)
             XCTFail("Operation should not have succeeded.")
         } catch RLObjectReflectionError.readOnlyProperty(property: let property, forClass: let classType) {
-            // TODO: Return enum values instead of strings
             XCTAssert(property == "test")
             XCTAssert(classType == Object1.self)
         } catch let error {

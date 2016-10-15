@@ -70,7 +70,7 @@ extension RetroluxTests {
         
         do {
             let model = Model()
-            let properties = try RLObjectReflector().reflect(model)
+            let properties = try model.properties()
             setPropertiesHelper(properties, dictionary: dictionary, instance: model)
         }
         catch let error {
@@ -108,7 +108,7 @@ extension RetroluxTests {
         
         do {
             let object = Object()
-            let properties = try RLObjectReflector().reflect(object)
+            let properties = try object.properties()
             guard let nameProp = properties.filter({ $0.name == "name" }).first else {
                 XCTFail("Name property was missing")
                 return
