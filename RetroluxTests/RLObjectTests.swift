@@ -10,7 +10,7 @@ import Foundation
 import Retrolux
 import XCTest
 
-extension RetroluxTests {
+class RLObjectTests: XCTestCase {
     func testRLObjectProperties() {
         class Model: RLObject {
             dynamic var name = ""
@@ -205,5 +205,18 @@ extension RetroluxTests {
         try! instance.set(value: "bad", for: property)
         XCTAssert(instance.value(for: property) as? String == "good")
         XCTAssert(proto.init().validate() == "good")
+    }
+    
+    func testNoProperties() {
+        class Object1: RLObject {
+        }
+        
+        let object = Object1()
+        do {
+            let properties = try object.properties()
+            XCTAssert(properties.isEmpty, "RLObject shouldn't have any serializable properties.")
+        } catch {
+            XCTFail("Reading list of properties on empty RLObject should not fail. Failed with error: \(error)")
+        }
     }
 }

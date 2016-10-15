@@ -10,7 +10,7 @@ import Foundation
 import Retrolux
 import XCTest
 
-extension RetroluxTests {
+class RLObjectReflectorTests: XCTestCase {
     func testRLObjectReflectorError_UnsupportedBaseClass() {
         class Object1: NSObject, RLObjectProtocol {
             required override init() {
@@ -236,6 +236,22 @@ extension RetroluxTests {
             XCTAssert(classType == Object1.self)
         } catch let error {
             XCTFail("\(error)")
+        }
+    }
+    
+    func testNoProperties() {
+        class Object1: NSObject, RLObjectProtocol {
+            required override init() {
+                super.init()
+            }
+        }
+        
+        let object = Object1()
+        do {
+            let properties = try object.properties()
+            XCTAssert(properties.isEmpty)
+        } catch {
+            XCTFail("Reading list of properties on empty class should not fail. Failed with error: \(error)")
         }
     }
 }

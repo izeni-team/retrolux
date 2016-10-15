@@ -10,7 +10,7 @@ import Foundation
 import Retrolux
 import XCTest
 
-extension RetroluxTests {
+class PropertyTypeTests: XCTestCase {
     func testPropertyTypeInference() {
         XCTAssert(PropertyType.from(AnyObject.self) == .anyObject)
         XCTAssert(PropertyType.from(Optional<Int>.self) == .optional(wrapped: .number))

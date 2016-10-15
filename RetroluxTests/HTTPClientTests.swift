@@ -10,7 +10,7 @@ import Foundation
 import Retrolux
 import XCTest
 
-extension RetroluxTests {
+class HTTPClientTests: XCTestCase {
     
     // Test Interceptor
     // Test HTTPClient
