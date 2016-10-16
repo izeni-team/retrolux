@@ -69,13 +69,13 @@ class RLObjectJSONSerializerTests: XCTestCase {
         do {
             _ = try serializer.serialize(from: response) as Car
             XCTFail("Should not have passed.")
-        } catch RLObjectError.typeMismatch(expected: let expected, got: let got, property: let property, forClass: let clazz) {
+        } catch RLObjectError.typeMismatch(expected: let expected, got: let got, property: let property, forClass: let `class`) {
             XCTAssert(expected == .string)
             
             // TODO: Can't check if 'got' is a String.Type.
             
             XCTAssert(property == "model")
-            XCTAssert(clazz == Car.self)
+            XCTAssert(`class` == Car.self)
         } catch {
             print("Error serializing data into a basic Car: \(error)")
             XCTFail()
@@ -343,13 +343,13 @@ class RLObjectJSONSerializerTests: XCTestCase {
         do {
             _ = try serializer.serialize(from: response) as Car
             XCTFail("Should not have passed.")
-        } catch RLObjectError.typeMismatch(expected: let expected, got: let got, property: let property, forClass: let clazz) {
+        } catch RLObjectError.typeMismatch(expected: let expected, got: let got, property: let property, forClass: let `class`) {
             XCTAssert(expected == .number)
             
             // TODO: Cannot check got type.
             
             XCTAssert(property == "year")
-            XCTAssert(clazz == Car.self)
+            XCTAssert(`class` == Car.self)
         } catch {
             print("Error serializing data into a basic Car: \(error)")
             XCTFail()
