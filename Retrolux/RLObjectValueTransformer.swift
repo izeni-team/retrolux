@@ -29,15 +29,11 @@ public struct RLObjectValueTransformer: PropertyValueTransformer {
         case .forwards:
             // TODO: Need target type to be able to code.
             let protoType = targetType as! RLObjectProtocol.Type
-            print(value)
             let dictionary = value as! [String: Any]
-            print(type(of: value))
-            print(dictionary)
             
             let newInstance = protoType.init()
             let properties = try newInstance.properties()
             for property in properties {
-                print("Assigning \(dictionary[property.mappedTo]) to \(property.name)")
                 try newInstance.set(value: dictionary[property.mappedTo], for: property)
             }
             return newInstance
@@ -47,7 +43,7 @@ public struct RLObjectValueTransformer: PropertyValueTransformer {
             }
             var output: [String: Any] = [:]
             for property in try object.properties() {
-                output[property.mappedTo] = object.value(for: property) ?? NSNull()
+                output[property.mappedTo] = try object.value(for: property) ?? NSNull()
             }
             return output
         }

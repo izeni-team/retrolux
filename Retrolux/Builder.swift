@@ -57,9 +57,7 @@ extension Builder {
                 for (index, arg) in normalizedStartingArgs.enumerated() {
                     if let arg = arg as? AlignedSelfApplyingArg {
                         let alignedArg = normalizedCreationArgs[index]
-                        print("BEFORE:", request.url!.absoluteString)
                         arg.apply(to: &request, with: alignedArg)
-                        print("AFTER:", request.url!.absoluteString)
                     } else if let arg = arg as? SelfApplyingArg {
                         arg.apply(to: &request)
                     } else if let body = arg as? BodyValues {
@@ -71,14 +69,12 @@ extension Builder {
                 }
                 
                 task = self.client.makeAsynchronousRequest(request: request, callback: { (response) in
-                    print("Status: \((response.response as? HTTPURLResponse)?.statusCode)")
                     let body: String
                     if let data = response.data {
                         body = String(data: data, encoding: .utf8)!
                     } else {
                         body = "<no_body>"
                     }
-                    print("Body: \(body)")
                     
                     do {
                         let result: Result<T>

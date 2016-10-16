@@ -27,13 +27,20 @@ internal func rlobj_setProperty(_ property: Property, value: Any?, instance: RLO
     }
     
     if let transformer = property.transformer {
-        let transformed = try rlobj_transform(value, type: property.type, transformer: transformer, direction: .forwards)
-        print("transformed:", transformed)
-        
+        let transformed = try rlobj_transform(value, type: property.type, transformer: transformer, direction: .forwards)        
         instance.setValue(transformed, forKey: property.name)
     } else {
         instance.setValue(value, forKey: property.name)
     }
+}
+
+internal func rlobj_value(for property: Property, instance: RLObjectProtocol) throws -> Any? {
+    let rawValue = instance.value(forKey: property.name)
+    if let transformer = property.transformer, let rawValue = rawValue {
+        let transformed = try rlobj_transform(rawValue, type: property.type, transformer: transformer, direction: .backwards)
+        return transformed
+    }
+    return rawValue
 }
 
 internal func rlobj_propertiesFor(_ instance: RLObjectProtocol) throws -> [Property] {
@@ -72,8 +79,8 @@ extension RLObjectProtocol {
         try rlobj_setProperty(property, value: value, instance: self)
     }
     
-    public func value(for property: Property) -> Any? {
-        return value(forKey: property.name)
+    public func value(for property: Property) throws -> Any? {
+        return try rlobj_value(for: property, instance: self)
     }
 
     // TODO: This isn't internationalizable.

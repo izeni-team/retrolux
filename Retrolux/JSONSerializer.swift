@@ -108,7 +108,7 @@ class RLObjectJSONSerializer: Serializer {
             var json: [String: Any] = [:]
             let properties = try RLObjectReflector().reflect(object)
             for property in properties {
-                json[property.mappedTo] = object.value(for: property)
+                json[property.mappedTo] = try object.value(for: property)
             }
             results.append(json)
         }

@@ -26,8 +26,8 @@ open class RLObject: NSObject, RLObjectProtocol {
         try rlobj_setProperty(property, value: value, instance: self)
     }
     
-    open func value(for property: Property) -> Any? {
-        return value(forKey: property.name)
+    open func value(for property: Property) throws -> Any? {
+        return try rlobj_value(for: property, instance: self)
     }
     
     open func validate() -> String? {

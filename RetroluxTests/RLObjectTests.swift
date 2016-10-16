@@ -32,19 +32,16 @@ class RLObjectTests: XCTestCase {
         
         for property in properties {
             do {
-                print("BEFORE")
                 try instance.set(value: dictionary[property.name], for: property)
-                print("AFTER")
             } catch let error {
                 XCTFail("\(error)")
             }
         }
         
         for property in properties {
-            print(property.mappedTo)
             let isNSNull = dictionary[property.mappedTo] is NSNull
             let screened: NSObject? = isNSNull ? nil : dictionary[property.mappedTo] as? NSObject
-            XCTAssert(instance.value(for: property) as? NSObject == screened || !property.required)
+            XCTAssert(try! instance.value(for: property) as? NSObject == screened || !property.required)
         }
     }
     
@@ -168,6 +165,10 @@ class RLObjectTests: XCTestCase {
             override class var mappedProperties: [String: String] {
                 return ["bad": "bad"]
             }
+            
+            override class var transformedProperties: [String: PropertyValueTransformer] {
+                return ["bad": RLObjectValueTransformer()]
+            }
         }
         
         class Problematic: Plain {
@@ -194,6 +195,10 @@ class RLObjectTests: XCTestCase {
             override class var mappedProperties: [String: String] {
                 return ["good": "good"]
             }
+            
+            override class var transformedProperties: [String: PropertyValueTransformer] {
+                return ["good": RLObjectValueTransformer()]
+            }
         }
         
         let proto: RLObjectProtocol.Type = Problematic.self
@@ -203,7 +208,7 @@ class RLObjectTests: XCTestCase {
         let instance = proto.init()
         let property = Property(type: .string, name: "bad", required: true, mappedTo: "bad", transformer: nil)
         try! instance.set(value: "bad", for: property)
-        XCTAssert(instance.value(for: property) as? String == "good")
+        XCTAssert(try! instance.value(for: property) as? String == "good")
         XCTAssert(proto.init().validate() == "good")
     }
     

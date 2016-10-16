@@ -11,5 +11,5 @@ import Foundation
 public protocol PropertyConvertible {
     func properties() throws -> [Property]
     func set(value: Any?, for property: Property) throws
-    func value(for property: Property) -> Any?
+    func value(for property: Property) throws -> Any?
 }

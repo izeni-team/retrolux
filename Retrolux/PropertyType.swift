@@ -87,7 +87,6 @@ public indirect enum PropertyType: CustomStringConvertible, Equatable {
     }
     
     public static func from(_ type: Any.Type, transformer: PropertyValueTransformer?, transformerMatched: inout Bool) -> PropertyType? {
-        print("T", type)
         if let transformer = transformer, transformer.supports(targetType: type) {
             transformerMatched = true
             return PropertyType.transformable(transformer: transformer, targetType: type)

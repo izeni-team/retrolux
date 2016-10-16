@@ -223,7 +223,6 @@ class RLObjectJSONSerializerTests: XCTestCase {
             XCTAssert(first?.friends.count == 0)
             
             let last = bob.friends.last
-            print(last)
             XCTAssert(last?.name == "Charles")
             XCTAssert(last?.friends.count == 1)
             
@@ -347,6 +346,9 @@ class RLObjectJSONSerializerTests: XCTestCase {
         } catch RLObjectError.typeMismatch(expected: let expected, got: let got, property: let property, forClass: let clazz) {
             XCTAssert(expected == .number)
             
+            print(got is String.Type)
+            print(got)
+            abort()
             // TODO: Cannot check got type.
             
             XCTAssert(property == "year")

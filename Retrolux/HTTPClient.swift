@@ -25,9 +25,7 @@ class HTTPClient: Client {
     {
         var request = inputRequest
         self.interceptor?(&request)
-        
-        print("\(request.httpMethod!) \(request.url!)")
-        
+                
         let task = session.dataTask(with: request, completionHandler: { (data: Data?, response: URLResponse?, error: Error?) in
             callback(ClientResponse(data: data, response: response, error: error))
         }) 

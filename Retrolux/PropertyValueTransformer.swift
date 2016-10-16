@@ -26,7 +26,6 @@ public protocol PropertyValueTransformer {
 }
 
 internal func rlobj_transform(_ value: Any, type: PropertyType, transformer: PropertyValueTransformer, direction: PropertyValueTransformerDirection) throws -> Any {
-    print(value)
     switch type {
     case .anyObject:
         return value
@@ -39,9 +38,7 @@ internal func rlobj_transform(_ value: Any, type: PropertyType, transformer: Pro
     case .string:
         return value
     case .transformable(transformer: let transformer, targetType: let targetType):
-        let value = try transformer.transform(value, targetType: targetType, direction: direction)
-        print("Transformed into: \(value)")
-        return value
+        return try transformer.transform(value, targetType: targetType, direction: direction)
     case .array(let element):
         guard let array = value as? [Any] else {
             throw RLObjectError.typeMismatch(expected: type, got: type(of: value), property: "", forClass: Int.self)
