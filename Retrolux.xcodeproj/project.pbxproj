@@ -34,8 +34,8 @@
 		4999F9081DA8CF6800E4C556 /* HTTPTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4999F9071DA8CF6800E4C556 /* HTTPTask.swift */; };
 		4999F90A1DA8CFEC00E4C556 /* Header.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4999F9091DA8CFEC00E4C556 /* Header.swift */; };
 		499BEC9C1DB4034200FCECD1 /* RLObjectValueTransformerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499BEC9B1DB4034200FCECD1 /* RLObjectValueTransformerTests.swift */; };
-		499BEC9E1DB40A6500FCECD1 /* PropertyValueTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499BEC9D1DB40A6500FCECD1 /* PropertyValueTransformer.swift */; };
-		499BECA01DB40C1200FCECD1 /* RLObjectValueTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499BEC9F1DB40C1200FCECD1 /* RLObjectValueTransformer.swift */; };
+		499BEC9E1DB40A6500FCECD1 /* ValueTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499BEC9D1DB40A6500FCECD1 /* ValueTransformer.swift */; };
+		499BECA01DB40C1200FCECD1 /* RLObjectTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499BEC9F1DB40C1200FCECD1 /* RLObjectTransformer.swift */; };
 		49C192581DA96CE400823A55 /* Builder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49C192571DA96CE400823A55 /* Builder.swift */; };
 		49C1925A1DA96D4500823A55 /* Method.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49C192591DA96D4500823A55 /* Method.swift */; };
 		49C1925C1DA9958F00823A55 /* HTTPCall.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49C1925B1DA9958F00823A55 /* HTTPCall.swift */; };
@@ -92,8 +92,8 @@
 		4999F9071DA8CF6800E4C556 /* HTTPTask.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HTTPTask.swift; sourceTree = "<group>"; };
 		4999F9091DA8CFEC00E4C556 /* Header.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Header.swift; sourceTree = "<group>"; };
 		499BEC9B1DB4034200FCECD1 /* RLObjectValueTransformerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RLObjectValueTransformerTests.swift; sourceTree = "<group>"; };
-		499BEC9D1DB40A6500FCECD1 /* PropertyValueTransformer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PropertyValueTransformer.swift; sourceTree = "<group>"; };
-		499BEC9F1DB40C1200FCECD1 /* RLObjectValueTransformer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RLObjectValueTransformer.swift; sourceTree = "<group>"; };
+		499BEC9D1DB40A6500FCECD1 /* ValueTransformer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ValueTransformer.swift; sourceTree = "<group>"; };
+		499BEC9F1DB40C1200FCECD1 /* RLObjectTransformer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RLObjectTransformer.swift; sourceTree = "<group>"; };
 		49C192571DA96CE400823A55 /* Builder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Builder.swift; sourceTree = "<group>"; };
 		49C192591DA96D4500823A55 /* Method.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Method.swift; sourceTree = "<group>"; };
 		49C1925B1DA9958F00823A55 /* HTTPCall.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HTTPCall.swift; sourceTree = "<group>"; };
@@ -202,8 +202,8 @@
 				4978AA7D1D356ADA00E1F1A5 /* RLObject.swift */,
 				4978AA7F1D356B8900E1F1A5 /* RLObjectProtocol.swift */,
 				4978AA811D358EE500E1F1A5 /* RLObjectReflector.swift */,
-				499BEC9D1DB40A6500FCECD1 /* PropertyValueTransformer.swift */,
-				499BEC9F1DB40C1200FCECD1 /* RLObjectValueTransformer.swift */,
+				499BEC9D1DB40A6500FCECD1 /* ValueTransformer.swift */,
+				499BEC9F1DB40C1200FCECD1 /* RLObjectTransformer.swift */,
 			);
 			name = Reflector;
 			sourceTree = "<group>";
@@ -338,10 +338,10 @@
 				49C192581DA96CE400823A55 /* Builder.swift in Sources */,
 				34F26CA41CFFE8A9008C3D9A /* AppDelegate.swift in Sources */,
 				49DE43441DAAA0C000D41572 /* Body.swift in Sources */,
-				499BECA01DB40C1200FCECD1 /* RLObjectValueTransformer.swift in Sources */,
+				499BECA01DB40C1200FCECD1 /* RLObjectTransformer.swift in Sources */,
 				4990617D1DA9B1D20047F553 /* HTTPCallFactory.swift in Sources */,
 				4999F8FE1DA8CD7C00E4C556 /* Client.swift in Sources */,
-				499BEC9E1DB40A6500FCECD1 /* PropertyValueTransformer.swift in Sources */,
+				499BEC9E1DB40A6500FCECD1 /* ValueTransformer.swift in Sources */,
 				F3A3D0111D875C7A0067D03C /* Response.swift in Sources */,
 				4990617B1DA9AFE30047F553 /* Serializer.swift in Sources */,
 				49DE43481DAAA54C00D41572 /* SelfApplyingArg.swift in Sources */,

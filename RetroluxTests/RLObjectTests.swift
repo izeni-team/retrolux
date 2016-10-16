@@ -166,8 +166,8 @@ class RLObjectTests: XCTestCase {
                 return ["bad": "bad"]
             }
             
-            override class var transformedProperties: [String: PropertyValueTransformer] {
-                return ["bad": RLObjectValueTransformer()]
+            override class var transformedProperties: [String: Retrolux.ValueTransformer] {
+                return ["bad": RLObjectTransformer()]
             }
         }
         
@@ -196,8 +196,8 @@ class RLObjectTests: XCTestCase {
                 return ["good": "good"]
             }
             
-            override class var transformedProperties: [String: PropertyValueTransformer] {
-                return ["good": RLObjectValueTransformer()]
+            override class var transformedProperties: [String: Retrolux.ValueTransformer] {
+                return ["good": RLObjectTransformer()]
             }
         }
         

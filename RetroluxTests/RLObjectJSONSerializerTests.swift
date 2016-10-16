@@ -346,9 +346,6 @@ class RLObjectJSONSerializerTests: XCTestCase {
         } catch RLObjectError.typeMismatch(expected: let expected, got: let got, property: let property, forClass: let clazz) {
             XCTAssert(expected == .number)
             
-            print(got is String.Type)
-            print(got)
-            abort()
             // TODO: Cannot check got type.
             
             XCTAssert(property == "year")

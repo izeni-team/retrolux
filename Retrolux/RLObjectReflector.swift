@@ -128,11 +128,11 @@ open class RLObjectReflector {
                 continue
             }
             
-            var transformer: PropertyValueTransformer?
+            var transformer: ValueTransformer?
             if let custom = transformed["label"] {
                 transformer = custom
             } else {
-                transformer = RLObjectValueTransformer()
+                transformer = RLObjectTransformer()
             }
             
             var transformerMatched = false

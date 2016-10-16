@@ -31,9 +31,9 @@ open class Property: Hashable, Equatable {
     open let hashValue: Int
     
     // Whether or not this value has a transformer.
-    open let transformer: PropertyValueTransformer?
+    open let transformer: ValueTransformer?
     
-    public init(type: PropertyType, name: String, required: Bool, mappedTo: String, transformer: PropertyValueTransformer?) {
+    public init(type: PropertyType, name: String, required: Bool, mappedTo: String, transformer: ValueTransformer?) {
         self.type = type
         self.name = name
         self.required = required

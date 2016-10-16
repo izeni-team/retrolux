@@ -18,7 +18,7 @@ class PropertyTypeTests: XCTestCase {
         XCTAssert(PropertyType.from(Int.self) == .number)
         XCTAssert(PropertyType.from(Double.self) == .number)
         
-        let transformer = RLObjectValueTransformer()
+        let transformer = RLObjectTransformer()
         var matched = false
         XCTAssert(PropertyType.from(RLObject.self, transformer: transformer, transformerMatched: &matched) == .transformable(transformer: transformer, targetType: RLObject.self))
         XCTAssert(matched)
@@ -57,7 +57,7 @@ class PropertyTypeTests: XCTestCase {
             XCTAssert(propertyTypes == [
                 PropertyType.string,
                 PropertyType.dictionary(type: .array(type: .number)),
-                PropertyType.array(type: PropertyType.transformable(transformer: RLObjectValueTransformer(), targetType: Object2.self))
+                PropertyType.array(type: PropertyType.transformable(transformer: RLObjectTransformer(), targetType: Object2.self))
                 ])
         } catch let error {
             XCTFail("\(error)")

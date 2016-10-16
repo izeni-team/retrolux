@@ -1,5 +1,5 @@
 //
-//  PropertyValueTransformer.swift
+//  ValueTransformer.swift
 //  Retrolux
 //
 //  Created by Christopher Bryan Henderson on 10/16/16.
@@ -8,7 +8,7 @@
 
 import Foundation
 
-public enum PropertyValueTransformerDirection {
+public enum ValueTransformerDirection {
     case forwards
     case backwards
 }
@@ -20,12 +20,12 @@ public enum PropertyValueTransformerDirection {
 // If property is like:
 //     var friend: [Person] = []
 // then targetType will still be Person.self.
-public protocol PropertyValueTransformer {
+public protocol ValueTransformer {
     func supports(targetType: Any.Type) -> Bool
-    func transform(_ value: Any, targetType: Any.Type, direction: PropertyValueTransformerDirection) throws -> Any
+    func transform(_ value: Any, targetType: Any.Type, direction: ValueTransformerDirection) throws -> Any
 }
 
-internal func rlobj_transform(_ value: Any, type: PropertyType, transformer: PropertyValueTransformer, direction: PropertyValueTransformerDirection) throws -> Any {
+internal func rlobj_transform(_ value: Any, type: PropertyType, transformer: ValueTransformer, direction: ValueTransformerDirection) throws -> Any {
     switch type {
     case .anyObject:
         return value

@@ -108,15 +108,15 @@ class RLObjectReflectorTests: XCTestCase {
     }
     
     func testRLObjectReflectorError_CannotTransformAndIgnoreProperty() {
-        struct DummyTransformer: PropertyValueTransformer {
+        struct DummyTransformer: Retrolux.ValueTransformer {
             func supports(targetType: Any.Type) -> Bool {
                 return true
             }
-            func supports(value: Any, targetType: Any.Type, direction: PropertyValueTransformerDirection) -> Bool {
+            func supports(value: Any, targetType: Any.Type, direction: ValueTransformerDirection) -> Bool {
                 return true
             }
             
-            func transform(_ value: Any, targetType: Any.Type, direction: PropertyValueTransformerDirection) throws -> Any {
+            func transform(_ value: Any, targetType: Any.Type, direction: ValueTransformerDirection) throws -> Any {
                 return value
             }
         }
@@ -128,8 +128,8 @@ class RLObjectReflectorTests: XCTestCase {
                 super.init()
             }
             
-            // TODO: The type has to be explicitly set because DummyTransformer.self != PropertyValueTransformer.Type
-            static let transformedProperties: [String: PropertyValueTransformer] = ["someProperty": DummyTransformer()]
+            // TODO: The type has to be explicitly set because DummyTransformer.self != ValueTransformer.Type
+            static let transformedProperties: [String: Retrolux.ValueTransformer] = ["someProperty": DummyTransformer()]
             static let ignoredProperties = ["someProperty"]
         }
         

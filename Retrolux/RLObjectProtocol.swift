@@ -67,7 +67,7 @@ public protocol RLObjectProtocol: NSObjectProtocol, PropertyConvertible {
     static var ignoredProperties: [String] { get }
     static var ignoreErrorsForProperties: [String] { get }
     static var mappedProperties: [String: String] { get }
-    static var transformedProperties: [String: PropertyValueTransformer] { get }
+    static var transformedProperties: [String: ValueTransformer] { get }
 }
 
 extension RLObjectProtocol {
@@ -101,7 +101,7 @@ extension RLObjectProtocol {
         return [:]
     }
     
-    public static var transformedProperties: [String: PropertyValueTransformer] {
+    public static var transformedProperties: [String: ValueTransformer] {
         return [:]
     }
 }

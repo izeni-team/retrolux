@@ -78,7 +78,7 @@ public indirect enum PropertyType: CustomStringConvertible, Equatable {
     case string
     case array(type: PropertyType)
     case dictionary(type: PropertyType)
-    case transformable(transformer: PropertyValueTransformer, targetType: Any.Type)
+    case transformable(transformer: ValueTransformer, targetType: Any.Type)
     
     // TODO: How to make this a custom initializer instead of a static function?
     public static func from(_ type: Any.Type) -> PropertyType? {
@@ -86,7 +86,7 @@ public indirect enum PropertyType: CustomStringConvertible, Equatable {
         return from(type, transformer: nil, transformerMatched: &transformerMatched)
     }
     
-    public static func from(_ type: Any.Type, transformer: PropertyValueTransformer?, transformerMatched: inout Bool) -> PropertyType? {
+    public static func from(_ type: Any.Type, transformer: ValueTransformer?, transformerMatched: inout Bool) -> PropertyType? {
         if let transformer = transformer, transformer.supports(targetType: type) {
             transformerMatched = true
             return PropertyType.transformable(transformer: transformer, targetType: type)

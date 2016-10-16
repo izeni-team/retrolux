@@ -46,7 +46,7 @@ open class RLObject: NSObject, RLObjectProtocol {
         return [:]
     }
     
-    open class var transformedProperties: [String: PropertyValueTransformer] {
+    open class var transformedProperties: [String: ValueTransformer] {
         return [:]
     }
 }

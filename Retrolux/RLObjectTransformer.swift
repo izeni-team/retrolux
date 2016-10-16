@@ -1,5 +1,5 @@
 //
-//  RLObjectValueTransformer.swift
+//  RLObjectTransformer.swift
 //  Retrolux
 //
 //  Created by Christopher Bryan Henderson on 10/16/16.
@@ -8,14 +8,14 @@
 
 import Foundation
 
-public struct RLObjectValueTransformer: PropertyValueTransformer {
+public struct RLObjectTransformer: ValueTransformer {
     public init() {}
     
     public func supports(targetType: Any.Type) -> Bool {
         return targetType is RLObjectProtocol.Type
     }
     
-    public func supports(value: Any, targetType: Any.Type, direction: PropertyValueTransformerDirection) -> Bool {
+    public func supports(value: Any, targetType: Any.Type, direction: ValueTransformerDirection) -> Bool {
         switch direction {
         case .forwards:
             return value is [String: Any]
@@ -24,7 +24,7 @@ public struct RLObjectValueTransformer: PropertyValueTransformer {
         }
     }
     
-    public func transform(_ value: Any, targetType: Any.Type, direction: PropertyValueTransformerDirection) throws -> Any {
+    public func transform(_ value: Any, targetType: Any.Type, direction: ValueTransformerDirection) throws -> Any {
         switch direction {
         case .forwards:
             // TODO: Need target type to be able to code.
