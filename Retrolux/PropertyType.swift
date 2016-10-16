@@ -9,45 +9,45 @@
 import Foundation
 
 private protocol RLArrayType {
-    static func type() -> PropertyType?
+    static func rl_type() -> Any.Type
 }
 
 extension Array: RLArrayType {
-    fileprivate static func type() -> PropertyType? {
-        return PropertyType.from(Element.self)
+    fileprivate static func rl_type() -> Any.Type {
+        return Element.self
     }
 }
 
 extension NSArray: RLArrayType {
-    fileprivate static func type() -> PropertyType? {
-        return .anyObject
+    fileprivate static func rl_type() -> Any.Type {
+        return AnyObject.self
     }
 }
 
 private protocol RLDictionaryType {
-    static func type() -> PropertyType?
+    static func rl_type() -> Any.Type
 }    
 
 extension Dictionary: RLDictionaryType {
-    fileprivate static func type() -> PropertyType? {
+    fileprivate static func rl_type() -> Any.Type {
         assert(String.self is Key.Type, "Dictionaries must have strings as keys")
-        return PropertyType.from(Value.self)
+        return Value.self
     }
 }
 
 extension NSDictionary: RLDictionaryType {
-    fileprivate static func type() -> PropertyType? {
-        return .anyObject
+    fileprivate static func rl_type() -> Any.Type {
+        return AnyObject.self
     }
 }
 
 private protocol RLOptionalType {
-    static func type() -> PropertyType?
+    static func rl_type() -> Any.Type
 }
 
 extension Optional: RLOptionalType {
-    fileprivate static func type() -> PropertyType? {
-        return PropertyType.from(Wrapped.self)
+    fileprivate static func rl_type() -> Any.Type {
+        return Wrapped.self
     }
 }
 
@@ -70,20 +70,6 @@ extension Float: RLNumberType {}
 extension Float64: RLNumberType {}
 extension NSNumber: RLNumberType {}
 
-public enum PropertyValueTransformerDirection {
-    case forwards
-    case backwards
-}
-
-public protocol PropertyValueTransformer {
-    func supports(type: Any.Type, direction: PropertyValueTransformerDirection) -> Bool
-    
-    // TODO: Rename to validate.
-    func supports(value: Any, direction: PropertyValueTransformerDirection) -> Bool
-    
-    func transform(_ value: Any, direction: PropertyValueTransformerDirection) throws -> Any
-}
-
 public indirect enum PropertyType: CustomStringConvertible, Equatable {
     case anyObject
     case optional(wrapped: PropertyType)
@@ -92,7 +78,7 @@ public indirect enum PropertyType: CustomStringConvertible, Equatable {
     case string
     case array(type: PropertyType)
     case dictionary(type: PropertyType)
-    case transformable(transformer: PropertyValueTransformer)
+    case transformable(transformer: PropertyValueTransformer, targetType: Any.Type)
     
     // TODO: How to make this a custom initializer instead of a static function?
     public static func from(_ type: Any.Type) -> PropertyType? {
@@ -101,9 +87,10 @@ public indirect enum PropertyType: CustomStringConvertible, Equatable {
     }
     
     public static func from(_ type: Any.Type, transformer: PropertyValueTransformer?, transformerMatched: inout Bool) -> PropertyType? {
-        if let transformer = transformer, transformer.supports(type: type, direction: .forwards) {
+        print("T", type)
+        if let transformer = transformer, transformer.supports(targetType: type) {
             transformerMatched = true
-            return PropertyType.transformable(transformer: transformer)
+            return PropertyType.transformable(transformer: transformer, targetType: type)
         } else if type == Bool.self {
             return PropertyType.bool
         } else if type == AnyObject.self {
@@ -112,11 +99,11 @@ public indirect enum PropertyType: CustomStringConvertible, Equatable {
             return PropertyType.string
         } else if type is RLNumberType.Type {
             return PropertyType.number
-        } else if let arr = type as? RLArrayType.Type, let innerType = arr.type() {
+        } else if let arr = type as? RLArrayType.Type, let innerType = from(arr.rl_type(), transformer: transformer, transformerMatched: &transformerMatched) {
             return PropertyType.array(type: innerType)
-        } else if let opt = type as? RLOptionalType.Type, let wrapped = opt.type() {
+        } else if let opt = type as? RLOptionalType.Type, let wrapped = from(opt.rl_type(), transformer: transformer, transformerMatched: &transformerMatched) {
             return PropertyType.optional(wrapped: wrapped)
-        } else if let dict = type as? RLDictionaryType.Type, let innerType = dict.type() {
+        } else if let dict = type as? RLDictionaryType.Type, let innerType = from(dict.rl_type(), transformer: transformer, transformerMatched: &transformerMatched) {
             return PropertyType.dictionary(type: innerType)
         } else {
             return nil
@@ -135,8 +122,10 @@ public indirect enum PropertyType: CustomStringConvertible, Equatable {
             return value is RLNumberType
         case .string:
             return value is RLStringType
-        case .transformable(let transformer):
-            return transformer.supports(value: value, direction: .forwards)
+        case .transformable:
+            // There is no pre-assignment validation for transformables.
+            // Validation will have to be done during actual assignment.
+            return true
         case .array(let element):
             guard let array = value as? [AnyObject] else {
                 return false
@@ -193,11 +182,11 @@ public func ==(lhs: PropertyType, rhs: PropertyType) -> Bool {
         if case PropertyType.number = rhs {
             return true
         }
-    case .transformable(let transformer):
-        if case PropertyType.transformable(let transformer2) = rhs {
+    case .transformable(transformer: let transformer, targetType: let targetType):
+        if case PropertyType.transformable(transformer: let transformer2, targetType: let targetType2) = rhs {
             // Only return true if the same transformer type is being used.
             // I.e., if classes are the same--not necessarily the same instance.
-            return type(of: transformer) == type(of: transformer2)
+            return type(of: transformer) == type(of: transformer2) && targetType == targetType2
         }
     case .optional(let wrapped):
         if case PropertyType.optional(let wrapped2) = rhs {

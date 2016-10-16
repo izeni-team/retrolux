@@ -128,33 +128,15 @@ open class RLObjectReflector {
                 continue
             }
             
-            let transformer
-            var transformers = [PropertyValueTransformer]()
-            if let transformer = transformed["label"] {
-                transformers.append(transformer)
+            var transformer: PropertyValueTransformer?
+            if let custom = transformed["label"] {
+                transformer = custom
+            } else {
+                transformer = RLObjectValueTransformer()
             }
             
-            struct RLObjectTransformer: PropertyValueTransformer {
-                func supports(type: Any.Type, direction: PropertyValueTransformerDirection) -> Bool {
-                    return type is RLObjectProtocol.Type
-                }
-                
-                func supports(value: Any, direction: PropertyValueTransformerDirection) -> Bool {
-                    switch direction {
-                    case .forwards:
-                        return value is [String: Any]
-                    case .backwards:
-                        return value is RLObjectProtocol
-                    }
-                }
-                
-                func transform(_ value: Any, direction: PropertyValueTransformerDirection) throws -> Any {
-                    // TODO: We need the type to be able to create a new instance.
-                    return value
-                }
-            }
-            
-            guard let type = PropertyType.from(valueType) else {
+            var transformerMatched = false
+            guard let type = PropertyType.from(valueType, transformer: transformer, transformerMatched: &transformerMatched) else {
                 // We don't know what type this property is, so it's unsupported.
                 // The user should probably add this to their list of ignored properties if it reaches this point.
                 
@@ -163,6 +145,11 @@ open class RLObjectReflector {
                     valueType: valueType,
                     forClass: subjectType
                 )
+            }
+            
+            if !transformerMatched {
+                // Don't save to the property.
+                transformer = nil
             }
             
             // TODO: At this point, we should validate that the transformer, if it exists, is being used properly
@@ -208,9 +195,7 @@ open class RLObjectReflector {
             }
             let required = !ignoreErrorsFor.contains(label)
             let finalMappedKey = mapped[label] ?? label
-            let transformer: PropertyValueTransformer? = nil
-            fatalError("TODO: Get transformer somehow")
-            let property = Property(type: type, name: label, required: required, mappedTo: finalMappedKey, transformer: transformers.first)
+            let property = Property(type: type, name: label, required: required, mappedTo: finalMappedKey, transformer: transformer)
             properties.append(property)
         }
         

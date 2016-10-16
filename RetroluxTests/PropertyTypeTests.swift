@@ -17,8 +17,13 @@ class PropertyTypeTests: XCTestCase {
         XCTAssert(PropertyType.from(Bool.self) == .bool)
         XCTAssert(PropertyType.from(Int.self) == .number)
         XCTAssert(PropertyType.from(Double.self) == .number)
-//        XCTAssert(PropertyType.from(RLObject.self) == .object(type: RLObject.self))
-        fatalError("Implement commented line above")
+        
+        let transformer = RLObjectValueTransformer()
+        var matched = false
+        XCTAssert(PropertyType.from(RLObject.self, transformer: transformer, transformerMatched: &matched) == .transformable(transformer: transformer, targetType: RLObject.self))
+        XCTAssert(matched)
+        matched = false
+        
         XCTAssert(PropertyType.from([Int?].self) == .array(type: .optional(wrapped: .number)))
         XCTAssert(PropertyType.from([String: Int?].self) == .dictionary(type: .optional(wrapped: .number)))
         XCTAssert(PropertyType.from(NSDictionary.self) == .dictionary(type: .anyObject))
@@ -52,9 +57,8 @@ class PropertyTypeTests: XCTestCase {
             XCTAssert(propertyTypes == [
                 PropertyType.string,
                 PropertyType.dictionary(type: .array(type: .number)),
-//                PropertyType.array(type: .object(type: Object2.self))
+                PropertyType.array(type: PropertyType.transformable(transformer: RLObjectValueTransformer(), targetType: Object2.self))
                 ])
-            fatalError("Implement commented line above")
         } catch let error {
             XCTFail("\(error)")
         }

@@ -21,38 +21,18 @@ internal func rlobj_setProperty(_ property: Property, value: Any?, instance: RLO
         return
     }
     
-    let screened = value is NSNull ? nil : value
+    guard let value = value, value is NSNull == false else {
+        instance.setValue(nil, forKey: property.name)
+        return
+    }
+    
     if let transformer = property.transformer {
-        let transformed = try rlobj_transform(screened, type: property.type, transformer: transformer, direction: .forwards)
+        let transformed = try rlobj_transform(value, type: property.type, transformer: transformer, direction: .forwards)
+        print("transformed:", transformed)
+        
         instance.setValue(transformed, forKey: property.name)
     } else {
-        instance.setValue(screened, forKey: property.name)
-    }
-}
-
-internal func rlobj_transform(_ value: Any?, type: PropertyType, transformer: PropertyValueTransformer, direction: PropertyValueTransformerDirection) throws -> Any? {
-    switch type {
-    case .anyObject:
-        return value
-    case .optional(let wrapped):
-        return try rlobj_transform(value, type: wrapped, transformer: transformer, direction: direction)
-    case .bool:
-        return value
-    case .number:
-        return value
-    case .string:
-        return value
-    case .transformable(let transformer):
-        guard transformer.supports(value: value, direction: direction) else {
-            // TODO: Throw proper transformation error
-            fatalError("TODO: Throw proper error")
-            throw RLObjectError.missingDataKey(requiredProperty: "", forClass: Int.self as Any.Type)
-        }
-        return try transformer.transform(value, direction: direction)
-    case .array(let element):
-        return value
-    case .dictionary(let valueType):
-        return value
+        instance.setValue(value, forKey: property.name)
     }
 }
 

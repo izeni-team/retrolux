@@ -223,6 +223,7 @@ class RLObjectJSONSerializerTests: XCTestCase {
             XCTAssert(first?.friends.count == 0)
             
             let last = bob.friends.last
+            print(last)
             XCTAssert(last?.name == "Charles")
             XCTAssert(last?.friends.count == 1)
             
@@ -260,7 +261,7 @@ class RLObjectJSONSerializerTests: XCTestCase {
         do {
             let bob = try serializer.serialize(from: response) as Person
             XCTAssert(bob.name == "Bob")
-            XCTAssert(bob.friends.count == 2)
+            XCTAssert(bob.friends.count == 1)
             
             guard let layer_1 = bob.friends["layer_1"] else {
                 XCTFail("Failed to find layer_1")
@@ -294,7 +295,7 @@ class RLObjectJSONSerializerTests: XCTestCase {
         }
         
         let dictionary: [String: Any] = [
-            "name": "Bobby",
+            "person_name": "Bobby",
             "pet": [
                 "pet_name": "Fluffy"
             ]
@@ -317,6 +318,42 @@ class RLObjectJSONSerializerTests: XCTestCase {
             XCTAssert(pet.pet_name == "Fluffy")
         } catch {
             XCTFail("Failed with exception: \(error)")
+        }
+    }
+    
+    func testMismatchedJSON() {
+        class Car: RLObject {
+            var make = ""
+            var model = ""
+            var year = 0
+            var dealership = false
+        }
+        
+        let responseData = toJSONData([
+            "make": "Honda",
+            "model": "Civic",
+            "year": "1988", // Class expects an integer, so this should trigger an error.
+            "dealership": true
+            ])
+        
+        let response = ClientResponse(data: responseData, response: nil, error: nil)
+        
+        let serializer = RLObjectJSONSerializer()
+        XCTAssert(serializer.supports(type: Car.self))
+        
+        do {
+            _ = try serializer.serialize(from: response) as Car
+            XCTFail("Should not have passed.")
+        } catch RLObjectError.typeMismatch(expected: let expected, got: let got, property: let property, forClass: let clazz) {
+            XCTAssert(expected == .number)
+            
+            // TODO: Cannot check got type.
+            
+            XCTAssert(property == "year")
+            XCTAssert(clazz == Car.self)
+        } catch {
+            print("Error serializing data into a basic Car: \(error)")
+            XCTFail()
         }
     }
 }

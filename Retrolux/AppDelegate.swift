@@ -168,12 +168,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             response: Body<LoginResponse>()
         )
         
-        let getUser = requestBuilder.makeRequest(
+        let getUsers = requestBuilder.makeRequest(
             method: .get,
-            endpoint: "api/users/{id}/",
-            args: Path("id"),
-            response: Body<User>()
+            endpoint: "api/users/",
+            args: (),
+            response: Body<[User]>()
         )
+        
+//        getUser(Path("asdf-asdfasd-fas-df-as-df-a")).enqueue { (response) in
+//            switch response.result {
+//            case .success(let user):
+//                
+//            case .failure(let error):
+//                
+//            }
+//        }
         
         let patchUser = requestBuilder.makeRequest(
             method: .patch,
@@ -196,12 +205,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             response: Body<Void>()
         )
         
-        let getUsers = requestBuilder.makeRequest(
-            method: .get,
-            endpoint: "api/users/",
-            args: (),
-            response: Body<[User]>()
-        )
+//        let getUsers = requestBuilder.makeRequest(
+//            method: .get,
+//            endpoint: "api/users/",
+//            args: (),
+//            response: Body<[User]>()
+//        )
         
         deleteUser(Path("asdf")).enqueue { response in
             print(response)
@@ -264,27 +273,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         
         let afterLogin = { () -> Void in
-            getUser(Path(userID!)).enqueue { response in
-                switch response.result {
-                case .success(let value):
-                    print("User: \(value.name), \(value.id)")
-                    
-                    let modified = value
-                    modified.first_name = "ALICE"
-                    
-                    patchUser((Path(value.id), Body(modified))).enqueue { patchResponse in
-                        switch patchResponse.result {
-                        case .success(let patchedUser):
-                            print("Patched user was successful.")
-                            print("User's name is now: \(patchedUser.first_name)")
-                        case .failure(let error):
-                            print("Error patching: \(error)")
-                        }
-                    }
-                case .failure(let error):
-                    print("Get users error:", error)
-                }
-            }
+//            getUser(Path(userID!)).enqueue { response in
+//                switch response.result {
+//                case .success(let value):
+//                    print("User: \(value.name), \(value.id)")
+//                    
+//                    let modified = value
+//                    modified.first_name = "ALICE"
+//                    
+//                    patchUser((Path(value.id), Body(modified))).enqueue { patchResponse in
+//                        switch patchResponse.result {
+//                        case .success(let patchedUser):
+//                            print("Patched user was successful.")
+//                            print("User's name is now: \(patchedUser.first_name)")
+//                        case .failure(let error):
+//                            print("Error patching: \(error)")
+//                        }
+//                    }
+//                case .failure(let error):
+//                    print("Get users error:", error)
+//                }
+//            }
         }
         
         if token == nil || userID == nil {

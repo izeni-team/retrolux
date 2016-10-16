@@ -22,14 +22,19 @@ public struct Response<T> {
         switch result {
         case .success(let value):
             return value
-        case .failure(_):
+        case .failure:
             return nil
         }
     }
     
     var isSuccessful: Bool {
         let status = rawResponse.status ?? 0
-        return (200...299).contains(status)
+        switch result {
+        case .success:
+            return (200...299).contains(status)
+        case .failure:
+            return false
+        }
     }
 }
 

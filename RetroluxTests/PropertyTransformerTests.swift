@@ -38,12 +38,8 @@ class PropertyTransformerTests: XCTestCase {
                 ]
             ]
             
-            XCTAssert(transformer.supports(type: Test.self, direction: .forwards))
-            XCTAssert(transformer.supports(type: [String: Any].self, direction: .backwards))
-            XCTAssert(transformer.supports(value: test, direction: .forwards))
-            XCTAssert(transformer.supports(value: dictionary, direction: .backwards))
-            
-            let another = try transformer.transform(dictionary["another"], direction: .forwards) as? Test
+            XCTAssert(transformer.supports(targetType: Test.self))
+            let another = try transformer.transform(dictionary["another"], targetType: Test.self, direction: .forwards) as? Test
             XCTAssert(another?.name == "KARMA")
         } catch {
             XCTFail("Failed with error: \(error)")
