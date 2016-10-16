@@ -10,7 +10,7 @@ import Foundation
 import XCTest
 @testable import Retrolux
 
-fileprivate func toJSONData(_ value: Any) -> Data {
+func toJSONData(_ value: Any) -> Data {
     return try! JSONSerialization.data(withJSONObject: value, options: [])
 }
 

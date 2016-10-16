@@ -29,10 +29,12 @@ class RLObjectJSONSerializer: Serializer {
         return type is RLObjectProtocol.Type || (type as? GetTypeFromArray.Type)?.getType() is RLObjectProtocol.Type
     }
     
+    fileprivate let jsonReadingOptions = JSONSerialization.ReadingOptions.mutableContainers
+    
     func normalizeJSON(data: Data) throws -> [[String: Any]] {
         let json: Any
         do {
-            json = try JSONSerialization.jsonObject(with: data, options: [])
+            json = try JSONSerialization.jsonObject(with: data, options: jsonReadingOptions)
         } catch {
             throw RLObjectJSONSerializerError.invalidJSON
         }

@@ -20,8 +20,40 @@ internal func rlobj_setProperty(_ property: Property, value: Any?, instance: RLO
         }
         return
     }
+    
     let screened = value is NSNull ? nil : value
-    instance.setValue(screened, forKey: property.name)
+    if let transformer = property.transformer {
+        let transformed = try rlobj_transform(screened, type: property.type, transformer: transformer, direction: .forwards)
+        instance.setValue(transformed, forKey: property.name)
+    } else {
+        instance.setValue(screened, forKey: property.name)
+    }
+}
+
+internal func rlobj_transform(_ value: Any?, type: PropertyType, transformer: PropertyValueTransformer, direction: PropertyValueTransformerDirection) throws -> Any? {
+    switch type {
+    case .anyObject:
+        return value
+    case .optional(let wrapped):
+        return try rlobj_transform(value, type: wrapped, transformer: transformer, direction: direction)
+    case .bool:
+        return value
+    case .number:
+        return value
+    case .string:
+        return value
+    case .transformable(let transformer):
+        guard transformer.supports(value: value, direction: direction) else {
+            // TODO: Throw proper transformation error
+            fatalError("TODO: Throw proper error")
+            throw RLObjectError.missingDataKey(requiredProperty: "", forClass: Int.self as Any.Type)
+        }
+        return try transformer.transform(value, direction: direction)
+    case .array(let element):
+        return value
+    case .dictionary(let valueType):
+        return value
+    }
 }
 
 internal func rlobj_propertiesFor(_ instance: RLObjectProtocol) throws -> [Property] {
@@ -48,6 +80,7 @@ public protocol RLObjectProtocol: NSObjectProtocol, PropertyConvertible {
     static var ignoredProperties: [String] { get }
     static var ignoreErrorsForProperties: [String] { get }
     static var mappedProperties: [String: String] { get }
+    static var transformedProperties: [String: PropertyValueTransformer] { get }
 }
 
 extension RLObjectProtocol {
@@ -78,6 +111,10 @@ extension RLObjectProtocol {
     }
     
     public static var mappedProperties: [String: String] {
+        return [:]
+    }
+    
+    public static var transformedProperties: [String: PropertyValueTransformer] {
         return [:]
     }
 }

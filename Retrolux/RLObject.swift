@@ -45,4 +45,8 @@ open class RLObject: NSObject, RLObjectProtocol {
     open class var mappedProperties: [String: String] {
         return [:]
     }
+    
+    open class var transformedProperties: [String: PropertyValueTransformer] {
+        return [:]
+    }
 }

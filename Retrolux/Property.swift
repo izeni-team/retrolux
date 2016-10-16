@@ -30,11 +30,15 @@ open class Property: Hashable, Equatable {
     // Hashable confirmance.
     open let hashValue: Int
     
-    public init(type: PropertyType, name: String, required: Bool, mappedTo: String) {
+    // Whether or not this value has a transformer.
+    open let transformer: PropertyValueTransformer?
+    
+    public init(type: PropertyType, name: String, required: Bool, mappedTo: String, transformer: PropertyValueTransformer?) {
         self.type = type
         self.name = name
         self.required = required
         self.mappedTo = mappedTo
+        self.transformer = transformer
         
         // Classes cannot have more than one property with the same name, so this *probably* won't have any collisions
         // with other hashes (unless you merge properties from multiple classes--then in that case collisions would

@@ -70,19 +70,41 @@ extension Float: RLNumberType {}
 extension Float64: RLNumberType {}
 extension NSNumber: RLNumberType {}
 
+public enum PropertyValueTransformerDirection {
+    case forwards
+    case backwards
+}
+
+public protocol PropertyValueTransformer {
+    func supports(type: Any.Type, direction: PropertyValueTransformerDirection) -> Bool
+    
+    // TODO: Rename to validate.
+    func supports(value: Any, direction: PropertyValueTransformerDirection) -> Bool
+    
+    func transform(_ value: Any, direction: PropertyValueTransformerDirection) throws -> Any
+}
+
 public indirect enum PropertyType: CustomStringConvertible, Equatable {
     case anyObject
     case optional(wrapped: PropertyType)
     case bool
     case number
     case string
-    case object(type: RLObjectProtocol.Type)
     case array(type: PropertyType)
     case dictionary(type: PropertyType)
+    case transformable(transformer: PropertyValueTransformer)
     
     // TODO: How to make this a custom initializer instead of a static function?
     public static func from(_ type: Any.Type) -> PropertyType? {
-        if type == Bool.self {
+        var transformerMatched = false
+        return from(type, transformer: nil, transformerMatched: &transformerMatched)
+    }
+    
+    public static func from(_ type: Any.Type, transformer: PropertyValueTransformer?, transformerMatched: inout Bool) -> PropertyType? {
+        if let transformer = transformer, transformer.supports(type: type, direction: .forwards) {
+            transformerMatched = true
+            return PropertyType.transformable(transformer: transformer)
+        } else if type == Bool.self {
             return PropertyType.bool
         } else if type == AnyObject.self {
             return .anyObject
@@ -92,8 +114,6 @@ public indirect enum PropertyType: CustomStringConvertible, Equatable {
             return PropertyType.number
         } else if let arr = type as? RLArrayType.Type, let innerType = arr.type() {
             return PropertyType.array(type: innerType)
-        } else if let t = type as? RLObjectProtocol.Type {
-            return PropertyType.object(type: t)
         } else if let opt = type as? RLOptionalType.Type, let wrapped = opt.type() {
             return PropertyType.optional(wrapped: wrapped)
         } else if let dict = type as? RLDictionaryType.Type, let innerType = dict.type() {
@@ -115,8 +135,8 @@ public indirect enum PropertyType: CustomStringConvertible, Equatable {
             return value is RLNumberType
         case .string:
             return value is RLStringType
-        case .object:
-            return value is NSDictionary
+        case .transformable(let transformer):
+            return transformer.supports(value: value, direction: .forwards)
         case .array(let element):
             guard let array = value as? [AnyObject] else {
                 return false
@@ -141,7 +161,7 @@ public indirect enum PropertyType: CustomStringConvertible, Equatable {
         case .array(let innerType): return "array<\(innerType)>"
         case .bool: return "bool"
         case .number: return "number"
-        case .object(let type): return "\(type)"
+        case .transformable(let transformer): return "\(transformer)"
         case .optional(let wrapped): return "optional<\(wrapped)>"
         case .string: return "string"
         }
@@ -173,9 +193,11 @@ public func ==(lhs: PropertyType, rhs: PropertyType) -> Bool {
         if case PropertyType.number = rhs {
             return true
         }
-    case .object(let classType):
-        if case PropertyType.object(let classType2) = rhs {
-            return classType == classType2
+    case .transformable(let transformer):
+        if case PropertyType.transformable(let transformer2) = rhs {
+            // Only return true if the same transformer type is being used.
+            // I.e., if classes are the same--not necessarily the same instance.
+            return type(of: transformer) == type(of: transformer2)
         }
     case .optional(let wrapped):
         if case PropertyType.optional(let wrapped2) = rhs {

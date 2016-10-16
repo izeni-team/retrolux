@@ -16,6 +16,7 @@ public enum RLObjectReflectionError: Error {
     case cannotMapNonExistantProperty(propertyName: String, forClass: Any.Type)
     case mappedPropertyConflict(properties: [String], conflictKey: String, forClass: Any.Type)
     case cannotMapAndIgnoreProperty(propertyName: String, forClass: Any.Type)
+    case cannotTransformAndIgnoreProperty(propertyName: String, forClass: Any.Type)
     case unsupportedPropertyValueType(property: String, valueType: Any.Type, forClass: Any.Type)
     case optionalPrimitiveNumberNotBridgable(property: String, forClass: Any.Type)
     
@@ -56,6 +57,7 @@ open class RLObjectReflector {
         let ignored = Set(subjectType.ignoredProperties)
         let ignoreErrorsFor = Set(subjectType.ignoreErrorsForProperties)
         let mapped = subjectType.mappedProperties
+        let transformed = subjectType.transformedProperties
         
         let children = try getMirrorChildren(Mirror(reflecting: instance), parentMirror: nil)
         let propertyNameSet: Set<String> = Set(children.map({ $0.label }))
@@ -114,9 +116,42 @@ open class RLObjectReflector {
             )
         }
         
+        if let transformedAndIgnored = ignored.intersection(transformed.keys).first {
+            throw RLObjectReflectionError.cannotTransformAndIgnoreProperty(
+                propertyName: transformedAndIgnored,
+                forClass: subjectType
+            )
+        }
+        
         for (label, valueType) in children {
             if ignored.contains(label) {
                 continue
+            }
+            
+            let transformer
+            var transformers = [PropertyValueTransformer]()
+            if let transformer = transformed["label"] {
+                transformers.append(transformer)
+            }
+            
+            struct RLObjectTransformer: PropertyValueTransformer {
+                func supports(type: Any.Type, direction: PropertyValueTransformerDirection) -> Bool {
+                    return type is RLObjectProtocol.Type
+                }
+                
+                func supports(value: Any, direction: PropertyValueTransformerDirection) -> Bool {
+                    switch direction {
+                    case .forwards:
+                        return value is [String: Any]
+                    case .backwards:
+                        return value is RLObjectProtocol
+                    }
+                }
+                
+                func transform(_ value: Any, direction: PropertyValueTransformerDirection) throws -> Any {
+                    // TODO: We need the type to be able to create a new instance.
+                    return value
+                }
             }
             
             guard let type = PropertyType.from(valueType) else {
@@ -130,16 +165,19 @@ open class RLObjectReflector {
                 )
             }
             
+            // TODO: At this point, we should validate that the transformer, if it exists, is being used properly
+            // in the property type.
+            
             guard instance.responds(to: Selector(label)) else {
                 // This property cannot be seen by the Objective-C runtime.
                 
                 switch type {
                 case .optional(let wrapped):
                     switch wrapped {
-                    case .bool: fallthrough
-                    case .number:
+                    case .number, .bool:
                         // Optional primitives cannot be bridged to Objective-C as of Swift 3.0.0 (Xcode 8.0).
                         // It might change in Swift 3.0.1 (Xcode 8.1).
+                        // https://github.com/apple/swift-evolution/blob/master/proposals/0139-bridge-nsnumber-and-nsvalue.md
                         throw RLObjectReflectionError.optionalPrimitiveNumberNotBridgable(
                             property: label,
                             forClass: subjectType
@@ -170,7 +208,9 @@ open class RLObjectReflector {
             }
             let required = !ignoreErrorsFor.contains(label)
             let finalMappedKey = mapped[label] ?? label
-            let property = Property(type: type, name: label, required: required, mappedTo: finalMappedKey)
+            let transformer: PropertyValueTransformer? = nil
+            fatalError("TODO: Get transformer somehow")
+            let property = Property(type: type, name: label, required: required, mappedTo: finalMappedKey, transformer: transformers.first)
             properties.append(property)
         }
         

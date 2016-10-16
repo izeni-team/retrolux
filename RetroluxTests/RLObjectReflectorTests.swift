@@ -107,6 +107,43 @@ class RLObjectReflectorTests: XCTestCase {
         }
     }
     
+    func testRLObjectReflectorError_CannotTransformAndIgnoreProperty() {
+        struct DummyTransformer: PropertyValueTransformer {
+            func supports(type: Any.Type, direction: PropertyValueTransformerDirection) -> Bool {
+                return true
+            }
+            func supports(value: Any, direction: PropertyValueTransformerDirection) -> Bool {
+                return true
+            }
+            
+            func transform(_ value: Any, direction: PropertyValueTransformerDirection) throws -> Any {
+                return value
+            }
+        }
+        
+        class Object1: NSObject, RLObjectProtocol {
+            var someProperty = false
+            
+            required override init() {
+                super.init()
+            }
+            
+            static let transformedProperties = ["someProperty": DummyTransformer()]
+            static let ignoredProperties = ["someProperty"]
+        }
+        
+        let object = Object1()
+        do {
+            _ = try RLObjectReflector().reflect(object)
+            XCTFail("Operation should not have succeeded.")
+        } catch RLObjectReflectionError.cannotTransformAndIgnoreProperty(propertyName: let propertyName, forClass: let classType) {
+            XCTAssert(propertyName == "someProperty")
+            XCTAssert(classType == Object1.self)
+        } catch let error {
+            XCTFail("\(error)")
+        }
+    }
+    
     func testRLObjectReflectorError_CannotMapNonExistantProperty() {
         class Object1: NSObject, RLObjectProtocol {
             required override init() {

@@ -201,7 +201,7 @@ class RLObjectTests: XCTestCase {
         XCTAssert(proto.ignoreErrorsForProperties == ["good"])
         XCTAssert(proto.mappedProperties == ["good": "good"])
         let instance = proto.init()
-        let property = Property(type: .string, name: "bad", required: true, mappedTo: "bad")
+        let property = Property(type: .string, name: "bad", required: true, mappedTo: "bad", transformer: nil)
         try! instance.set(value: "bad", for: property)
         XCTAssert(instance.value(for: property) as? String == "good")
         XCTAssert(proto.init().validate() == "good")
