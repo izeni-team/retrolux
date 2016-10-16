@@ -387,7 +387,7 @@ class RLObjectJSONSerializerTests: XCTestCase {
         }
     }
     
-    func testSendComplexObject() {
+    func testSendAndReceiveComplexObject() {
         class Pet: RLObject {
             var name = ""
             
@@ -485,8 +485,30 @@ class RLObjectJSONSerializerTests: XCTestCase {
             XCTAssert(bf?["upgraded_at"] as? String == transformer.formatter.string(from: bestFriend.upgradedAt!))
             
             XCTAssert(dictionary["upgraded_at"] is NSNull)
+            
+            let response = ClientResponse(data: urlRequest.httpBody!, response: nil, error: nil)
+            let serialized: Person = try serializer.serialize(from: response)
+            XCTAssert(serialized.name == object.name)
+            XCTAssert(serialized.age == object.age)
+            XCTAssert(serialized.born.toString() == object.born.toString())
+            XCTAssert(serialized.visitDates.map { $0.toString() } == object.visitDates.map { $0.toString() })
+            XCTAssert(serialized.pets.map { $0.name } == object.pets.map { $0.name })
+            XCTAssert(serialized.bestFriend?.name == object.bestFriend?.name)
+            XCTAssert(serialized.bestFriend?.age == object.bestFriend?.age)
+            XCTAssert(serialized.bestFriend?.upgradedAt?.toString() == object.bestFriend?.upgradedAt?.toString())
+            XCTAssert(serialized.upgradedAt == nil && object.upgradedAt == nil)
+            XCTAssert(serialized.bestFriend?.bestFriend == nil)
+            XCTAssert(serialized.bestFriend?.visitDates.isEmpty == true)
+            XCTAssert(serialized.bestFriend?.born.toString() == object.bestFriend?.born.toString())
+            XCTAssert(serialized.bestFriend?.pets.isEmpty == true)
         } catch {
             XCTFail("Failed with error: \(error)")
         }
+    }
+}
+
+extension Date {
+    fileprivate func toString() -> String {
+        return DateTransformer.shared.formatter.string(from: self)
     }
 }
