@@ -39,7 +39,7 @@ public struct RLObjectTransformer: ValueTransformer {
             return newInstance
         case .backwards:
             guard let object = value as? RLObjectProtocol else {
-                throw RLObjectError.missingDataKey(requiredProperty: "", forClass: Int.self)
+                throw RLObjectError.placeholder
             }
             var output: [String: Any] = [:]
             for property in try object.properties() {

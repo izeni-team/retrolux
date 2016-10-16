@@ -10,10 +10,11 @@ import Foundation
 
 public enum RLObjectError: Error {
     case typeMismatch(expected: PropertyType, got: Any.Type?, property: String, forClass: Any.Type)
-    case missingDataKey(requiredProperty: String, forClass: Any.Type)
+    case placeholder
 }
 
 internal func rlobj_setProperty(_ property: Property, value: Any?, instance: RLObjectProtocol) throws {
+    
     guard property.type.isCompatible(with: value) else {
         if property.required {
             throw RLObjectError.typeMismatch(expected: property.type, got: type(of: value), property: property.name, forClass: type(of: instance))
@@ -40,7 +41,7 @@ internal func rlobj_value(for property: Property, instance: RLObjectProtocol) th
         let transformed = try rlobj_transform(rawValue, type: property.type, transformer: transformer, direction: .backwards)
         return transformed
     }
-    return rawValue
+    return rawValue ?? NSNull()
 }
 
 internal func rlobj_propertiesFor(_ instance: RLObjectProtocol) throws -> [Property] {

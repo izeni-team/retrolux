@@ -355,4 +355,138 @@ class RLObjectJSONSerializerTests: XCTestCase {
             XCTFail()
         }
     }
+    
+    func testSendBasicObject() {
+        class Object: RLObject {
+            var name = ""
+            var age = 0
+        }
+        
+        let object = Object()
+        object.name = "Bryan"
+        object.age = 24
+        
+        var urlRequest = URLRequest(url: URL(string: "https://www.google.com/")!)
+        let serializer = RLObjectJSONSerializer()
+        
+        do {
+            try serializer.deserialize(from: object, modify: &urlRequest)
+            XCTAssert(urlRequest.value(forHTTPHeaderField: "Content-Type") == "application/json")
+            guard let data = urlRequest.httpBody else {
+                XCTFail("Serializer failed to set httpBody.")
+                return
+            }
+            guard let dictionary = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
+                XCTFail("Serializer set incorrect root type. Expected dictionary.")
+                return
+            }
+            XCTAssert(dictionary["name"] as? String == "Bryan")
+            XCTAssert(dictionary["age"] as? Int == 24)
+        } catch {
+            XCTFail("Failed with error: \(error)")
+        }
+    }
+    
+    func testSendComplexObject() {
+        class Pet: RLObject {
+            var name = ""
+            
+            convenience init(name: String) {
+                self.init()
+                self.name = name
+            }
+        }
+        
+        class Person: RLObject {
+            var name = ""
+            var age = 0
+            var born = Date()
+            var visitDates: [Date] = []
+            var pets: [Pet] = []
+            var bestFriend: Person?
+            var upgradedAt: Date?
+            
+            override class var transformedProperties: [String: Retrolux.ValueTransformer] {
+                return [
+                    "born": DateTransformer.shared,
+                    "visitDates": DateTransformer.shared,
+                    "upgradedAt": DateTransformer.shared
+                ]
+            }
+            
+            override class var mappedProperties: [String: String] {
+                return [
+                    "visitDates": "visit_dates",
+                    "bestFriend": "best_friend",
+                    "upgradedAt": "upgraded_at"
+                ]
+            }
+        }
+        
+        let object = Person()
+        object.name = "Bryan"
+        object.age = 24
+        object.born = Date(timeIntervalSince1970: -86400 * 365 * 24) // Roughly 24 years ago.
+        
+        let now = Date()
+        let date2 = Date(timeIntervalSince1970: 276246)
+        let date3 = Date(timeIntervalSinceReferenceDate: 123873)
+        object.visitDates = [
+            now,
+            date2,
+            date3
+        ]
+        
+        object.pets = [
+            Pet(name: "Fifi"),
+            Pet(name: "Tiger")
+        ]
+        
+        let bestFriend = Person()
+        bestFriend.name = "Bob"
+        bestFriend.age = 2
+        bestFriend.born = Date(timeIntervalSinceNow: -86400 * 365 * 2)
+        bestFriend.upgradedAt = now
+        object.bestFriend = bestFriend
+        
+        var urlRequest = URLRequest(url: URL(string: "https://www.google.com/")!)
+        let serializer = RLObjectJSONSerializer()
+        
+        do {
+            try serializer.deserialize(from: object, modify: &urlRequest)
+            XCTAssert(urlRequest.value(forHTTPHeaderField: "Content-Type") == "application/json")
+            guard let data = urlRequest.httpBody else {
+                XCTFail("Serializer failed to set httpBody.")
+                return
+            }
+            guard let dictionary = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
+                XCTFail("Serializer set incorrect root type. Expected dictionary.")
+                return
+            }
+            XCTAssert(dictionary["name"] as? String == "Bryan")
+            XCTAssert(dictionary["age"] as? Int == 24)
+            
+            let dates = dictionary["visit_dates"] as? [String]
+            XCTAssert(dates?.count == 3)
+            let transformer = DateTransformer()
+            XCTAssert(dates?[0] == transformer.formatter.string(from: now))
+            XCTAssert(dates?[1] == transformer.formatter.string(from: date2))
+            XCTAssert(dates?[2] == transformer.formatter.string(from: date3))
+            
+            let pets = dictionary["pets"] as? [[String: Any]]
+            XCTAssert(pets?.count == 2)
+            XCTAssert(pets?[0]["name"] as? String == "Fifi")
+            XCTAssert(pets?[1]["name"] as? String == "Tiger")
+            
+            let bf = dictionary["best_friend"] as? [String: Any]
+            XCTAssert(bf?["name"] as? String == "Bob")
+            XCTAssert(bf?["age"] as? Int == 2)
+            XCTAssert(bf?["born"] as? String == transformer.formatter.string(from: bestFriend.born))
+            XCTAssert(bf?["upgraded_at"] as? String == transformer.formatter.string(from: bestFriend.upgradedAt!))
+            
+            XCTAssert(dictionary["upgraded_at"] is NSNull)
+        } catch {
+            XCTFail("Failed with error: \(error)")
+        }
+    }
 }

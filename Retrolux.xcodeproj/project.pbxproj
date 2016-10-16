@@ -36,6 +36,7 @@
 		499BEC9C1DB4034200FCECD1 /* RLObjectValueTransformerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499BEC9B1DB4034200FCECD1 /* RLObjectValueTransformerTests.swift */; };
 		499BEC9E1DB40A6500FCECD1 /* ValueTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499BEC9D1DB40A6500FCECD1 /* ValueTransformer.swift */; };
 		499BECA01DB40C1200FCECD1 /* RLObjectTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499BEC9F1DB40C1200FCECD1 /* RLObjectTransformer.swift */; };
+		499BECA21DB445DA00FCECD1 /* DateTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499BECA11DB445DA00FCECD1 /* DateTransformer.swift */; };
 		49C192581DA96CE400823A55 /* Builder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49C192571DA96CE400823A55 /* Builder.swift */; };
 		49C1925A1DA96D4500823A55 /* Method.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49C192591DA96D4500823A55 /* Method.swift */; };
 		49C1925C1DA9958F00823A55 /* HTTPCall.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49C1925B1DA9958F00823A55 /* HTTPCall.swift */; };
@@ -94,6 +95,7 @@
 		499BEC9B1DB4034200FCECD1 /* RLObjectValueTransformerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RLObjectValueTransformerTests.swift; sourceTree = "<group>"; };
 		499BEC9D1DB40A6500FCECD1 /* ValueTransformer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ValueTransformer.swift; sourceTree = "<group>"; };
 		499BEC9F1DB40C1200FCECD1 /* RLObjectTransformer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RLObjectTransformer.swift; sourceTree = "<group>"; };
+		499BECA11DB445DA00FCECD1 /* DateTransformer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DateTransformer.swift; sourceTree = "<group>"; };
 		49C192571DA96CE400823A55 /* Builder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Builder.swift; sourceTree = "<group>"; };
 		49C192591DA96D4500823A55 /* Method.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Method.swift; sourceTree = "<group>"; };
 		49C1925B1DA9958F00823A55 /* HTTPCall.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HTTPCall.swift; sourceTree = "<group>"; };
@@ -171,6 +173,7 @@
 				3484545B1DB2C37700032ACC /* RLObjectJSONSerializerTests.swift */,
 				34BB37F31DB3467E00004881 /* PropertyTransformerTests.swift */,
 				499BEC9B1DB4034200FCECD1 /* RLObjectValueTransformerTests.swift */,
+				499BECA11DB445DA00FCECD1 /* DateTransformer.swift */,
 			);
 			path = RetroluxTests;
 			sourceTree = "<group>";
@@ -367,6 +370,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4978AA961D360F5300E1F1A5 /* PropertyTypeTests.swift in Sources */,
+				499BECA21DB445DA00FCECD1 /* DateTransformer.swift in Sources */,
 				499BEC9C1DB4034200FCECD1 /* RLObjectValueTransformerTests.swift in Sources */,
 				3484545C1DB2C37700032ACC /* RLObjectJSONSerializerTests.swift in Sources */,
 				F3251C251D83186E00D62722 /* HTTPClientTests.swift in Sources */,

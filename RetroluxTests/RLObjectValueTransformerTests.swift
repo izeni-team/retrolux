@@ -191,7 +191,52 @@ class RLObjectValueTransformerTests: XCTestCase {
         }
     }
     
-    // TODO: Test nested backwards and fowards.
+    func testErrorHandling() {
+        class Test: RLObject {
+            var name = ""
+        }
+        
+        let dictionary: [String: Any] = [:] // Should trigger a key not found error.
+        
+        let transformer = RLObjectTransformer()
+        
+        do {
+            _ = try transformer.transform(dictionary, targetType: Test.self, direction: .forwards) as? Test
+            XCTFail("Should not have passed.")
+        } catch RLObjectError.typeMismatch(expected: let expected, got: let got, property: let property, forClass: let `class`) {
+            XCTAssert(expected == .string)
+            XCTAssert(property == "name")
+            XCTAssert(`class` == Test.self)
+        } catch {
+            XCTFail("Failed with error: \(error)")
+        }
+    }
     
-    // TODO: Test error handling.
+    func testNullable() {
+        class Test: NSObject, RLObjectProtocol {
+            var date: Date?
+            
+            required override init() {
+                super.init()
+            }
+            
+            static let transformedProperties: [String: Retrolux.ValueTransformer] = [
+                "date": DateTransformer.shared
+            ]
+        }
+        
+        let test = Test()
+        
+        let reflector = RLObjectReflector()
+        
+        do {
+            let properties = try reflector.reflect(test)
+            XCTAssert(properties.count == 1)
+            XCTAssert(properties.first?.name == "date")
+            let value = try test.value(for: properties.first!)
+            XCTAssert(value is NSNull)
+        } catch {
+            XCTFail("Error getting value: \(error)")
+        }
+    }
 }

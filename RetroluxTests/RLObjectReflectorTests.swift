@@ -166,6 +166,27 @@ class RLObjectReflectorTests: XCTestCase {
         }
     }
     
+    func testRLObjectReflectorError_CannotTransformNonExistantProperty() {
+        class Object1: NSObject, RLObjectProtocol {
+            required override init() {
+                super.init()
+            }
+            
+            static let transformedProperties: [String: Retrolux.ValueTransformer] = ["does_not_exist": RLObjectTransformer()]
+        }
+        
+        let object = Object1()
+        do {
+            _ = try RLObjectReflector().reflect(object)
+            XCTFail("Operation should not have succeeded.")
+        } catch RLObjectReflectionError.cannotTransformNonExistantProperty(propertyName: let propertyName, forClass: let classType) {
+            XCTAssert(propertyName == "does_not_exist")
+            XCTAssert(classType == Object1.self)
+        } catch let error {
+            XCTFail("\(error)")
+        }
+    }
+    
     func testRLObjectReflectionError_MappedPropertyConflict() {
         class Object1: NSObject, RLObjectProtocol {
             var test1 = ""

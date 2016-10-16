@@ -39,9 +39,8 @@ class RLObjectTests: XCTestCase {
         }
         
         for property in properties {
-            let isNSNull = dictionary[property.mappedTo] is NSNull
-            let screened: NSObject? = isNSNull ? nil : dictionary[property.mappedTo] as? NSObject
-            XCTAssert(try! instance.value(for: property) as? NSObject == screened || !property.required)
+            let value = dictionary[property.mappedTo] as? NSObject
+            XCTAssert(try! instance.value(for: property) as? NSObject == value || !property.required)
         }
     }
     

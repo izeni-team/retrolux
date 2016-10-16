@@ -14,6 +14,7 @@ public enum RLObjectReflectionError: Error {
     case cannotIgnoreErrorsForNonExistantProperty(propertyName: String, forClass: Any.Type)
     case cannotIgnoreErrorsAndIgnoreProperty(propertyName: String, forClass: Any.Type)
     case cannotMapNonExistantProperty(propertyName: String, forClass: Any.Type)
+    case cannotTransformNonExistantProperty(propertyName: String, forClass: Any.Type)
     case mappedPropertyConflict(properties: [String], conflictKey: String, forClass: Any.Type)
     case cannotMapAndIgnoreProperty(propertyName: String, forClass: Any.Type)
     case cannotTransformAndIgnoreProperty(propertyName: String, forClass: Any.Type)
@@ -96,6 +97,13 @@ open class RLObjectReflector {
             )
         }
         
+        if let transformedButNotImplemented = Set(transformed.keys).subtracting(propertyNameSet).first {
+            throw RLObjectReflectionError.cannotTransformNonExistantProperty(
+                propertyName: transformedButNotImplemented,
+                forClass: subjectType
+            )
+        }
+        
         // We cannot possibly map one property to multiple values.
         let excessivelyMapped = mapped.filter { k1, v1 in mapped.contains { v1 == $1 && k1 != $0 } }
         if !excessivelyMapped.isEmpty {
@@ -129,12 +137,12 @@ open class RLObjectReflector {
             }
             
             var transformer: ValueTransformer?
-            if let custom = transformed["label"] {
+            if let custom = transformed[label] {
                 transformer = custom
             } else {
                 transformer = RLObjectTransformer()
             }
-            
+                        
             var transformerMatched = false
             guard let type = PropertyType.from(valueType, transformer: transformer, transformerMatched: &transformerMatched) else {
                 // We don't know what type this property is, so it's unsupported.
