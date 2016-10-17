@@ -62,7 +62,7 @@ class RLObjectTests: XCTestCase {
                 "height": "5' 7\""
             ],
             "model": NSNull()
-        ] as [String : Any]
+            ] as [String : Any]
         
         do {
             let model = Model()
