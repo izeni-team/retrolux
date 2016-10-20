@@ -7,8 +7,9 @@
 //
 
 import UIKit
+import RetroluxReflector
 
-class Person: RLObject {
+class Person: Reflection {
     var name: String? = "default"
     var isSelected: Bool? = false
     
@@ -113,7 +114,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
         
-        class LoginResponse: RLObject {
+        class LoginResponse: Reflection {
             var id = ""
             var token = ""
         }
@@ -122,10 +123,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             baseURL: URL(string: "https://seek.izeni.net/")!,
             client: HTTPClient(),
             callFactory: HTTPCallFactory(),
-            serializer: RLObjectJSONSerializer()
+            serializer: ReflectionJSONSerializer()
         )
         
-        class LoginBody: RLObject {
+        class LoginBody: Reflection {
             var username = ""
             var password = ""
             
@@ -136,7 +137,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
         
-        class User: RLObject {
+        class User: Reflection {
             var id = ""
             var first_name = ""
             var last_name = ""
@@ -146,7 +147,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
         
-        class NewUser: RLObject {
+        class NewUser: Reflection {
             var email = ""
             var password = ""
             

@@ -62,26 +62,30 @@ extension Builder {
                         arg.apply(to: &request)
                     } else if let body = arg as? BodyValues {
                         assert(self.serializer.supports(type: body.type), "Unsupported type: \(body.type)")
-                        try! self.serializer.deserialize(from: body.value, modify: &request)
+                        
+                        // TODO: Catch exception.
+                        try! self.serializer.apply(value: body.value, to: &request)
                     } else {
                         fatalError("Unsupported argument type: \(type(of: arg))")
                     }
                 }
                 
                 task = self.client.makeAsynchronousRequest(request: request, callback: { (response) in
-                    let body: String
-                    if let data = response.data {
-                        body = String(data: data, encoding: .utf8)!
-                    } else {
-                        body = "<no_body>"
-                    }
+//                    let body: String
+//                    if let data = response.data {
+//                        body = String(data: data, encoding: .utf8)!
+//                    } else {
+//                        body = "<no_body>"
+//                    }
+//                    print("Body: \(body)")
                     
                     do {
                         let result: Result<T>
                         if T.self == Void.self {
-                            result = Result<T>.success(value: () as! T)
+                            result = .success(value: () as! T)
                         } else {
-                            result = Result<T>.success(value: try self.serializer.serialize(from: response))
+                            assert(self.serializer.supports(type: T.self))
+                            result = .success(value: try self.serializer.makeValue(from: response, type: T.self))
                         }
                         let response = Response(request: request, rawResponse: response, result: result)
                         

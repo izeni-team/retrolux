@@ -10,6 +10,6 @@ import Foundation
 
 protocol Serializer {
     func supports(type: Any.Type) -> Bool
-    func serialize<T>(from clientResponse: ClientResponse) throws -> T
-    func deserialize<T>(from value: T, modify request: inout URLRequest) throws
+    func makeValue<T>(from clientResponse: ClientResponse, type: T.Type) throws -> T
+    func apply<T>(value: T, to request: inout URLRequest) throws
 }
