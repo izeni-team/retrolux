@@ -81,10 +81,6 @@ extension Builder {
                                 result = .success(value: try self.serializer.makeValue(from: clientResponse, type: T.self))
                             }
                             response = Response(request: request, rawResponse: clientResponse, result: result)
-                            
-                            DispatchQueue.main.async {
-                                callback(response)
-                            }
                         } catch {
                             print("Error serializing response: \(error)")
                             result = .failure(error: ErrorResponse(error: error))
