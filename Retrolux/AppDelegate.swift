@@ -213,7 +213,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 //            response: Body<[User]>()
 //        )
         
-        deleteUser(Path("asdf")).enqueue { response in
+        try! deleteUser(Path("asdf")).enqueue { response in
             print(response)
             switch response.interpreted {
             case .success(let value):
@@ -247,7 +247,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
         
-        getUsers().enqueue { response in
+        try! getUsers().enqueue { response in
             switch response.result {
             case .success(let values):
                 print("Got users: \(values.count)")
@@ -262,7 +262,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 email: "bhenderson+rl002@izeni.com",
                 password: "a45d8f47-0e93-42a5-9efe-2ce59001eb97"
             )
-            createUser(Body(newUser)).enqueue { createResponse in
+            try! createUser(Body(newUser)).enqueue { createResponse in
                 switch createResponse.result {
                 case .success(let value):
                     print("New user created")
@@ -303,7 +303,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 password: "a45d8f47-0e93-42a5-9efe-2ce59001eb97"
             )
             
-            login(Body(credentials)).enqueue { response in
+            try! login(Body(credentials)).enqueue { response in
                 switch response.result {
                 case .success(let value):
                     userID = value.id

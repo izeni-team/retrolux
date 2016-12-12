@@ -25,18 +25,39 @@ class ReflectionJSONSerializerTests: XCTestCase {
         
         let serializer = ReflectionJSONSerializer()
         do {
-            let object = try serializer.serialize(from: makeResponse(from: [
+            let response = makeResponse(from: [
                 "name": "Bob",
-                "age": 35
-                ]), type: Person.self)
+                "age": 24
+                ])
+            let object = try serializer.makeValue(from: response, type: Person.self)
             
             XCTAssert(object.name == "Bob")
-            XCTAssert(object.age == 35)
+            XCTAssert(object.age == 24)
             
-            let data = try serializer.deserialize(from: object, modify: &urlRequest)
+            let url = URL(string: "https://default.thing.any")!
+            var request = URLRequest(url: url)
+            try serializer.apply(value: object, to: &request)
+            XCTAssert(request.url == url, "URL should not have changed")
+            XCTAssert(request.value(forHTTPHeaderField: "Content-Type") == "application/json", "Missing Content-Type header.")
+            XCTAssert(request.allHTTPHeaderFields?.count == 1, "Only Content-Type should be set.")
+            XCTAssert(request.httpBody?.count == "{\"name\":\"Bob\",\"age\":24}".characters.count)
+            print("request.httpMethod: \(request.httpMethod)")
+            XCTAssert(request.httpMethod == "GET") // Default value is GET--it shouldn't be different.
             
+            guard let body = request.httpBody else {
+                XCTFail("Missing body on URL request")
+                return
+            }
+            
+            guard let dictionary = try JSONSerialization.jsonObject(with: body, options: []) as? [String: Any] else {
+                XCTFail("Invalid root type for http body--expected dictionary")
+                return
+            }
+            
+            XCTAssert(dictionary["name"] as? String == "Bob")
+            XCTAssert(dictionary["age"] as? Int == 24)
         } catch {
-            print("Error: \(error)")
+            XCTFail("Error: \(error)")
         }
     }
 }

@@ -7,7 +7,7 @@
 //
 
 public class Call<T> {
-    func enqueue(callback: @escaping (Response<T>) -> Void) {
+    func enqueue(callback: @escaping (Response<T>) -> Void) throws {
         fatalError("Unimplemented. Should be overridden.")
     }
     

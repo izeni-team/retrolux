@@ -43,66 +43,60 @@ extension Builder {
             var cancelled = false
             
             let start: (@escaping (Response<T>) -> Void) -> Void = { (callback) in
-                if cancelled {
-                    return
-                }
-                
-                let url = self.baseURL.appendingPathComponent(endpoint)
-                var request = URLRequest(url: url)
-                request.httpMethod = method.rawValue
-                
-                let normalizedCreationArgs = self.normalizeArgs(args: creationArgs)
-                let normalizedStartingArgs = self.normalizeArgs(args: startingArgs)
-                
-                for (index, arg) in normalizedStartingArgs.enumerated() {
-                    if let arg = arg as? AlignedSelfApplyingArg {
-                        let alignedArg = normalizedCreationArgs[index]
-                        arg.apply(to: &request, with: alignedArg)
-                    } else if let arg = arg as? SelfApplyingArg {
-                        arg.apply(to: &request)
-                    } else if let body = arg as? BodyValues {
-                        assert(self.serializer.supports(type: body.type), "Unsupported type: \(body.type)")
-                        
-                        // TODO: Catch exception.
-                        try! self.serializer.apply(value: body.value, to: &request)
-                    } else {
-                        fatalError("Unsupported argument type: \(type(of: arg))")
+                DispatchQueue.global().async {
+                    if cancelled {
+                        return
                     }
-                }
-                
-                task = self.client.makeAsynchronousRequest(request: request, callback: { (response) in
-//                    let body: String
-//                    if let data = response.data {
-//                        body = String(data: data, encoding: .utf8)!
-//                    } else {
-//                        body = "<no_body>"
-//                    }
-//                    print("Body: \(body)")
                     
-                    do {
-                        let result: Result<T>
-                        if T.self == Void.self {
-                            result = .success(value: () as! T)
+                    let url = self.baseURL.appendingPathComponent(endpoint)
+                    var request = URLRequest(url: url)
+                    request.httpMethod = method.rawValue
+                    
+                    let normalizedCreationArgs = self.normalizeArgs(args: creationArgs)
+                    let normalizedStartingArgs = self.normalizeArgs(args: startingArgs)
+                    
+                    for (index, arg) in normalizedStartingArgs.enumerated() {
+                        if let arg = arg as? AlignedSelfApplyingArg {
+                            let alignedArg = normalizedCreationArgs[index]
+                            arg.apply(to: &request, with: alignedArg)
+                        } else if let arg = arg as? SelfApplyingArg {
+                            arg.apply(to: &request)
+                        } else if let body = arg as? BodyValues {
+                            assert(self.serializer.supports(type: body.type), "Unsupported type: \(body.type)")
+                            
+                            try! self.serializer.apply(value: body.value, to: &request)
                         } else {
-                            assert(self.serializer.supports(type: T.self))
-                            result = .success(value: try self.serializer.makeValue(from: response, type: T.self))
-                        }
-                        let response = Response(request: request, rawResponse: response, result: result)
-                        
-                        DispatchQueue.main.async {
-                            callback(response)
-                        }
-                    } catch let error {
-                        print("Error serializing response: \(error)")
-                        let result = Result<T>.failure(error: ErrorResponse(error: error))
-                        let response = Response(request: request, rawResponse: response, result: result)
-                        
-                        DispatchQueue.main.async {
-                            callback(response)
+                            fatalError("Unsupported argument type: \(type(of: arg))")
                         }
                     }
-                })
-                task!.resume()
+                    
+                    task = self.client.makeAsynchronousRequest(request: request, callback: { (clientResponse) in
+                        let result: Result<T>
+                        let response: Response<T>
+                        do {
+                            if T.self == Void.self {
+                                result = .success(value: () as! T)
+                            } else {
+                                assert(self.serializer.supports(type: T.self))
+                                result = .success(value: try self.serializer.makeValue(from: clientResponse, type: T.self))
+                            }
+                            response = Response(request: request, rawResponse: clientResponse, result: result)
+                            
+                            DispatchQueue.main.async {
+                                callback(response)
+                            }
+                        } catch {
+                            print("Error serializing response: \(error)")
+                            result = .failure(error: ErrorResponse(error: error))
+                            response = Response(request: request, rawResponse: clientResponse, result: result)
+                        }
+                        
+                        DispatchQueue.main.async {
+                            callback(response)
+                        }
+                    })
+                    task!.resume()
+                }
             }
             
             let cancel = { () -> Void in

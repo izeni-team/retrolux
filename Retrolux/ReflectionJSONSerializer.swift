@@ -26,7 +26,7 @@ extension Array: GetTypeFromArray {
     }
 }
 
-class ReflectionJSONSerializer: Serializer {
+public class ReflectionJSONSerializer: Serializer {
     func supports(type: Any.Type) -> Bool {
         return type is Reflectable.Type || (type as? GetTypeFromArray.Type)?.getReflectableType() != nil
     }
