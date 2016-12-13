@@ -8,7 +8,7 @@
 
 import Foundation
 
-protocol Serializer {
+public protocol Serializer {
     func supports(type: Any.Type) -> Bool
     func makeValue<T>(from clientResponse: ClientResponse, type: T.Type) throws -> T
     func apply<T>(value: T, to request: inout URLRequest) throws

@@ -8,13 +8,13 @@
 
 import Foundation
 
-struct Body<T>: BodyValues {
-    var type: Any.Type {
+public struct Body<T>: BodyValues {
+    public var type: Any.Type {
         return T.self
     }
     
     fileprivate var _value: T?
-    var value: Any {
+    public var value: Any {
         return _value!
     }
     

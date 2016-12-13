@@ -8,8 +8,12 @@
 
 import Foundation
 
-struct HTTPCallFactory: CallFactory {
-    func makeCall<T>(start: @escaping (@escaping (Response<T>) -> Void) -> Void, cancel: @escaping () -> Void) -> Call<T> {
+public struct HTTPCallFactory: CallFactory {
+    public init() {
+    
+    }
+    
+    public func makeCall<T>(start: @escaping (@escaping (Response<T>) -> Void) -> Void, cancel: @escaping () -> Void) -> Call<T> {
         return HTTPCall(start: start, cancel: cancel)
     }
 }

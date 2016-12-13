@@ -9,16 +9,16 @@
 import Foundation
 
 // TODO: Add support for ignoring SSL errors.
-class HTTPClient: Client {
-    let session: URLSession
-    var interceptor: ((inout URLRequest) -> Void)?
+public class HTTPClient: Client {
+    public let session: URLSession
+    public var interceptor: ((inout URLRequest) -> Void)?
     
-    init() {
+    public init() {
         let configuration = URLSessionConfiguration.default
         session = URLSession(configuration: configuration)
     }
     
-    func makeAsynchronousRequest(
+    public func makeAsynchronousRequest(
         request inputRequest: URLRequest,
         callback: @escaping (_ response: ClientResponse) -> Void
         ) -> Task

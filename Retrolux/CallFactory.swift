@@ -6,6 +6,6 @@
 //  Copyright © 2016 Bryan. All rights reserved.
 //
 
-protocol CallFactory {
+public protocol CallFactory {
     func makeCall<T>(start: @escaping (@escaping (Response<T>) -> Void) -> Void, cancel: @escaping () -> Void) -> Call<T>
 }

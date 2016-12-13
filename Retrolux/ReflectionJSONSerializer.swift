@@ -9,7 +9,7 @@
 import Foundation
 import RetroluxReflector
 
-enum ReflectionJSONSerializerError: Error {
+public enum ReflectionJSONSerializerError: Error {
     case unsupportedType(type: Any.Type)
     case noData
     case invalidJSON
@@ -26,7 +26,11 @@ extension Array: GetTypeFromArray {
 }
 
 public class ReflectionJSONSerializer: Serializer {
-    func supports(type: Any.Type) -> Bool {
+    public init() {
+        
+    }
+    
+    public func supports(type: Any.Type) -> Bool {
         return type is Reflectable.Type || (type as? GetTypeFromArray.Type)?.getReflectableType() != nil
     }
     
@@ -51,7 +55,7 @@ public class ReflectionJSONSerializer: Serializer {
         return dictionary
     }
     
-    func makeValue<T>(from clientResponse: ClientResponse, type: T.Type) throws -> T {
+    public func makeValue<T>(from clientResponse: ClientResponse, type: T.Type) throws -> T {
         guard let data = clientResponse.data else {
             throw ReflectionJSONSerializerError.noData
         }
@@ -74,7 +78,7 @@ public class ReflectionJSONSerializer: Serializer {
         }
     }
     
-    func apply<T>(value input: T, to request: inout URLRequest) throws {
+    public func apply<T>(value input: T, to request: inout URLRequest) throws {
         if let reflectable = input as? Reflectable {
             let dictionary = try convertToDictionary(reflectable)
             let data = try JSONSerialization.data(withJSONObject: dictionary, options: [])

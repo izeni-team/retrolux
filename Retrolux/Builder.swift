@@ -8,7 +8,7 @@
 
 import Foundation
 
-protocol Builder {
+public protocol Builder {
     var baseURL: URL { get }
     var client: Client { get }
     var callFactory: CallFactory { get }
@@ -17,7 +17,7 @@ protocol Builder {
 }
 
 extension Builder {
-    func isArg(arg: Any) -> Bool {
+    public func isArg(arg: Any) -> Bool {
         if arg is AlignedSelfApplyingArg {
             return true
         } else if arg is SelfApplyingArg {
@@ -29,7 +29,7 @@ extension Builder {
         return false
     }
     
-    func normalizeArgs<A>(args: A) -> [Any] {
+    public func normalizeArgs<A>(args: A) -> [Any] {
         if isArg(arg: args) {
             return [args]
         } else {
@@ -37,7 +37,7 @@ extension Builder {
         }
     }
     
-    func makeRequest<A, T>(method: HTTPMethod, endpoint: String, args creationArgs: A, response: Body<T>) -> (A) -> Call<T> {
+    public func makeRequest<A, T>(method: HTTPMethod, endpoint: String, args creationArgs: A, response: Body<T>) -> (A) -> Call<T> {
         return { startingArgs in
             var task: Task?
             var cancelled = false
