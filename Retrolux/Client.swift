@@ -8,16 +8,6 @@
 
 import Foundation
 
-public struct ClientResponse {
-    let data: Data?
-    let response: URLResponse?
-    let error: Error?
-    
-    var status: Int? {
-        return (response as? HTTPURLResponse)?.statusCode
-    }
-}
-
 public protocol Client: class {
     var interceptor: ((inout URLRequest) -> Void)? { get set }
     func makeAsynchronousRequest(request: URLRequest, callback: @escaping (_ response: ClientResponse) -> Void) -> Task

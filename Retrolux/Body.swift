@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct Body<T>: BodyValues, BodyInitializers {
+struct Body<T>: BodyValues {
     var type: Any.Type {
         return T.self
     }
