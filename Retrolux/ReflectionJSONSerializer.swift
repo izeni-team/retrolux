@@ -10,7 +10,6 @@ import Foundation
 import RetroluxReflector
 
 enum ReflectionJSONSerializerError: Error {
-    case reflectionError(error: ReflectionError)
     case unsupportedType(type: Any.Type)
     case noData
     case invalidJSON
