@@ -12,8 +12,8 @@ import XCTest
 import RetroluxReflector
 
 class ReflectionJSONSerializerTests: XCTestCase {
-    func makeResponse(from dictionary: [String: Any]) -> ClientResponse {
-        let data = try! JSONSerialization.data(withJSONObject: dictionary, options: [])
+    func makeResponse(from jsonObject: Any) -> ClientResponse {
+        let data = try! JSONSerialization.data(withJSONObject: jsonObject, options: [])
         return ClientResponse(data: data, response: nil, error: nil)
     }
     
@@ -106,6 +106,41 @@ class ReflectionJSONSerializerTests: XCTestCase {
             XCTAssert(property == "name")
             XCTAssert(valueType == Data.self)
             XCTAssert(forClass == Invalid.self)
+        } catch {
+            XCTFail("Unexpected error \(error)")
+        }
+    }
+    
+    func testFromJSONError() {
+        class Valid: Reflection {
+            var age: Int = 0
+        }
+        
+        let serializer = ReflectionJSONSerializer()
+        let inputDictionary = [
+            "age": "0" // Is wrong type on purpose
+        ]
+        
+        do {
+            let response = makeResponse(from: inputDictionary)
+            _ = try serializer.makeValue(from: response, type: Valid.self)
+            XCTFail("Should not have succeeded.")
+        } catch SerializationError.typeMismatch(expected: let expected, got: _, property: let property, forClass: let forClass) {
+            XCTAssert(expected == .number)
+            XCTAssert(property == "age")
+            XCTAssert(forClass == Valid.self)
+        } catch {
+            XCTFail("Unexpected error \(error)")
+        }
+        
+        do {
+            let response = makeResponse(from: [inputDictionary])
+            _ = try serializer.makeValue(from: response, type: [Valid].self)
+            XCTFail("Should not have succeeded.")
+        } catch SerializationError.typeMismatch(expected: let expected, got: _, property: let property, forClass: let forClass) {
+            XCTAssert(expected == .number)
+            XCTAssert(property == "age")
+            XCTAssert(forClass == Valid.self)
         } catch {
             XCTFail("Unexpected error \(error)")
         }

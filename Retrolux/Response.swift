@@ -15,7 +15,7 @@ struct ErrorResponse {
 public struct Response<T> {
     // Do we want the NSURLRequest or NSHTTPURLResponse?
     let request: URLRequest
-    let rawResponse: ClientResponse
+    let rawResponse: ClientResponse?
     let result: Result<T>
     
     var body: T? {
@@ -28,7 +28,7 @@ public struct Response<T> {
     }
     
     var isSuccessful: Bool {
-        let status = rawResponse.status ?? 0
+        let status = rawResponse?.status ?? 0
         switch result {
         case .success:
             return (200...299).contains(status)

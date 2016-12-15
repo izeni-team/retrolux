@@ -18,11 +18,11 @@ public struct Body<T>: BodyValues {
         return _value!
     }
     
-    init() {
+    public init() {
         
     }
     
-    init(_ value: T) {
+    public init(_ value: T) {
         self._value = value
     }
 }

@@ -55,43 +55,50 @@ extension Builder {
                     let normalizedCreationArgs = self.normalizeArgs(args: creationArgs)
                     let normalizedStartingArgs = self.normalizeArgs(args: startingArgs)
                     
-                    for (index, arg) in normalizedStartingArgs.enumerated() {
-                        if let arg = arg as? AlignedSelfApplyingArg {
-                            let alignedArg = normalizedCreationArgs[index]
-                            arg.apply(to: &request, with: alignedArg)
-                        } else if let arg = arg as? SelfApplyingArg {
-                            arg.apply(to: &request)
-                        } else if let body = arg as? BodyValues {
-                            assert(self.serializer.supports(type: body.type), "Unsupported type: \(body.type)")
-                            
-                            try! self.serializer.apply(value: body.value, to: &request)
-                        } else {
-                            fatalError("Unsupported argument type: \(type(of: arg))")
-                        }
-                    }
-                    
-                    task = self.client.makeAsynchronousRequest(request: request, callback: { (clientResponse) in
-                        let result: Result<T>
-                        let response: Response<T>
-                        do {
-                            if T.self == Void.self {
-                                result = .success(value: () as! T)
+                    do {
+                        for (index, arg) in normalizedStartingArgs.enumerated() {
+                            if let arg = arg as? AlignedSelfApplyingArg {
+                                let alignedArg = normalizedCreationArgs[index]
+                                arg.apply(to: &request, with: alignedArg)
+                            } else if let arg = arg as? SelfApplyingArg {
+                                arg.apply(to: &request)
+                            } else if let body = arg as? BodyValues {
+                                assert(self.serializer.supports(type: body.type), "Unsupported type: \(body.type)")
+                                try self.serializer.apply(value: body.value, to: &request)
                             } else {
-                                assert(self.serializer.supports(type: T.self))
-                                result = .success(value: try self.serializer.makeValue(from: clientResponse, type: T.self))
+                                fatalError("Unsupported argument type: \(type(of: arg))")
                             }
-                            response = Response(request: request, rawResponse: clientResponse, result: result)
-                        } catch {
-                            print("Error serializing response: \(error)")
-                            result = .failure(error: ErrorResponse(error: error))
-                            response = Response(request: request, rawResponse: clientResponse, result: result)
                         }
                         
+                        task = self.client.makeAsynchronousRequest(request: request, callback: { (clientResponse) in
+                            let result: Result<T>
+                            let response: Response<T>
+                            do {
+                                if T.self == Void.self {
+                                    result = .success(value: () as! T)
+                                } else {
+                                    assert(self.serializer.supports(type: T.self))
+                                    result = .success(value: try self.serializer.makeValue(from: clientResponse, type: T.self))
+                                }
+                                response = Response(request: request, rawResponse: clientResponse, result: result)
+                            } catch {
+                                print("Error serializing response: \(error)")
+                                result = .failure(error: ErrorResponse(error: error))
+                                response = Response(request: request, rawResponse: clientResponse, result: result)
+                            }
+                            
+                            DispatchQueue.main.async {
+                                callback(response)
+                            }
+                        })
+                        task!.resume()
+                    } catch {
+                        let result = Result<T>.failure(error: ErrorResponse(error: error))
+                        let response = Response<T>(request: request, rawResponse: nil, result: result)
                         DispatchQueue.main.async {
                             callback(response)
                         }
-                    })
-                    task!.resume()
+                    }
                 }
             }
             

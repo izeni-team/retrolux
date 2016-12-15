@@ -9,5 +9,6 @@
 import Foundation
 
 public protocol AlignedSelfApplyingArg {
+    // TODO: Make this throw
     func apply(to request: inout URLRequest, with alignedArg: Any)
 }
