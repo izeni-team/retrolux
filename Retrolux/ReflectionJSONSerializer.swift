@@ -30,7 +30,7 @@ public class ReflectionJSONSerializer: Serializer {
         
     }
     
-    public func supports(type: Any.Type) -> Bool {
+    public func supports(type: Any.Type, args: [Any], direction: SerializerDirection) -> Bool {
         return type is Reflectable.Type || (type as? GetTypeFromArray.Type)?.getReflectableType() != nil
     }
     

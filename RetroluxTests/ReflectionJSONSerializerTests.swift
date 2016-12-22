@@ -75,9 +75,14 @@ class ReflectionJSONSerializerTests: XCTestCase {
         }
         
         let serializer = ReflectionJSONSerializer()
-        XCTAssert(serializer.supports(type: NotSupported.self) == false)
-        XCTAssert(serializer.supports(type: Supported.self) == true)
-        XCTAssert(serializer.supports(type: AlsoSupported.self) == true)
+        XCTAssert(serializer.supports(type: NotSupported.self, args: [], direction: .inbound) == false)
+        XCTAssert(serializer.supports(type: NotSupported.self, args: [], direction: .outbound) == false)
+        
+        XCTAssert(serializer.supports(type: Supported.self, args: [], direction: .inbound) == true)
+        XCTAssert(serializer.supports(type: Supported.self, args: [], direction: .outbound) == true)
+        
+        XCTAssert(serializer.supports(type: AlsoSupported.self, args: [], direction: .inbound) == true)
+        XCTAssert(serializer.supports(type: AlsoSupported.self, args: [], direction: .outbound) == true)
     }
     
     func testToJSONError() {

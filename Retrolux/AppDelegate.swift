@@ -104,13 +104,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             var baseURL: URL
             var client: Client
             var callFactory: CallFactory
-            var serializer: Serializer
+            var serializers: [Serializer]
             
-            init(baseURL: URL, client: Client, callFactory: CallFactory, serializer: Serializer) {
+            init(baseURL: URL, client: Client, callFactory: CallFactory, serializers: [Serializer]) {
                 self.baseURL = baseURL
                 self.client = client
                 self.callFactory = callFactory
-                self.serializer = serializer
+                self.serializers = serializers
             }
         }
         
@@ -123,7 +123,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             baseURL: URL(string: "https://seek.izeni.net/")!,
             client: HTTPClient(),
             callFactory: HTTPCallFactory(),
-            serializer: ReflectionJSONSerializer()
+            serializers: [ReflectionJSONSerializer()]
         )
         
         class LoginBody: Reflection {

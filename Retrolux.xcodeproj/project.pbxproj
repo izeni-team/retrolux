@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		3418ABF61DFF15DD00E71ECB /* RetroluxReflector.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 497131A81DB87507007AF60E /* RetroluxReflector.framework */; };
 		3418ABF81DFF1B3A00E71ECB /* BuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3418ABF71DFF1B3A00E71ECB /* BuilderTests.swift */; };
+		3472D1C81E0C70E600AE8621 /* URLEncodedSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3472D1C71E0C70E600AE8621 /* URLEncodedSerializer.swift */; };
+		3472D1CC1E0C75A400AE8621 /* SerializerDirection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3472D1CB1E0C75A400AE8621 /* SerializerDirection.swift */; };
 		3484545C1DB2C37700032ACC /* ReflectionJSONSerializerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3484545B1DB2C37700032ACC /* ReflectionJSONSerializerTests.swift */; };
 		34E5F3021DFF89B20014537C /* ClientResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34E5F3011DFF89B20014537C /* ClientResponse.swift */; };
 		34F26CA41CFFE8A9008C3D9A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F26CA31CFFE8A9008C3D9A /* AppDelegate.swift */; };
@@ -65,6 +67,8 @@
 
 /* Begin PBXFileReference section */
 		3418ABF71DFF1B3A00E71ECB /* BuilderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BuilderTests.swift; sourceTree = "<group>"; };
+		3472D1C71E0C70E600AE8621 /* URLEncodedSerializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = URLEncodedSerializer.swift; sourceTree = "<group>"; };
+		3472D1CB1E0C75A400AE8621 /* SerializerDirection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SerializerDirection.swift; sourceTree = "<group>"; };
 		3484545B1DB2C37700032ACC /* ReflectionJSONSerializerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReflectionJSONSerializerTests.swift; sourceTree = "<group>"; };
 		34E5F3011DFF89B20014537C /* ClientResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClientResponse.swift; sourceTree = "<group>"; };
 		34F26CA01CFFE8A9008C3D9A /* Retrolux.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Retrolux.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -174,6 +178,7 @@
 				498BCF611D39F9B100345E9F /* Task.swift */,
 				49DE43471DAAA54C00D41572 /* SelfApplyingArg.swift */,
 				4990617A1DA9AFE30047F553 /* Serializer.swift */,
+				3472D1CB1E0C75A400AE8621 /* SerializerDirection.swift */,
 				49DE434D1DAAE01800D41572 /* AlignedSelfApplyingArg.swift */,
 			);
 			name = Abstract;
@@ -192,6 +197,7 @@
 				4990617E1DA9B39F0047F553 /* ReflectionJSONSerializer.swift */,
 				49DE43431DAAA0C000D41572 /* Body.swift */,
 				49DE434B1DAAD82100D41572 /* Path.swift */,
+				3472D1C71E0C70E600AE8621 /* URLEncodedSerializer.swift */,
 			);
 			name = Concrete;
 			sourceTree = "<group>";
@@ -309,6 +315,7 @@
 				49C192581DA96CE400823A55 /* Builder.swift in Sources */,
 				34F26CA41CFFE8A9008C3D9A /* AppDelegate.swift in Sources */,
 				49DE43441DAAA0C000D41572 /* Body.swift in Sources */,
+				3472D1CC1E0C75A400AE8621 /* SerializerDirection.swift in Sources */,
 				4990617D1DA9B1D20047F553 /* HTTPCallFactory.swift in Sources */,
 				4999F8FE1DA8CD7C00E4C556 /* Client.swift in Sources */,
 				F3A3D0111D875C7A0067D03C /* Response.swift in Sources */,
@@ -324,6 +331,7 @@
 				49DE434A1DAAA57C00D41572 /* BodyValues.swift in Sources */,
 				49DE434C1DAAD82100D41572 /* Path.swift in Sources */,
 				498BCF661D39FC5E00345E9F /* HTTPClient.swift in Sources */,
+				3472D1C81E0C70E600AE8621 /* URLEncodedSerializer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

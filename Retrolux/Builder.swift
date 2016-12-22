@@ -12,7 +12,7 @@ public protocol Builder {
     var baseURL: URL { get }
     var client: Client { get }
     var callFactory: CallFactory { get }
-    var serializer: Serializer { get }
+    var serializers: [Serializer] { get }
     func makeRequest<A, T>(method: HTTPMethod, endpoint: String, args: A, response: Body<T>) -> (A) -> Call<T>
 }
 
@@ -37,12 +37,12 @@ extension Builder {
         }
     }
     
-    public func makeRequest<A, T>(method: HTTPMethod, endpoint: String, args creationArgs: A, response: Body<T>) -> (A) -> Call<T> {
+    public func makeRequest<Args, ResponseType>(method: HTTPMethod, endpoint: String, args creationArgs: Args, response: Body<ResponseType>) -> (Args) -> Call<ResponseType> {
         return { startingArgs in
             var task: Task?
             var cancelled = false
             
-            let start: (@escaping (Response<T>) -> Void) -> Void = { (callback) in
+            let start: (@escaping (Response<ResponseType>) -> Void) -> Void = { (callback) in
                 DispatchQueue.global().async {
                     if cancelled {
                         return
@@ -52,8 +52,8 @@ extension Builder {
                     var request = URLRequest(url: url)
                     request.httpMethod = method.rawValue
                     
-                    let normalizedCreationArgs = self.normalizeArgs(args: creationArgs)
-                    let normalizedStartingArgs = self.normalizeArgs(args: startingArgs)
+                    let normalizedCreationArgs = self.normalizeArgs(args: creationArgs) // Args used to create this request
+                    let normalizedStartingArgs = self.normalizeArgs(args: startingArgs) // Args passed in when executing this request
                     
                     do {
                         for (index, arg) in normalizedStartingArgs.enumerated() {
@@ -63,22 +63,29 @@ extension Builder {
                             } else if let arg = arg as? SelfApplyingArg {
                                 arg.apply(to: &request)
                             } else if let body = arg as? BodyValues {
-                                assert(self.serializer.supports(type: body.type), "Unsupported type: \(body.type)")
-                                try self.serializer.apply(value: body.value, to: &request)
+                                if let serializer = self.serializers.first(where: { $0.supports(type: body.type, args: normalizedStartingArgs, direction: .outbound) }) {
+                                    try serializer.apply(value: body.value, to: &request)
+                                } else {
+                                    // This is incorrect usage of Retrolux, hence it is a fatal error.
+                                    fatalError("Unsupported argument type when sending request: \(type(of: body.type))")
+                                }
                             } else {
-                                fatalError("Unsupported argument type: \(type(of: arg))")
+                                // This is incorrect usage of Retrolux, hence it is a fatal error.
+                                fatalError("Unsupported argument type when sending request: \(type(of: arg))")
                             }
                         }
                         
                         task = self.client.makeAsynchronousRequest(request: request, callback: { (clientResponse) in
-                            let result: Result<T>
-                            let response: Response<T>
+                            let result: Result<ResponseType>
+                            let response: Response<ResponseType>
                             do {
-                                if T.self == Void.self {
-                                    result = .success(value: () as! T)
+                                if ResponseType.self == Void.self {
+                                    result = .success(value: () as! ResponseType)
+                                } else if let serializer = self.serializers.first(where: { $0.supports(type: ResponseType.self, args: normalizedStartingArgs, direction: .inbound) }) {
+                                    result = .success(value: try serializer.makeValue(from: clientResponse, type: ResponseType.self))
                                 } else {
-                                    assert(self.serializer.supports(type: T.self))
-                                    result = .success(value: try self.serializer.makeValue(from: clientResponse, type: T.self))
+                                    // This is incorrect usage of Retrolux, hence it is a fatal error.
+                                    fatalError("Unsupported argument type when processing request: \(ResponseType.self)")
                                 }
                                 response = Response(request: request, rawResponse: clientResponse, result: result)
                             } catch {
@@ -93,8 +100,8 @@ extension Builder {
                         })
                         task!.resume()
                     } catch {
-                        let result = Result<T>.failure(error: ErrorResponse(error: error))
-                        let response = Response<T>(request: request, rawResponse: nil, result: result)
+                        let result = Result<ResponseType>.failure(error: ErrorResponse(error: error))
+                        let response = Response<ResponseType>(request: request, rawResponse: nil, result: result)
                         DispatchQueue.main.async {
                             callback(response)
                         }

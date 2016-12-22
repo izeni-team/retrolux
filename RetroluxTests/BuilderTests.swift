@@ -29,6 +29,8 @@ fileprivate class FakeClient: Client {
         }
     }
     
+    var credential: URLCredential?
+    
     var fakeResponse: ClientResponse!
     
     func makeAsynchronousRequest(request: URLRequest, callback: @escaping (_ response: ClientResponse) -> Void) -> Task {
@@ -69,21 +71,34 @@ fileprivate class FakeBuilder: Builder {
     let baseURL: URL
     let client: Client
     let callFactory: CallFactory
-    let serializer: Serializer
+    let serializers: [Serializer]
     
     init() {
         self.baseURL = URL(string: "https://www.google.com/")!
         self.client = FakeClient()
         self.callFactory = FakeCallFactory()
-        self.serializer = ReflectionJSONSerializer()
+        self.serializers = [ReflectionJSONSerializer()]
+    }
+}
+
+fileprivate class RealBuilder: Builder {
+    let baseURL: URL
+    let client: Client
+    let callFactory: CallFactory
+    let serializers: [Serializer]
+    
+    init() {
+        self.baseURL = URL(string: "https://www.google.com/")!
+        self.client = HTTPClient()
+        self.callFactory = HTTPCallFactory()
+        self.serializers = [ReflectionJSONSerializer()]
     }
 }
 
 class BuilderTests: XCTestCase {
     func test() {
         let builder = FakeBuilder()
-        let client = builder.client as! FakeClient
-        
+
         let function = builder.makeRequest(method: .delete, endpoint: "endpoint", args: (), response: Body<Void>())
         
         let call = function() as! FakeCall<()>
@@ -113,5 +128,11 @@ class BuilderTests: XCTestCase {
             
             expectation.fulfill()
         }
+    }
+    
+    func testDigestAuth() {
+        let builder = FakeBuilder()
+        builder.client.credential = URLCredential(user: "utteacher", password: "demo", persistence: .permanent)
+        
     }
 }
