@@ -8,13 +8,13 @@
 
 import Foundation
 
-fileprivate protocol URLEncodedSerializer_ArrayOrDictionary {}
-extension Array: URLEncodedSerializer_ArrayOrDictionary {}
-extension Dictionary: URLEncodedSerializer_ArrayOrDictionary {}
-
 public class URLEncodedSerializer: Serializer {
+    public init() {
+        
+    }
+    
     public func supports(type: Any.Type, args: [Any], direction: SerializerDirection) -> Bool {
-        return type is URLEncodedSerializer_ArrayOrDictionary.Type && direction == .outbound
+        return type is URLEncodedBody.Type && direction == .outbound
     }
     
     public func makeValue<T>(from clientResponse: ClientResponse, type: T.Type) throws -> T {
@@ -22,20 +22,16 @@ public class URLEncodedSerializer: Serializer {
     }
     
     public func apply<T>(value: T, to request: inout URLRequest) throws {
-        /*
-         let connect = builder.makeRequest(
-         "online/api/v2/app/login",
-         args: Body<URLEncodedBody>(),
-         response: Body<LoginResponse>()
-         )
-         
-         let args = URLEncodedBody(keyAndValuePairs: [
-         ("username", "utteacher"),
-         ("password", "demo")
-         ])
-         connect(args).enqueue { response in
-         
-         }
-         */
+        assert(value is URLEncodedBody)
+        
+        let body = value as! URLEncodedBody
+        
+        var components = URLComponents()
+        components.queryItems = body.values.map { URLQueryItem(name: $0, value: $1) }
+        let string = components.percentEncodedQuery
+        print("string: \(string)")
+        let data = string?.data(using: .utf8)
+        request.httpBody = data
+        request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
     }
 }

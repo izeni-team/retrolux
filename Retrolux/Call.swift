@@ -11,7 +11,7 @@ open class Call<T> {
         
     }
     
-    open func enqueue(callback: @escaping (Response<T>) -> Void) throws {
+    open func enqueue(callback: @escaping (Response<T>) -> Void) {
         fatalError("Unimplemented. Should be overridden.")
     }
     

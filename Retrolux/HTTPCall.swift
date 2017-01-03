@@ -9,7 +9,7 @@
 import Foundation
 
 class HTTPCall<T>: Call<T> {
-    fileprivate var delegatedStart: (@escaping (Response<T>) -> Void) throws -> Void
+    fileprivate var delegatedStart: (@escaping (Response<T>) -> Void) -> Void
     fileprivate var delegatedCancel: () -> Void
     
     init(start: @escaping (@escaping (Response<T>) -> Void) -> Void, cancel: @escaping () -> Void) {
@@ -17,8 +17,8 @@ class HTTPCall<T>: Call<T> {
         self.delegatedCancel = cancel
     }
     
-    override func enqueue(callback: @escaping (Response<T>) -> Void) throws {
-        try delegatedStart(callback)
+    override func enqueue(callback: @escaping (Response<T>) -> Void) {
+        delegatedStart(callback)
     }
     
     override func cancel() {
