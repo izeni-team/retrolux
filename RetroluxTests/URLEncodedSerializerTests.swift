@@ -11,6 +11,7 @@ import XCTest
 import Retrolux
 
 class URLEncodedSerializerTests: XCTestCase {
+    // TODO: Use a fake HTTP client that doesn't actually hit google.com.
     private class URLEncodedBuilder: Builder {
         let baseURL: URL = URL(string: "https://www.google.com/")!
         let client: Client = HTTPClient()
@@ -70,6 +71,8 @@ class URLEncodedSerializerTests: XCTestCase {
             expectation.fulfill()
         }
         
+        // TODO: Use a fake HTTP client that doesn't actually hit google.com.
+        // TODO: Stop waiting 5 seconds for timeout, since that's too much--test shouldn't depend on network.
         self.waitForExpectations(timeout: 5) { (error) in
             if let error = error {
                 XCTFail("\(error)")
