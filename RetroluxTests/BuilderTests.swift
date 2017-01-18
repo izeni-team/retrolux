@@ -179,7 +179,7 @@ class BuilderTests: XCTestCase {
                 return digestHex
             }
             
-            // Algorithm taken from:
+            // Algorithm for RFC 2069 taken from:
             // https://en.wikipedia.org/wiki/Digest_access_authentication
             let username = plist("DigestUsername")
             let realm = plist("DigestRealm")
@@ -212,21 +212,35 @@ class BuilderTests: XCTestCase {
         request(Body(params)).enqueue { (response: Response<Void>) in
             let status = response.raw?.status ?? 0
             XCTAssert(status == 200)
+            print("HTTP \(status)")
             if status != 200 {
-                print("\n--- TEST FAILURE ---")
-                print("HTTP \(status)")
                 if let data = response.raw?.data {
+                    print("\n--- TEST FAILURE ---")
                     let string = String(data: data, encoding: .utf8)!
-                    print("\(string)")
+                    print("1: \(string)")
+                    print("--- TEST FAILURE ---\n")
                 }
-                print("--- TEST FAILURE ---\n")
                 XCTFail("Unexpected status code of \(status)")
+            } else {
+                let pubs = builder.makeRequest(method: .get, endpoint: "online/api/v2/app/publications", args: (), response: Body<Void>())
+                pubs().enqueue { (response: Response<Void>) in
+                    let status2 = response.raw?.status ?? 0
+                    print("HTTP \(status2)")
+                    XCTAssert(status2 == 200)
+                    if status2 != 200 {
+                        if let data = response.raw?.data {
+                            print("\n--- TEST FAILURE ---")
+                            let string = String(data: data, encoding: .utf8)!
+                            print("2: \(string)")
+                            print("--- TEST FAILURE ---\n")
+                        }
+                    }
+                    expectation.fulfill()
+                }
             }
-            
-            expectation.fulfill()
         }
         
-        waitForExpectations(timeout: 2) { (error) in
+        waitForExpectations(timeout: 5) { (error) in
             if let error = error {
                 XCTFail("Failed to wait for expectation: \(error)")
             }

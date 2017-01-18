@@ -29,7 +29,6 @@ public class URLEncodedSerializer: Serializer {
         var components = URLComponents()
         components.queryItems = body.values.map { URLQueryItem(name: $0, value: $1) }
         let string = components.percentEncodedQuery
-        print("string: \(string)")
         let data = string?.data(using: .utf8)
         request.httpBody = data
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
