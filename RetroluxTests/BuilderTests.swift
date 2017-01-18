@@ -96,9 +96,21 @@ fileprivate class RealBuilder: Builder {
     }
 }
 
+func plist(_ key: String) -> String {
+    // http://stackoverflow.com/a/38035382/2406857
+    let bundle = Bundle(for: BuilderTests.self)
+    let path = bundle.path(forResource: "Sensitive", ofType: "plist")!
+    let url = URL(fileURLWithPath: path)
+    let data = try! Data(contentsOf: url)
+    let plist = try! PropertyListSerialization.propertyList(from: data, options: .mutableContainers, format: nil)
+    let dictionary = plist as! [String: Any]
+    return dictionary[key] as! String
+}
+
 class BuilderTests: XCTestCase {
-    func test() {
+    func testStartAndCancelCalls() {
         let builder = FakeBuilder()
+        (builder.client as! FakeClient).fakeResponse = ClientResponse(data: nil, response: nil, error: nil)
 
         let function = builder.makeRequest(method: .delete, endpoint: "endpoint", args: (), response: Body<Void>())
         
@@ -118,22 +130,106 @@ class BuilderTests: XCTestCase {
             oldCancel()
         }
         
-        let expectation = XCTestExpectation()
+        let expectation = self.expectation(description: "Waiting for network callback")
         
         call.enqueue { response in
             XCTAssert(startCalled == 1)
             XCTAssert(cancelCalled == 0)
             
-            // TODO: WIP, test client.
-//            XCTAssert(client.)
+            call.cancel()
+            XCTAssert(cancelCalled == 1)
             
             expectation.fulfill()
+        }
+        
+        waitForExpectations(timeout: 1) { (error) in
+            if let error = error {
+                XCTFail("Failed to wait for expectation: \(error)")
+            }
         }
     }
     
     func testDigestAuth() {
-        let builder = FakeBuilder()
-        builder.client.credential = URLCredential(user: "utteacher", password: "demo", persistence: .permanent)
+        class MyBuilder: Builder {
+            let baseURL = URL(string: plist("URL"))!
+            let client: Client = HTTPClient()
+            let callFactory: CallFactory = HTTPCallFactory()
+            let serializers: [Serializer] = [
+                ReflectionJSONSerializer(),
+                URLEncodedSerializer()
+            ]
+        }
         
+        let builder = MyBuilder()
+        
+        builder.client.interceptor = { request in
+            func md5(_ string: String) -> String {
+                var digest = [UInt8](repeating: 0, count: Int(CC_MD5_DIGEST_LENGTH))
+                
+                let data = string.data(using: .utf8)!
+                _ = data.withUnsafeBytes { bytes in
+                    CC_MD5(bytes, CC_LONG(data.count), &digest)
+                }
+                
+                var digestHex = ""
+                for index in 0..<Int(CC_MD5_DIGEST_LENGTH) {
+                    digestHex += String(format: "%02x", digest[index])
+                }
+                
+                return digestHex
+            }
+            
+            // Algorithm taken from:
+            // https://en.wikipedia.org/wiki/Digest_access_authentication
+            let username = plist("DigestUsername")
+            let realm = plist("DigestRealm")
+            let password = plist("DigestPassword")
+            let ha1 = md5("\(username):\(realm):\(password)")
+            
+            let method = "\(request.httpMethod ?? "")"
+            let digestURI: String = {
+                var url = "/"
+                url += request.url!.absoluteString
+                url = url.replacingOccurrences(of: builder.baseURL.absoluteString, with: "")
+                url = url.removingPercentEncoding!
+                return url
+            }()
+            let ha2 = md5("\(method):\(digestURI)")
+            
+            let nonce = ""
+            let response = md5("\(ha1):\(nonce):\(ha2)")
+            
+            let headerValue = "Digest username=\"\(username)\", realm=\"\(realm)\", nonce=\"\(nonce)\", uri=\"\(digestURI)\", response=\"\(response)\", opaque=\"\""
+            request.addValue(headerValue, forHTTPHeaderField: "Authorization")
+        }
+        
+        let request = builder.makeRequest(method: .post, endpoint: "online/api/v2/app/login", args: Body<URLEncodedBody>(), response: Body<Void>())
+        let expectation = self.expectation(description: "Waiting for network callback")
+        let params = URLEncodedBody(values: [
+            ("username", plist("username")),
+            ("password", plist("password"))
+            ])
+        request(Body(params)).enqueue { (response: Response<Void>) in
+            let status = response.raw?.status ?? 0
+            XCTAssert(status == 200)
+            if status != 200 {
+                print("\n--- TEST FAILURE ---")
+                print("HTTP \(status)")
+                if let data = response.raw?.data {
+                    let string = String(data: data, encoding: .utf8)!
+                    print("\(string)")
+                }
+                print("--- TEST FAILURE ---\n")
+                XCTFail("Unexpected status code of \(status)")
+            }
+            
+            expectation.fulfill()
+        }
+        
+        waitForExpectations(timeout: 2) { (error) in
+            if let error = error {
+                XCTFail("Failed to wait for expectation: \(error)")
+            }
+        }
     }
 }

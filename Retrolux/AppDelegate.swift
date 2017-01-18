@@ -63,7 +63,7 @@ struct InterpretedError {
 extension Response {
     var interpreted: InterpretedResponse<T> {
 //        if let error = self.rawResponse.error {
-            return .failure(error: InterpretedError(response: rawResponse, serializerError: result.error))
+            return .failure(error: InterpretedError(response: raw, serializerError: result.error))
 //        }
 //
 //
@@ -98,6 +98,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
+        
+        return true
+        /*
         let person = Diplomat()
         
         class MyBuilder: Builder {
@@ -213,7 +216,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 //            response: Body<[User]>()
 //        )
         
-        try! deleteUser(Path("asdf")).enqueue { response in
+        deleteUser(Path("asdf")).enqueue { response in
             print(response)
             switch response.interpreted {
             case .success(let value):
@@ -247,7 +250,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
         
-        try! getUsers().enqueue { response in
+        getUsers().enqueue { response in
             switch response.result {
             case .success(let values):
                 print("Got users: \(values.count)")
@@ -262,7 +265,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 email: "bhenderson+rl002@izeni.com",
                 password: "a45d8f47-0e93-42a5-9efe-2ce59001eb97"
             )
-            try! createUser(Body(newUser)).enqueue { createResponse in
+            createUser(Body(newUser)).enqueue { createResponse in
                 switch createResponse.result {
                 case .success(let value):
                     print("New user created")
@@ -303,7 +306,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 password: "a45d8f47-0e93-42a5-9efe-2ce59001eb97"
             )
             
-            try! login(Body(credentials)).enqueue { response in
+            login(Body(credentials)).enqueue { response in
                 switch response.result {
                 case .success(let value):
                     userID = value.id
@@ -318,6 +321,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         
         return true
+ */
     }
 
     func applicationWillResignActive(_ application: UIApplication) {

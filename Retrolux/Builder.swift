@@ -13,7 +13,6 @@ public protocol Builder {
     var client: Client { get }
     var callFactory: CallFactory { get }
     var serializers: [Serializer] { get }
-    func makeRequest<A, T>(method: HTTPMethod, endpoint: String, args: A, response: Body<T>) -> (A) -> Call<T>
 }
 
 extension Builder {
@@ -48,7 +47,7 @@ extension Builder {
                         return
                     }
                     
-                    let url = self.baseURL.appendingPathComponent(endpoint)
+                    let url = URL(string: self.baseURL.absoluteString.removingPercentEncoding! + endpoint)!
                     var request = URLRequest(url: url)
                     request.httpMethod = method.rawValue
                     
@@ -87,11 +86,11 @@ extension Builder {
                                     // This is incorrect usage of Retrolux, hence it is a fatal error.
                                     fatalError("Unsupported argument type when processing request: \(ResponseType.self)")
                                 }
-                                response = Response(request: request, rawResponse: clientResponse, result: result)
+                                response = Response(request: request, raw: clientResponse, result: result)
                             } catch {
                                 print("Error serializing response: \(error)")
                                 result = .failure(error: ErrorResponse(error: error))
-                                response = Response(request: request, rawResponse: clientResponse, result: result)
+                                response = Response(request: request, raw: clientResponse, result: result)
                             }
                             
                             DispatchQueue.main.async {
@@ -101,7 +100,7 @@ extension Builder {
                         task!.resume()
                     } catch {
                         let result = Result<ResponseType>.failure(error: ErrorResponse(error: error))
-                        let response = Response<ResponseType>(request: request, rawResponse: nil, result: result)
+                        let response = Response<ResponseType>(request: request, raw: nil, result: result)
                         DispatchQueue.main.async {
                             callback(response)
                         }

@@ -12,7 +12,6 @@ import Foundation
 public class HTTPClient: NSObject, Client, URLSessionDelegate, URLSessionTaskDelegate {
     public private(set) var session: URLSession!
     public var interceptor: ((inout URLRequest) -> Void)?
-    public var credential: URLCredential?
     
     public override init() {
         super.init()
@@ -27,18 +26,10 @@ public class HTTPClient: NSObject, Client, URLSessionDelegate, URLSessionTaskDel
     {
         var request = inputRequest
         self.interceptor?(&request)
-                
+        
         let task = session.dataTask(with: request, completionHandler: { (data: Data?, response: URLResponse?, error: Error?) in
             callback(ClientResponse(data: data, response: response, error: error))
         }) 
         return HTTPTask(task: task)
-    }
-    
-    public func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        if let credential = self.credential {
-            completionHandler(.useCredential, credential)
-        } else {
-            completionHandler(.performDefaultHandling, nil)
-        }
     }
 }

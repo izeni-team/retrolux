@@ -9,11 +9,17 @@
 import Foundation
 
 public struct ClientResponse {
-    let data: Data?
-    let response: URLResponse?
-    let error: Error?
+    public let data: Data?
+    public let response: URLResponse?
+    public let error: Error?
     
-    var status: Int? {
+    public var status: Int? {
         return (response as? HTTPURLResponse)?.statusCode
+    }
+    
+    public init(data: Data?, response: URLResponse?, error: Error?) {
+        self.data = data
+        self.response = response
+        self.error = error
     }
 }
