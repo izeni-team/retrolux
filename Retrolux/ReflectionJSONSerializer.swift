@@ -31,11 +31,13 @@ public class ReflectionJSONSerializer: Serializer {
     }
     
     public func supports(inboundType: Any.Type) -> Bool {
-        return inboundType is Reflectable.Type || (inboundType as? GetTypeFromArray.Type)?.getReflectableType() != nil
+        let supported = inboundType is Reflectable.Type || (inboundType as? GetTypeFromArray.Type)?.getReflectableType() != nil
+        print("inbound type \(inboundType) is supported? \(supported)")
+        return supported
     }
     
-    public func supports(outbound: Any) -> Bool {
-        return supports(inboundType: type(of: outbound))
+    public func supports(outbound: [Any]) -> Bool {
+        return outbound.filter { supports(inboundType: type(of: $0)) }.count == 1
     }
     
     public func makeValue<T>(from clientResponse: ClientResponse, type: T.Type) throws -> T {
@@ -61,7 +63,9 @@ public class ReflectionJSONSerializer: Serializer {
         }
     }
     
-    public func apply(_ arg: Any, to request: inout URLRequest) throws {
+    public func apply(arguments: [Any], to request: inout URLRequest) throws {
+        let arg = arguments.first!
+        
         if let reflectable = arg as? Reflectable {
             let dictionary = try Reflector().convertToDictionary(from: reflectable)
             let data = try JSONSerialization.data(withJSONObject: dictionary, options: [])

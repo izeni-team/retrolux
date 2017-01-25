@@ -41,7 +41,7 @@ class ReflectionJSONSerializerTests: XCTestCase {
             
             var request = makeEmptyURLRequest()
             let originalURL = request.url!
-            try serializer.apply(object, to: &request)
+            try serializer.apply(arguments: [object], to: &request)
             XCTAssert(request.url == originalURL, "URL should not have changed")
             XCTAssert(request.value(forHTTPHeaderField: "Content-Type") == "application/json", "Missing Content-Type header.")
             XCTAssert(request.allHTTPHeaderFields?.count == 1, "Only Content-Type should be set.")
@@ -76,15 +76,13 @@ class ReflectionJSONSerializerTests: XCTestCase {
         
         let serializer = ReflectionJSONSerializer()
         XCTAssert(serializer.supports(inboundType: NotSupported.self) == false)
-        //XCTAssert(serializer.supports(type: NotSupported.self, args: [], direction: .inbound) == false)
-        XCTAssert(serializer.supports(outbound: NotSupported()) == false)
-        //XCTAssert(serializer.supports(type: NotSupported.self, args: [], direction: .outbound) == false)
+        XCTAssert(serializer.supports(outbound: [NotSupported()]) == false)
         
         XCTAssert(serializer.supports(inboundType: Supported.self) == true)
-        XCTAssert(serializer.supports(outbound: Supported()) == true)
+        XCTAssert(serializer.supports(outbound: [Supported()]) == true)
         
         XCTAssert(serializer.supports(inboundType: AlsoSupported.self) == true)
-        XCTAssert(serializer.supports(outbound: AlsoSupported()) == true)
+        XCTAssert(serializer.supports(outbound: [AlsoSupported()]) == true)
     }
     
     func testToJSONError() {
@@ -96,7 +94,7 @@ class ReflectionJSONSerializerTests: XCTestCase {
         var request = makeEmptyURLRequest()
         
         do {
-            try serializer.apply(Invalid(), to: &request)
+            try serializer.apply(arguments: [Invalid()], to: &request)
             XCTFail("Should not have succeeded.")
         } catch ReflectionError.unsupportedPropertyValueType(let property, let valueType, let forClass) {
             XCTAssert(property == "name")
@@ -107,7 +105,7 @@ class ReflectionJSONSerializerTests: XCTestCase {
         }
         
         do {
-            try serializer.apply([Invalid()], to: &request)
+            try serializer.apply(arguments: [Invalid()], to: &request)
             XCTFail("Should not have succeeded.")
         } catch ReflectionError.unsupportedPropertyValueType(let property, let valueType, let forClass) {
             XCTAssert(property == "name")
@@ -211,10 +209,11 @@ class ReflectionJSONSerializerTests: XCTestCase {
         }
         
         do {
-            _ = try serializer.apply([0], to: &request)
+            _ = try serializer.apply(arguments: [[0]], to: &request)
             XCTFail("Should not have succeeded.")
         } catch ReflectionJSONSerializerError.unsupportedType(let type) {
             XCTAssert(type == [Int].self)
+            print("type is: \(type)")
         } catch {
             XCTFail("Unknown error: \(error)")
         }
@@ -231,7 +230,7 @@ class ReflectionJSONSerializerTests: XCTestCase {
         }
         
         do {
-            _ = try serializer.apply(0, to: &request)
+            _ = try serializer.apply(arguments: [0], to: &request)
             XCTFail("Should not have succeeded.")
         } catch ReflectionJSONSerializerError.unsupportedType(let type) {
             XCTAssert(type == Int.self)

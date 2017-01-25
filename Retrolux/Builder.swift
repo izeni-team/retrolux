@@ -55,83 +55,55 @@ extension Builder {
                         return $1
                     }
                     
+                    let wrappedSerializerArgs = mergedArgs.flatMap { $0 as? SerializerArg }
+                    let unwrappedSerializerArgs: [Any] = wrappedSerializerArgs.map {
+                        if let wrapped = $0 as? WrappedSerializerArg {
+                            return wrapped.value
+                        }
+                        return $0
+                    }
+                    if let serializer = self.serializers.first(where: { $0.supports(outbound: unwrappedSerializerArgs) }) {
+                        do {
+                            try serializer.apply(arguments: unwrappedSerializerArgs, to: &request)
+                        } catch {
+                            let result = Result<ResponseType>.failure(error: ErrorResponse(error: error))
+                            let response = Response<ResponseType>(request: request, raw: nil, result: result)
+                            DispatchQueue.main.async {
+                                callback(response)
+                            }
+                        }
+                    }
+                    
+                    // Self applying arguments are always applied last, so as to allow the user to override the serializer if they want.
                     let selfApplyingArgs = mergedArgs.flatMap { $0 as? SelfApplyingArg }
                     for arg in selfApplyingArgs {
                         arg.apply(to: &request)
                     }
                     
-                    let serializerArgs = mergedArgs.flatMap { $0 as? SerializerArg }
-                    let serializer = self.serializers.first {
-                        $0.supports(outbound: serializerArgs)
-                    }
-                    let serializer: Serializer? = self.serializers.first(where: { s in serializerArgs.contains(where: { a in s.supports(outbound: a) }) })
-                    guard  else {
-                        return
-                    }
-                    for arg in serializerArgs {
-                        
-                    }
-                    
-                    do {
-                        
-                        
-                        for (index, (creation, starting)) in serializerArgs.enumerated() {
-                            
-                        }
-                        
-                        for (index, input) in normalizedStartingArgs.enumerated() {
-                            if let arg = arg as? SelfApplyingArg {
-                                arg.apply(to: &request)
-                            } else if let arg = arg as? SerializerArg {
-                                let unwrapped = (arg as? WrappedSerializerArg)?.value ?? arg
-                                
-                                if let serializer = self.serializers.first(where: { $0.supports(outbound: unwrapped) }) {
-                                    try serializer.apply(unwrapped, to: &request, isLast: isLast)
-                                } else {
-                                    // This is incorrect usage of Retrolux, hence it is a fatal error.
-                                    fatalError("No serializer supports the arg: \(arg)")
-                                }
+                    task = self.client.makeAsynchronousRequest(request: request, callback: { (clientResponse) in
+                        let result: Result<ResponseType>
+                        let response: Response<ResponseType>
+                        do {
+                            if ResponseType.self == Void.self {
+                                result = .success(value: () as! ResponseType)
+                            } else if let serializer = self.serializers.first(where: { $0.supports(inboundType: ResponseType.self) }) {
+                                result = .success(value: try serializer.makeValue(from: clientResponse, type: ResponseType.self))
                             } else {
                                 // This is incorrect usage of Retrolux, hence it is a fatal error.
-                                fatalError("Unsupported argument type when sending request: \(arg)")
+                                fatalError("Unsupported argument type when processing request: \(ResponseType.self)")
                             }
+                            response = Response(request: request, raw: clientResponse, result: result)
+                        } catch {
+                            print("Error serializing response: \(error)")
+                            result = .failure(error: ErrorResponse(error: error))
+                            response = Response(request: request, raw: clientResponse, result: result)
                         }
                         
-                        for serializer in self.serializers {
-                            serializer.finished()
-                        }
-                        
-                        task = self.client.makeAsynchronousRequest(request: request, callback: { (clientResponse) in
-                            let result: Result<ResponseType>
-                            let response: Response<ResponseType>
-                            do {
-                                if ResponseType.self == Void.self {
-                                    result = .success(value: () as! ResponseType)
-                                } else if let serializer = self.serializers.first(where: { $0.supports(inboundType: ResponseType.self) }) {
-                                    result = .success(value: try serializer.makeValue(from: clientResponse, type: ResponseType.self))
-                                } else {
-                                    // This is incorrect usage of Retrolux, hence it is a fatal error.
-                                    fatalError("Unsupported argument type when processing request: \(ResponseType.self)")
-                                }
-                                response = Response(request: request, raw: clientResponse, result: result)
-                            } catch {
-                                print("Error serializing response: \(error)")
-                                result = .failure(error: ErrorResponse(error: error))
-                                response = Response(request: request, raw: clientResponse, result: result)
-                            }
-                            
-                            DispatchQueue.main.async {
-                                callback(response)
-                            }
-                        })
-                        task!.resume()
-                    } catch {
-                        let result = Result<ResponseType>.failure(error: ErrorResponse(error: error))
-                        let response = Response<ResponseType>(request: request, raw: nil, result: result)
                         DispatchQueue.main.async {
                             callback(response)
                         }
-                    }
+                    })
+                    task!.resume()
                 }
             }
             
