@@ -8,8 +8,9 @@
 
 import Foundation
 
-public struct Path: AlignedSelfApplyingArg, ExpressibleByStringLiteral {
-    public let value: String
+public struct Path: SelfApplyingArg, MergeableArg, ExpressibleByStringLiteral {
+    private let value: String
+    private var mergeValue: String?
     
     public init(stringLiteral value: String) {
         self.value = value
@@ -27,9 +28,13 @@ public struct Path: AlignedSelfApplyingArg, ExpressibleByStringLiteral {
         self.value = value
     }
     
-    public func apply(to request: inout URLRequest, with alignedArg: Any) {
+    public mutating func merge(with alignedArg: Any) {
+        self.mergeValue = (alignedArg as! Path).value
+    }
+    
+    public func apply(to request: inout URLRequest) {
         // TODO: Don't replace escaped variant. There has to be a better way...
-        let token = "%7B" + (alignedArg as! Path).value + "%7D"
+        let token = "%7B" + mergeValue! + "%7D"
         request.url = URL(string: request.url!.absoluteString.replacingOccurrences(of: token, with: value))!
     }
 }

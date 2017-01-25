@@ -30,8 +30,12 @@ public class ReflectionJSONSerializer: Serializer {
         
     }
     
-    public func supports(type: Any.Type, args: [Any], direction: SerializerDirection) -> Bool {
-        return type is Reflectable.Type || (type as? GetTypeFromArray.Type)?.getReflectableType() != nil
+    public func supports(inboundType: Any.Type) -> Bool {
+        return inboundType is Reflectable.Type || (inboundType as? GetTypeFromArray.Type)?.getReflectableType() != nil
+    }
+    
+    public func supports(outbound: Any) -> Bool {
+        return supports(inboundType: type(of: outbound))
     }
     
     public func makeValue<T>(from clientResponse: ClientResponse, type: T.Type) throws -> T {
@@ -57,19 +61,19 @@ public class ReflectionJSONSerializer: Serializer {
         }
     }
     
-    public func apply<T>(value input: T, to request: inout URLRequest) throws {
-        if let reflectable = input as? Reflectable {
+    public func apply(_ arg: Any, to request: inout URLRequest) throws {
+        if let reflectable = arg as? Reflectable {
             let dictionary = try Reflector().convertToDictionary(from: reflectable)
             let data = try JSONSerialization.data(withJSONObject: dictionary, options: [])
             request.httpBody = data
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        } else if let array = input as? [Reflectable] {
+        } else if let array = arg as? [Reflectable] {
             let dictionaries = try array.map { try Reflector().convertToDictionary(from: $0) }
             let data = try JSONSerialization.data(withJSONObject: dictionaries, options: [])
             request.httpBody = data
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         } else {
-            throw ReflectionJSONSerializerError.unsupportedType(type: T.self)
+            throw ReflectionJSONSerializerError.unsupportedType(type: type(of: arg))
         }
     }
 }

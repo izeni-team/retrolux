@@ -1,5 +1,5 @@
 //
-//  BodyValues.swift
+//  WrappedSerializerArg.swift
 //  Retrolux
 //
 //  Created by Christopher Bryan Henderson on 10/9/16.
@@ -8,7 +8,6 @@
 
 import Foundation
 
-public protocol BodyValues {
-    var type: Any.Type { get }
+public protocol WrappedSerializerArg: SerializerArg {
     var value: Any { get }
 }

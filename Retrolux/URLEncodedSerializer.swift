@@ -13,18 +13,22 @@ public class URLEncodedSerializer: Serializer {
         
     }
     
-    public func supports(type: Any.Type, args: [Any], direction: SerializerDirection) -> Bool {
-        return type is URLEncodedBody.Type && direction == .outbound
+    public func supports(inboundType: Any.Type) -> Bool {
+        return false
+    }
+    
+    public func supports(outbound: Any) -> Bool {
+        return outbound is URLEncodedBody
     }
     
     public func makeValue<T>(from clientResponse: ClientResponse, type: T.Type) throws -> T {
         fatalError("This serializer only supports outbound serialization.")
     }
     
-    public func apply<T>(value: T, to request: inout URLRequest) throws {
-        assert(value is URLEncodedBody)
+    public func apply(_ arg: Any, to request: inout URLRequest) throws {
+        assert(arg is URLEncodedBody)
         
-        let body = value as! URLEncodedBody
+        let body = arg as! URLEncodedBody
         
         var components = URLComponents()
         components.queryItems = body.values.map { URLQueryItem(name: $0, value: $1) }

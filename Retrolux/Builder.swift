@@ -17,15 +17,7 @@ public protocol Builder {
 
 extension Builder {
     public func isArg(arg: Any) -> Bool {
-        if arg is AlignedSelfApplyingArg {
-            return true
-        } else if arg is SelfApplyingArg {
-            return true
-        } else if arg is BodyValues {
-            return true
-        }
-        
-        return false
+        return arg is SelfApplyingArg || arg is SerializerArg
     }
     
     public func normalizeArgs<A>(args: A) -> [Any] {
@@ -51,27 +43,62 @@ extension Builder {
                     var request = URLRequest(url: url)
                     request.httpMethod = method.rawValue
                     
-                    let normalizedCreationArgs = self.normalizeArgs(args: creationArgs) // Args used to create this request
-                    let normalizedStartingArgs = self.normalizeArgs(args: startingArgs) // Args passed in when executing this request
+                    let normalizedCreationArgs: [Any] = self.normalizeArgs(args: creationArgs) // Args used to create this request
+                    let normalizedStartingArgs: [Any] = self.normalizeArgs(args: startingArgs) // Args passed in when executing this request
+                    assert(normalizedCreationArgs.count == normalizedStartingArgs.count)
+                    let mergedArgs: [Any] = zip(normalizedCreationArgs, normalizedStartingArgs).map {
+                        if $1 is MergeableArg {
+                            var mergeable = $1 as! MergeableArg
+                            mergeable.merge(with: $0)
+                            return mergeable
+                        }
+                        return $1
+                    }
+                    
+                    let selfApplyingArgs = mergedArgs.flatMap { $0 as? SelfApplyingArg }
+                    for arg in selfApplyingArgs {
+                        arg.apply(to: &request)
+                    }
+                    
+                    let serializerArgs = mergedArgs.flatMap { $0 as? SerializerArg }
+                    let serializer = self.serializers.first {
+                        $0.supports(outbound: serializerArgs)
+                    }
+                    let serializer: Serializer? = self.serializers.first(where: { s in serializerArgs.contains(where: { a in s.supports(outbound: a) }) })
+                    guard  else {
+                        return
+                    }
+                    for arg in serializerArgs {
+                        
+                    }
                     
                     do {
-                        for (index, arg) in normalizedStartingArgs.enumerated() {
-                            if let arg = arg as? AlignedSelfApplyingArg {
-                                let alignedArg = normalizedCreationArgs[index]
-                                arg.apply(to: &request, with: alignedArg)
-                            } else if let arg = arg as? SelfApplyingArg {
+                        
+                        
+                        for (index, (creation, starting)) in serializerArgs.enumerated() {
+                            
+                        }
+                        
+                        for (index, input) in normalizedStartingArgs.enumerated() {
+                            if let arg = arg as? SelfApplyingArg {
                                 arg.apply(to: &request)
-                            } else if let body = arg as? BodyValues {
-                                if let serializer = self.serializers.first(where: { $0.supports(type: body.type, args: normalizedStartingArgs, direction: .outbound) }) {
-                                    try serializer.apply(value: body.value, to: &request)
+                            } else if let arg = arg as? SerializerArg {
+                                let unwrapped = (arg as? WrappedSerializerArg)?.value ?? arg
+                                
+                                if let serializer = self.serializers.first(where: { $0.supports(outbound: unwrapped) }) {
+                                    try serializer.apply(unwrapped, to: &request, isLast: isLast)
                                 } else {
                                     // This is incorrect usage of Retrolux, hence it is a fatal error.
-                                    fatalError("Unsupported argument type when sending request: \(type(of: body.type))")
+                                    fatalError("No serializer supports the arg: \(arg)")
                                 }
                             } else {
                                 // This is incorrect usage of Retrolux, hence it is a fatal error.
-                                fatalError("Unsupported argument type when sending request: \(type(of: arg))")
+                                fatalError("Unsupported argument type when sending request: \(arg)")
                             }
+                        }
+                        
+                        for serializer in self.serializers {
+                            serializer.finished()
                         }
                         
                         task = self.client.makeAsynchronousRequest(request: request, callback: { (clientResponse) in
@@ -80,7 +107,7 @@ extension Builder {
                             do {
                                 if ResponseType.self == Void.self {
                                     result = .success(value: () as! ResponseType)
-                                } else if let serializer = self.serializers.first(where: { $0.supports(type: ResponseType.self, args: normalizedStartingArgs, direction: .inbound) }) {
+                                } else if let serializer = self.serializers.first(where: { $0.supports(inboundType: ResponseType.self) }) {
                                     result = .success(value: try serializer.makeValue(from: clientResponse, type: ResponseType.self))
                                 } else {
                                     // This is incorrect usage of Retrolux, hence it is a fatal error.

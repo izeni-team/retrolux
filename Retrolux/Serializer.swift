@@ -9,7 +9,8 @@
 import Foundation
 
 public protocol Serializer {
-    func supports(type: Any.Type, args: [Any], direction: SerializerDirection) -> Bool
+    func supports(outbound: [Any]) -> Bool
+    func supports(inboundType: Any.Type) -> Bool
     func makeValue<T>(from clientResponse: ClientResponse, type: T.Type) throws -> T
-    func apply<T>(value: T, to request: inout URLRequest) throws
+    func apply(arguments: [Any], to request: inout URLRequest) throws
 }

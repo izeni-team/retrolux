@@ -8,12 +8,8 @@
 
 import Foundation
 
-public struct Body<T>: BodyValues {
-    public var type: Any.Type {
-        return T.self
-    }
-    
-    fileprivate var _value: T?
+public struct Body<T>: WrappedSerializerArg {
+    private var _value: T?
     public var value: Any {
         return _value!
     }

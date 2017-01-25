@@ -216,7 +216,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 //            response: Body<[User]>()
 //        )
         
-        deleteUser(Path("asdf")).enqueue { response in
+        deleteUser(Path("aow78935y0a33wa-32qa5-32a3d-rwa")).enqueue { response in
             print(response)
             switch response.interpreted {
             case .success(let value):
