@@ -22,7 +22,12 @@ class SearchResult: Reflection {
 }
 
 let builder = RetroluxBuilder(baseURL: URL(string: "http://api.example.com/")!)
-let request = builder.makeRequest(method: .post, endpoint: "some/endpoint/", args: (Query("distance"), Body<SearchRequest>()), response: Body<SearchResponse>())
+let request = builder.makeRequest(
+    method: .post,
+    endpoint: "some/endpoint/",
+    args: (Query("distance"), Body<SearchRequest>()),
+    response: Body<SearchResponse>()
+    )
 
 let searchRequest = SearchRequest()
 searchRequest.latitude = -41
@@ -54,7 +59,12 @@ class User: Reflection {
 }
 
 let builder = RetroluxBuilder(baseURL: URL(string: "http://api.example.com/")!)
-let request = builder.makeRequest(method: .post, endpoint: "api/media/{id}/upload/", args: (Path("id"), Part(name: "image", filename: "image.png", mimeType: "image/png")), response: Body<User>())
+let request = builder.makeRequest(
+    method: .post,
+    endpoint: "api/media/{id}/upload/",
+    args: (Path("id"), Part(name: "image", filename: "image.png", mimeType: "image/png")),
+    response: Body<User>()
+    )
 
 let currentUserId = getCurrentUserId()
 let imageData = UIImagePNGRepresentation(getUserImage())!
