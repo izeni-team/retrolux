@@ -137,4 +137,19 @@ class BuilderTests: XCTestCase {
             }
         }
     }
+    
+    func testURLEscaping() {
+        let builder = RetroluxBuilder(baseURL: URL(string: "http://127.0.0.1/")!)
+        let request = builder.makeRequest(method: .post, endpoint: "some_endpoint/?query=value a", args: (), response: Body<()>())
+        let expectation = self.expectation(description: "Waiting for response")
+        request().enqueue { response in
+            XCTAssert(response.request.url?.absoluteString == "http://127.0.0.1/some_endpoint/%3Fquery=value%20a")
+            expectation.fulfill()
+        }
+        waitForExpectations(timeout: 10) { (error) in
+            if error != nil {
+                XCTFail("Failed with error: \(error)")
+            }
+        }
+    }
 }

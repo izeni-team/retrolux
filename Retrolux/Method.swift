@@ -10,7 +10,7 @@ import Foundation
 
 // This was taken from Alamofire.
 // https://github.com/Alamofire/Alamofire/blob/0ac38d7e312e87aeea608d384e44401f3d8a6b3d/Source/ParameterEncoding.swift
-// 
+
 //
 //  ParameterEncoding.swift
 //

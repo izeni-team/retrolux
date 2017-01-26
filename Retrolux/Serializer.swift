@@ -8,9 +8,14 @@
 
 import Foundation
 
-public protocol Serializer {
+public protocol Serializer {}
+
+public protocol OutboundSerializer: Serializer {
     func supports(outbound: [Any]) -> Bool
+    func apply(arguments: [Any], to request: inout URLRequest) throws
+}
+
+public protocol InboundSerializer: Serializer {
     func supports(inboundType: Any.Type) -> Bool
     func makeValue<T>(from clientResponse: ClientResponse, type: T.Type) throws -> T
-    func apply(arguments: [Any], to request: inout URLRequest) throws
 }

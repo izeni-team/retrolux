@@ -8,21 +8,13 @@
 
 import Foundation
 
-public class URLEncodedSerializer: Serializer {
+public class URLEncodedSerializer: OutboundSerializer {
     public init() {
         
     }
     
-    public func supports(inboundType: Any.Type) -> Bool {
-        return false
-    }
-    
     public func supports(outbound: [Any]) -> Bool {
         return outbound.flatMap { $0 is URLEncodedBody }.count == 1
-    }
-    
-    public func makeValue<T>(from clientResponse: ClientResponse, type: T.Type) throws -> T {
-        fatalError("This serializer only supports outbound serialization.")
     }
     
     public func apply(arguments: [Any], to request: inout URLRequest) throws {

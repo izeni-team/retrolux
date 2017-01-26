@@ -25,7 +25,7 @@ extension Array: GetTypeFromArray {
     }
 }
 
-public class ReflectionJSONSerializer: Serializer {
+public class ReflectionJSONSerializer: OutboundSerializer, InboundSerializer {
     public init() {
         
     }

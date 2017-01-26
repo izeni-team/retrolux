@@ -16,6 +16,14 @@ public protocol Builder {
 }
 
 extension Builder {
+    public var outboundSerializers: [OutboundSerializer] {
+        return serializers.flatMap { $0 as? OutboundSerializer }
+    }
+    
+    public var inboundSerializers: [InboundSerializer] {
+        return serializers.flatMap { $0 as? InboundSerializer }
+    }
+    
     public func isArg(arg: Any) -> Bool {
         return arg is SelfApplyingArg || arg is SerializerArg
     }
@@ -38,8 +46,8 @@ extension Builder {
                     if cancelled {
                         return
                     }
-                    
-                    let url = URL(string: self.baseURL.absoluteString.removingPercentEncoding! + endpoint)!
+                    let url = self.baseURL.appendingPathComponent(endpoint)
+                    print(url)
                     var request = URLRequest(url: url)
                     request.httpMethod = method.rawValue
                     
@@ -62,7 +70,7 @@ extension Builder {
                         }
                         return $0
                     }
-                    if let serializer = self.serializers.first(where: { $0.supports(outbound: unwrappedSerializerArgs) }) {
+                    if let serializer = self.outboundSerializers.first(where: { $0.supports(outbound: unwrappedSerializerArgs) }) {
                         do {
                             try serializer.apply(arguments: unwrappedSerializerArgs, to: &request)
                         } catch {
@@ -74,11 +82,13 @@ extension Builder {
                         }
                     }
                     
-                    // Self applying arguments are always applied last, so as to allow the user to override the serializer if they want.
+                    // Self applying arguments are always applied last, so as to allow the user to override the serializer's output.
                     let selfApplyingArgs = mergedArgs.flatMap { $0 as? SelfApplyingArg }
                     for arg in selfApplyingArgs {
                         arg.apply(to: &request)
                     }
+                    
+                    print(request.url!)
                     
                     task = self.client.makeAsynchronousRequest(request: request, callback: { (clientResponse) in
                         let result: Result<ResponseType>
@@ -86,7 +96,7 @@ extension Builder {
                         do {
                             if ResponseType.self == Void.self {
                                 result = .success(value: () as! ResponseType)
-                            } else if let serializer = self.serializers.first(where: { $0.supports(inboundType: ResponseType.self) }) {
+                            } else if let serializer = self.inboundSerializers.first(where: { $0.supports(inboundType: ResponseType.self) }) {
                                 result = .success(value: try serializer.makeValue(from: clientResponse, type: ResponseType.self))
                             } else {
                                 // This is incorrect usage of Retrolux, hence it is a fatal error.
