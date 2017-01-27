@@ -70,7 +70,6 @@ extension Builder {
                         return
                     }
                     let url = self.baseURL.appendingPathComponent(endpoint)
-                    print(url)
                     var request = URLRequest(url: url)
                     request.httpMethod = method.rawValue
                     
@@ -112,9 +111,7 @@ extension Builder {
                     for arg in selfApplyingArgs {
                         arg.apply(to: &request)
                     }
-                    
-                    print(request.url!)
-                    
+                                        
                     task = self.client.makeAsynchronousRequest(request: request, callback: { (clientResponse) in
                         let result: Result<ResponseType>
                         let response: Response<ResponseType>

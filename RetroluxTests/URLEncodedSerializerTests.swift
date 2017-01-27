@@ -72,7 +72,6 @@ class URLEncodedSerializerTests: XCTestCase {
             ])
         let expectation = self.expectation(description: "request.enqueue")
         request(body).enqueue { (response: Response<Void>) in
-            print(String(data: response.request.httpBody!, encoding: .utf8)!)
             XCTAssert(response.request.httpBody! == "Hello=3&Another=Way&Test=Yay!&3+3%3D=24/4&Another=&=&Misc=!@%23$%25%5E%26*()%3D:/?%20%22'".data(using: .utf8)!)
             XCTAssert(response.request.value(forHTTPHeaderField: "Content-Type") == "application/x-www-form-urlencoded")
             expectation.fulfill()

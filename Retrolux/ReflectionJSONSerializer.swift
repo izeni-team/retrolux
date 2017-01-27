@@ -31,9 +31,7 @@ public class ReflectionJSONSerializer: OutboundSerializer, InboundSerializer {
     }
     
     public func supports(inboundType: Any.Type) -> Bool {
-        let supported = inboundType is Reflectable.Type || (inboundType as? GetTypeFromArray.Type)?.getReflectableType() != nil
-        print("inbound type \(inboundType) is supported? \(supported)")
-        return supported
+        return inboundType is Reflectable.Type || (inboundType as? GetTypeFromArray.Type)?.getReflectableType() != nil
     }
     
     public func supports(outbound: [Any]) -> Bool {

@@ -213,7 +213,6 @@ class ReflectionJSONSerializerTests: XCTestCase {
             XCTFail("Should not have succeeded.")
         } catch ReflectionJSONSerializerError.unsupportedType(let type) {
             XCTAssert(type == [Int].self)
-            print("type is: \(type)")
         } catch {
             XCTFail("Unknown error: \(error)")
         }
