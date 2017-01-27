@@ -15,8 +15,6 @@
 		347814EC1E36AFD6004E47E0 /* DigestAuthTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 347814EB1E36AFD6004E47E0 /* DigestAuthTests.swift */; };
 		3484545C1DB2C37700032ACC /* ReflectionJSONSerializerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3484545B1DB2C37700032ACC /* ReflectionJSONSerializerTests.swift */; };
 		34926EEA1E3023B3009E4E42 /* Sensitive.plist in Resources */ = {isa = PBXBuildFile; fileRef = 34926EE71E3020CE009E4E42 /* Sensitive.plist */; };
-		34AD63961E37E21900DE228C /* MultipartFormData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 347814EF1E36B7D5004E47E0 /* MultipartFormData.swift */; };
-		34AD63971E37E21D00DE228C /* AFError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 347814F11E36B832004E47E0 /* AFError.swift */; };
 		34B0D0161E38097C0036A65E /* SerializerArg.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34B0D0151E38097C0036A65E /* SerializerArg.swift */; };
 		34E21CCD1E1B26F8003294D6 /* URLEncodedBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34E21CCC1E1B26F8003294D6 /* URLEncodedBody.swift */; };
 		34E21CCF1E1B2A20003294D6 /* URLEncodedSerializerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34E21CCE1E1B2A20003294D6 /* URLEncodedSerializerTests.swift */; };
@@ -31,6 +29,8 @@
 		34F027921E3BE954007AA8C9 /* Field.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F027911E3BE954007AA8C9 /* Field.swift */; };
 		34F027941E3BF4B8007AA8C9 /* testmultipleparts.data in Resources */ = {isa = PBXBuildFile; fileRef = 34F027931E3BF4B8007AA8C9 /* testmultipleparts.data */; };
 		34F027961E3BFC79007AA8C9 /* HeaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F027951E3BFC79007AA8C9 /* HeaderTests.swift */; };
+		34F027991E3BFF9E007AA8C9 /* AFError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F027971E3BFF9E007AA8C9 /* AFError.swift */; };
+		34F0279A1E3BFF9E007AA8C9 /* MultipartFormData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F027981E3BFF9E007AA8C9 /* MultipartFormData.swift */; };
 		34F26CA41CFFE8A9008C3D9A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F26CA31CFFE8A9008C3D9A /* AppDelegate.swift */; };
 		34F26CA61CFFE8A9008C3D9A /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F26CA51CFFE8A9008C3D9A /* ViewController.swift */; };
 		34F26CA91CFFE8A9008C3D9A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 34F26CA71CFFE8A9008C3D9A /* Main.storyboard */; };
@@ -89,8 +89,6 @@
 		3424A6EE1E3A962700D2240F /* request.data */ = {isa = PBXFileReference; lastKnownFileType = file; path = request.data; sourceTree = "<group>"; };
 		3472D1C71E0C70E600AE8621 /* URLEncodedSerializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = URLEncodedSerializer.swift; sourceTree = "<group>"; };
 		347814EB1E36AFD6004E47E0 /* DigestAuthTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DigestAuthTests.swift; sourceTree = "<group>"; };
-		347814EF1E36B7D5004E47E0 /* MultipartFormData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = MultipartFormData.swift; path = RetroluxTests/MultipartFormData.swift; sourceTree = SOURCE_ROOT; };
-		347814F11E36B832004E47E0 /* AFError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AFError.swift; path = RetroluxTests/AFError.swift; sourceTree = SOURCE_ROOT; };
 		3484545B1DB2C37700032ACC /* ReflectionJSONSerializerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReflectionJSONSerializerTests.swift; sourceTree = "<group>"; };
 		34926EE61E301255009E4E42 /* RetroluxTests-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "RetroluxTests-Bridging-Header.h"; sourceTree = "<group>"; };
 		34926EE71E3020CE009E4E42 /* Sensitive.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Sensitive.plist; sourceTree = "<group>"; };
@@ -108,6 +106,8 @@
 		34F027911E3BE954007AA8C9 /* Field.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Field.swift; sourceTree = "<group>"; };
 		34F027931E3BF4B8007AA8C9 /* testmultipleparts.data */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = testmultipleparts.data; sourceTree = "<group>"; };
 		34F027951E3BFC79007AA8C9 /* HeaderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HeaderTests.swift; sourceTree = "<group>"; };
+		34F027971E3BFF9E007AA8C9 /* AFError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AFError.swift; sourceTree = "<group>"; };
+		34F027981E3BFF9E007AA8C9 /* MultipartFormData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MultipartFormData.swift; sourceTree = "<group>"; };
 		34F26CA01CFFE8A9008C3D9A /* Retrolux.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Retrolux.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		34F26CA31CFFE8A9008C3D9A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		34F26CA51CFFE8A9008C3D9A /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -203,8 +203,8 @@
 		34E55BED1E3A6BE5000DD128 /* MultipartFormData */ = {
 			isa = PBXGroup;
 			children = (
-				347814EF1E36B7D5004E47E0 /* MultipartFormData.swift */,
-				347814F11E36B832004E47E0 /* AFError.swift */,
+				34F027971E3BFF9E007AA8C9 /* AFError.swift */,
+				34F027981E3BFF9E007AA8C9 /* MultipartFormData.swift */,
 				34E55BFA1E3A7B8B000DD128 /* MultipartFormDataSerializer.swift */,
 				34E55BFC1E3A7BDE000DD128 /* MultipartEncodeable.swift */,
 				34E55BFE1E3A7BF7000DD128 /* Part.swift */,
@@ -428,7 +428,6 @@
 				34F26CA61CFFE8A9008C3D9A /* ViewController.swift in Sources */,
 				49C1925E1DA99B0000823A55 /* CallFactory.swift in Sources */,
 				49C1925C1DA9958F00823A55 /* HTTPCall.swift in Sources */,
-				34AD63961E37E21900DE228C /* MultipartFormData.swift in Sources */,
 				49C192581DA96CE400823A55 /* Builder.swift in Sources */,
 				34F26CA41CFFE8A9008C3D9A /* AppDelegate.swift in Sources */,
 				49DE43441DAAA0C000D41572 /* Body.swift in Sources */,
@@ -439,7 +438,6 @@
 				4990617B1DA9AFE30047F553 /* Serializer.swift in Sources */,
 				34E55BFF1E3A7BF7000DD128 /* Part.swift in Sources */,
 				34E55BFD1E3A7BDE000DD128 /* MultipartEncodeable.swift in Sources */,
-				34AD63971E37E21D00DE228C /* AFError.swift in Sources */,
 				49DE43481DAAA54C00D41572 /* SelfApplyingArg.swift in Sources */,
 				34E55BFB1E3A7B8B000DD128 /* MultipartFormDataSerializer.swift in Sources */,
 				34B0D0161E38097C0036A65E /* SerializerArg.swift in Sources */,
@@ -450,7 +448,9 @@
 				34E5F3021DFF89B20014537C /* ClientResponse.swift in Sources */,
 				4999F9081DA8CF6800E4C556 /* HTTPTask.swift in Sources */,
 				4990617F1DA9B39F0047F553 /* ReflectionJSONSerializer.swift in Sources */,
+				34F027991E3BFF9E007AA8C9 /* AFError.swift in Sources */,
 				34E55BF51E3A6F55000DD128 /* RetroluxBuilder.swift in Sources */,
+				34F0279A1E3BFF9E007AA8C9 /* MultipartFormData.swift in Sources */,
 				49DE434A1DAAA57C00D41572 /* WrappedSerializerArg.swift in Sources */,
 				49DE434C1DAAD82100D41572 /* Path.swift in Sources */,
 				498BCF661D39FC5E00345E9F /* HTTPClient.swift in Sources */,
