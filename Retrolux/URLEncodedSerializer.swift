@@ -14,16 +14,27 @@ public class URLEncodedSerializer: OutboundSerializer {
     }
     
     public func supports(outbound: [Any]) -> Bool {
-        return outbound.flatMap { $0 is URLEncodedBody }.count == 1
+        if outbound.isEmpty {
+            return false
+        }
+        
+        return !outbound.contains(where: { $0 is Field == false && $0 is URLEncodedBody == false })
     }
     
     public func apply(arguments: [Any], to request: inout URLRequest) throws {
-        assert(arguments.count == 1)
-        
-        let body = arguments.first as! URLEncodedBody
+        var items: [URLQueryItem] = []
+        for arg in arguments {
+            if let body = arg as? URLEncodedBody {
+                items.append(contentsOf: body.values.map { URLQueryItem(name: $0, value: $1) })
+            } else if let field = arg as? Field {
+                items.append(URLQueryItem(name: field.key, value: field.value))
+            } else {
+                fatalError("Unknown/unsupported type \(type(of: arg))")
+            }
+        }
         
         var components = URLComponents()
-        components.queryItems = body.values.map { URLQueryItem(name: $0, value: $1) }
+        components.queryItems = items
         let string = components.percentEncodedQuery
         let data = string?.data(using: .utf8)
         request.httpBody = data

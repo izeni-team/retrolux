@@ -13,7 +13,7 @@ import Retrolux
 class QueryTests: XCTestCase {
     func testSingleQuery() {
         let builder = RetroluxBuilder(baseURL: URL(string: "http://127.0.0.1/")!)
-        let request = builder.makeRequest(method: .post, endpoint: "whatever/", args: Query("name"), response: Body<Void>())
+        let request = builder.makeRequest(method: .post, endpoint: "whatever/", args: Query("name"), response: Void.self)
         
         let expectation = self.expectation(description: "Waiting for response")
         
@@ -31,7 +31,7 @@ class QueryTests: XCTestCase {
     
     func testMultipleQueries() {
         let builder = RetroluxBuilder(baseURL: URL(string: "http://127.0.0.1/")!)
-        let request = builder.makeRequest(method: .get, endpoint: "whatever/", args: (Query("name"), Query("last")), response: Body<Void>())
+        let request = builder.makeRequest(method: .get, endpoint: "whatever/", args: (Query("name"), Query("last")), response: Void.self)
         
         let expectation = self.expectation(description: "Waiting for response")
         

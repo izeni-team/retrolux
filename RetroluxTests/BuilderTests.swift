@@ -101,7 +101,7 @@ class BuilderTests: XCTestCase {
         let builder = FakeBuilder()
         (builder.client as! FakeClient).fakeResponse = ClientResponse(data: nil, response: nil, error: nil)
 
-        let function = builder.makeRequest(method: .delete, endpoint: "endpoint", args: (), response: Body<Void>())
+        let function = builder.makeRequest(method: .delete, endpoint: "endpoint", args: (), response: Void.self)
         
         let call = function() as! FakeCall<()>
         
@@ -140,7 +140,7 @@ class BuilderTests: XCTestCase {
     
     func testURLEscaping() {
         let builder = RetroluxBuilder(baseURL: URL(string: "http://127.0.0.1/")!)
-        let request = builder.makeRequest(method: .post, endpoint: "some_endpoint/?query=value a", args: (), response: Body<()>())
+        let request = builder.makeRequest(method: .post, endpoint: "some_endpoint/?query=value a", args: (), response: Void.self)
         let expectation = self.expectation(description: "Waiting for response")
         request().enqueue { response in
             XCTAssert(response.request.url?.absoluteString == "http://127.0.0.1/some_endpoint/%3Fquery=value%20a")

@@ -20,7 +20,8 @@ public class RetroluxBuilder: Builder {
         self.callFactory = HTTPCallFactory()
         self.serializers = [
             ReflectionJSONSerializer(),
-            MultipartFormDataSerializer()
+            MultipartFormDataSerializer(),
+            URLEncodedSerializer()
         ]
     }
 }

@@ -15,6 +15,29 @@ public protocol Builder {
     var serializers: [Serializer] { get }
 }
 
+public enum OutboundSerializerType {
+    case auto
+    case urlEncoded
+    case multipart
+    case json
+    case custom(serializer: Any.Type)
+    
+    func isDesired(serializer: Any) -> Bool {
+        switch self {
+        case .auto:
+            return true
+        case .custom(serializer: let type):
+            return type(of: serializer) == type
+        case .json:
+            return serializer is ReflectionJSONSerializer
+        case .multipart:
+            return serializer is MultipartFormDataSerializer
+        case .urlEncoded:
+            return serializer is URLEncodedSerializer
+        }
+    }
+}
+
 extension Builder {
     public var outboundSerializers: [OutboundSerializer] {
         return serializers.flatMap { $0 as? OutboundSerializer }
@@ -36,7 +59,7 @@ extension Builder {
         }
     }
     
-    public func makeRequest<Args, ResponseType>(method: HTTPMethod, endpoint: String, args creationArgs: Args, response: Body<ResponseType>) -> (Args) -> Call<ResponseType> {
+    public func makeRequest<Args, ResponseType>(type: OutboundSerializerType = .auto, method: HTTPMethod, endpoint: String, args creationArgs: Args, response: ResponseType.Type) -> (Args) -> Call<ResponseType> {
         return { startingArgs in
             var task: Task?
             var cancelled = false
@@ -70,7 +93,8 @@ extension Builder {
                         }
                         return $0
                     }
-                    if let serializer = self.outboundSerializers.first(where: { $0.supports(outbound: unwrappedSerializerArgs) }) {
+                    
+                    if !unwrappedSerializerArgs.isEmpty, let serializer = self.outboundSerializers.first(where: { type.isDesired(serializer: $0) && $0.supports(outbound: unwrappedSerializerArgs) }) {
                         do {
                             try serializer.apply(arguments: unwrappedSerializerArgs, to: &request)
                         } catch {
@@ -81,6 +105,7 @@ extension Builder {
                             }
                         }
                     }
+                    
                     
                     // Self applying arguments are always applied last, so as to allow the user to override the serializer's output.
                     let selfApplyingArgs = mergedArgs.flatMap { $0 as? SelfApplyingArg }
