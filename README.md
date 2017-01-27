@@ -1,4 +1,4 @@
-# retrolux
+# Retrolux
 The all in one networking solution for iOS.
 
 Project Goal: Allow developers to describe their API instead of implementing code to consume it, like Square's Retrofit for Android.
@@ -25,14 +25,14 @@ let builder = RetroluxBuilder(baseURL: URL(string: "http://api.example.com/")!)
 let request = builder.makeRequest(
     method: .post,
     endpoint: "some/endpoint/",
-    args: (Query("distance"), Body<SearchRequest>()),
-    response: Body<SearchResponse>()
+    args: (Query("distance"), SearchRequest()),
+    response: SearchResponse.self
     )
 
 let searchRequest = SearchRequest()
 searchRequest.latitude = -41
 searchRequest.longitude = 123
-request((Query("50"), Body(searchRequest))).enqueue { response in
+request((Query("50"), searchRequest)).enqueue { response in
     switch response.result {
     case .success(let searchResponse):
         let titles = searchResponse.results.map { $0.name }
@@ -63,7 +63,7 @@ let request = builder.makeRequest(
     method: .post,
     endpoint: "api/media/{id}/upload/",
     args: (Path("id"), Part(name: "image", filename: "image.png", mimeType: "image/png")),
-    response: Body<User>()
+    response: User.self
     )
 
 let currentUserId = getCurrentUserId()
@@ -75,6 +75,45 @@ request((Path(currentUserId), Part(imageData))).enqueue { response in
         update(with: user)
     case .failure(let error):
         handle(error)
+    }
+}
+```
+
+---
+
+And here's a URL encoded example:
+
+```swift
+class LoginResponse: Reflection {
+    var userId = ""
+}
+
+let builder = RetroluxBuilder(baseURL: URL(string: "http://api.example.com/")!)
+
+struct LoginParams {
+    let username: Field
+    let password: Field
+}
+
+let request = builder.makeRequest(
+    type: .urlEncoded,
+    method: .post,
+    endpoint: "api/login/",
+    args: LoginParams(username: Field("username"), password: Field("password")),
+    response: LoginResponse.self
+    )
+
+let currentUserId = getCurrentUserId()
+let imageData = UIImagePNGRepresentation(getUserImage())!
+
+let params = LoginParams(
+    username: Field("bob"),
+    password: Field("bobbywasawesomeuntilheatecheese")
+}
+request(params).enqueue { response in
+    print("Was successful: \(response.isSuccessful)")
+    if response.isSuccessful {
+        saveUserId(response.body!.userId)
     }
 }
 ```
