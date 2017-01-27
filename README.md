@@ -1,4 +1,4 @@
-# retrolux
+# Retrolux
 The all in one networking solution for iOS.
 
 Project Goal: Allow developers to describe their API instead of implementing code to consume it, like Square's Retrofit for Android.
@@ -78,6 +78,8 @@ request((Path(currentUserId), Part(imageData))).enqueue { response in
     }
 }
 ```
+
+---
 
 And here's a URL encoded example:
 
