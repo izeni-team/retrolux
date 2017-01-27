@@ -83,7 +83,7 @@ request((Path(currentUserId), Part(imageData))).enqueue { response in
 
 And here's a URL encoded example:
 
-```
+```swift
 class LoginResponse: Reflection {
     var userId = ""
 }
