@@ -89,18 +89,28 @@ class LoginResponse: Reflection {
 }
 
 let builder = RetroluxBuilder(baseURL: URL(string: "http://api.example.com/")!)
+
+struct LoginParams {
+    let username: Field
+    let password: Field
+}
+
 let request = builder.makeRequest(
     type: .urlEncoded,
     method: .post,
     endpoint: "api/login/",
-    args: (Field("username"), Field("password")),
+    args: LoginParams(username: Field("username"), password: Field("password")),
     response: LoginResponse.self
     )
 
 let currentUserId = getCurrentUserId()
 let imageData = UIImagePNGRepresentation(getUserImage())!
 
-request((Field("bob"), Field("bobbywasawesomeuntilheatecheese")).enqueue { response in
+let params = LoginParams(
+    username: Field("bob"),
+    password: Field("bobbywasawesomeuntilheatecheese")
+}
+request(params).enqueue { response in
     print("Was successful: \(response.isSuccessful)")
     if response.isSuccessful {
         saveUserId(response.body!.userId)
