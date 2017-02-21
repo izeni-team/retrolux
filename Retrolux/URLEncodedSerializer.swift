@@ -13,21 +13,23 @@ public class URLEncodedSerializer: OutboundSerializer {
         
     }
     
-    public func supports(outbound: [Any]) -> Bool {
+    public func supports(outbound: [BuilderArg]) -> Bool {
         if outbound.isEmpty {
             return false
         }
         
-        return !outbound.contains(where: { $0 is Field == false && $0 is URLEncodedBody == false })
+        return !outbound.contains(where: { $0.type is Field.Type == false && $0.type is URLEncodedBody.Type == false })
     }
     
-    public func apply(arguments: [Any], to request: inout URLRequest) throws {
+    public func apply(arguments: [BuilderArg], to request: inout URLRequest) throws {
         var items: [URLQueryItem] = []
         for arg in arguments {
-            if let body = arg as? URLEncodedBody {
+            if let body = arg.starting as? URLEncodedBody {
                 items.append(contentsOf: body.values.map { URLQueryItem(name: $0, value: $1) })
-            } else if let field = arg as? Field {
-                items.append(URLQueryItem(name: field.key, value: field.value))
+            } else if arg.type is Field.Type {
+                if let creation = arg.creation as? Field, let starting = arg.starting as? Field {
+                    items.append(URLQueryItem(name: creation.value, value: starting.value))
+                }
             } else {
                 fatalError("Unknown/unsupported type \(type(of: arg))")
             }

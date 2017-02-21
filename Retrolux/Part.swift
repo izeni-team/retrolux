@@ -8,7 +8,7 @@
 
 import UIKit
 
-public struct Part: MultipartEncodeable, SerializerArg, MergeableArg {
+public struct Part: MultipartEncodeable, SerializerArg {
     private var mimeType: String?
     private var filename: String?
     private var name: String?
@@ -37,20 +37,15 @@ public struct Part: MultipartEncodeable, SerializerArg, MergeableArg {
         self.data = string.data(using: .utf8)!
     }
     
-    public mutating func merge(with arg: Any) {
-        let other = arg as! Part
-        self.name = other.name
-        self.filename = other.filename
-        self.mimeType = other.mimeType
-    }
-    
-    public func encode(using encoder: MultipartFormData) {
-        if let filename = filename, let mimeType = mimeType {
-            encoder.append(data!, withName: name!, fileName: filename, mimeType: mimeType)
-        } else if let mimeType = mimeType {
-            encoder.append(data!, withName: name!, mimeType: mimeType)
-        } else {
-            encoder.append(data!, withName: name!)
+    public static func encode(with arg: BuilderArg, using encoder: MultipartFormData) {
+        if let creation = arg.creation as? Part, let starting = arg.starting as? Part {
+            if let filename = creation.filename, let mimeType = creation.mimeType {
+                encoder.append(starting.data!, withName: creation.name!, fileName: filename, mimeType: mimeType)
+            } else if let mimeType = creation.mimeType {
+                encoder.append(starting.data!, withName: creation.name!, mimeType: mimeType)
+            } else {
+                encoder.append(starting.data!, withName: creation.name!)
+            }
         }
     }
 }

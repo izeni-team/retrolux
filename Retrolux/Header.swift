@@ -8,19 +8,16 @@
 
 import Foundation
 
-public struct Header: SelfApplyingArg, MergeableArg {
+public struct Header: SelfApplyingArg {
     private var value: String
-    private var mergeValue: String?
     
     public init(_ nameOrValue: String) {
         self.value = nameOrValue
     }
     
-    public mutating func merge(with arg: Any) {
-        self.mergeValue = (arg as! Header).value
-    }
-    
-    public func apply(to request: inout URLRequest) {
-        request.addValue(value, forHTTPHeaderField: mergeValue!)
+    public static func apply(arg: BuilderArg, to request: inout URLRequest) {
+        if let creation = arg.creation as? Header, let starting = arg.starting as? Header {
+            request.addValue(starting.value, forHTTPHeaderField: creation.value)
+        }
     }
 }

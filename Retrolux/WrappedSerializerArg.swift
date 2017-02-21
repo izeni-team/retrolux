@@ -9,5 +9,6 @@
 import Foundation
 
 public protocol WrappedSerializerArg: SerializerArg {
-    var value: Any { get }
+    var value: Any? { get }
+    var type: Any.Type { get }
 }

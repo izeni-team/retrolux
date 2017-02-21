@@ -10,5 +10,5 @@ import Foundation
 
 public protocol SelfApplyingArg {
     // TODO: Make this throw
-    func apply(to request: inout URLRequest)
+    static func apply(arg: BuilderArg, to request: inout URLRequest)
 }

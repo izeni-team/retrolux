@@ -69,4 +69,51 @@ class MultipartFormDataSerializerTests: XCTestCase {
             }
         }
     }
+    
+    func testFieldsAndPartsCombined() {
+        let builder = RetroluxBuilder(baseURL: URL(string: "http://lxer.com/")!)
+        
+        struct RequestData {
+            let firstName: Field
+            let imagePart: Part
+        }
+        
+        let request = builder.makeRequest(
+            method: .post,
+            endpoint: "whatever/",
+            args: RequestData(firstName: Field("first_name"), imagePart: Part(name: "file", filename: "image.png", mimeType: "image/png")),
+            response: Void.self
+        )
+        
+        let expectation = self.expectation(description: "Waiting for response")
+        
+        let image = UIImage(named: "something")!
+        let data = UIImagePNGRepresentation(image)!
+        
+        let requestData = RequestData(
+            firstName: Field("Bob"),
+            imagePart: Part(data)
+        )
+        
+        request(requestData).enqueue { response in
+            let bundle = Bundle(for: type(of: self))
+            let url = bundle.url(forResource: "fieldsandpartscombined", withExtension: "data")!
+            let data = try! Data(contentsOf: url)
+            let asciiExpected = String(data: data, encoding: .ascii)!
+            
+            var asciiRequest = String(data: response.request.httpBody!, encoding: .ascii)!
+            let staticBoundary = "alamofire.boundary.5483ad401099117f"
+            asciiRequest = asciiRequest.replacingOccurrences(of: "alamofire\\.boundary\\.[0-9a-f]{16,16}", with: staticBoundary, options: .regularExpression)
+            
+            XCTAssert(asciiExpected == asciiRequest)
+            XCTAssert(response.request.value(forHTTPHeaderField: "Content-Type")?.hasPrefix("multipart/form-data; boundary=alamofire.boundary.") == true)
+            expectation.fulfill()
+        }
+        
+        waitForExpectations(timeout: 1) { (error) in
+            if error != nil {
+                XCTFail("Failed with error: \(error)")
+            }
+        }
+    }
 }

@@ -152,4 +152,112 @@ class BuilderTests: XCTestCase {
             }
         }
     }
+    
+    func testOptionalArgs() {
+        let builder = RetroluxBuilder(baseURL: URL(string: "http://127.0.0.1/")!)
+        
+        let arg: Path? = Path("id")
+        let request = builder.makeRequest(method: .post, endpoint: "/some_endpoint/{id}/", args: arg, response: Void.self)
+        let expectation = self.expectation(description: "Waiting for response")
+        request(Path("it_worked")).enqueue { response in
+            XCTAssert(response.request.url!.absoluteString.contains("it_worked"))
+            expectation.fulfill()
+        }
+        waitForExpectations(timeout: 1) { (error) in
+            if error != nil {
+                XCTFail("Failed with error: \(error)")
+            }
+        }
+        
+        let arg2: Path? = Path("id")
+        let request2 = builder.makeRequest(method: .post, endpoint: "/some_endpoint/{id}/", args: arg2, response: Void.self)
+        let expectation2 = self.expectation(description: "Waiting for response")
+        request2(nil).enqueue { response in
+            XCTAssert(response.request.url!.absoluteString.removingPercentEncoding!.contains("{id}"))
+            expectation2.fulfill()
+        }
+        waitForExpectations(timeout: 1) { (error) in
+            if error != nil {
+                XCTFail("Failed with error: \(error)")
+            }
+        }
+        
+        struct Args3 {
+            let field: Field?
+        }
+        let args3 = Args3(field: Field("username"))
+        let request3 = builder.makeRequest(method: .post, endpoint: "/some_endpoint/", args: args3, response: Void.self)
+        let expectation3 = self.expectation(description: "Waiting for response")
+        request3(Args3(field: Field("IT_WORKED"))).enqueue { response in
+            let data = response.request.httpBody!
+            let string = String(data: data, encoding: .utf8)!
+            XCTAssert(string.contains("IT_WORKED"))
+            
+            expectation3.fulfill()
+        }
+        waitForExpectations(timeout: 1) { (error) in
+            if error != nil {
+                XCTFail("Failed with error: \(error)")
+            }
+        }
+        
+        struct Args4 {
+            let field: Field?
+        }
+        let args4 = Args4(field: Field("username"))
+        let request4 = builder.makeRequest(method: .post, endpoint: "/some_endpoint/", args: args4, response: Void.self)
+        let expectation4 = self.expectation(description: "Waiting for response")
+        request4(Args4(field: nil)).enqueue { response in
+            XCTAssert(response.request.httpBody == nil)
+            expectation4.fulfill()
+        }
+        waitForExpectations(timeout: 1) { (error) in
+            if error != nil {
+                XCTFail("Failed with error: \(error)")
+            }
+        }
+        
+        struct Args5 {
+            let field: Field?
+            let field2: Field?
+            let field3: Field
+            let field4: Field?
+        }
+        let args5 = Args5(field: nil, field2: Field("username"), field3: Field("password"), field4: nil)
+        let request5 = builder.makeRequest(method: .post, endpoint: "/some_endpoint/", args: args5, response: Void.self)
+        let expectation5 = self.expectation(description: "Waiting for response")
+        request5(Args5(field: nil, field2: Field("TEST_USERNAME"), field3: Field("TEST_PASSWORD"), field4: nil)).enqueue { response in
+            let data = response.request.httpBody!
+            let string = String(data: data, encoding: .utf8)!
+            XCTAssert(string.contains("TEST_USERNAME") && string.contains("TEST_PASSWORD"))
+            
+            expectation5.fulfill()
+        }
+        waitForExpectations(timeout: 1) { (error) in
+            if error != nil {
+                XCTFail("Failed with error: \(error)")
+            }
+        }
+        
+        let args6: Field? = nil
+        let request6 = builder.makeRequest(
+            method: .post,
+            endpoint: "/some_endpoint/",
+            args: args6,
+            response: Void.self
+        )
+        
+        let expectation6 = self.expectation(description: "Waiting for response")
+        
+        request6(nil).enqueue { response in
+            XCTAssert(response.request.httpBody == nil)
+            
+            expectation6.fulfill()
+        }
+        waitForExpectations(timeout: 1) { (error) in
+            if error != nil {
+                XCTFail("Failed with error: \(error)")
+            }
+        }
+    }
 }

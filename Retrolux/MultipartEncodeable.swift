@@ -9,5 +9,5 @@
 import Foundation
 
 public protocol MultipartEncodeable {
-    func encode(using encoder: MultipartFormData)
+    static func encode(with arg: BuilderArg, using encoder: MultipartFormData)
 }

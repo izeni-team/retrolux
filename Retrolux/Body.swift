@@ -9,16 +9,16 @@
 import Foundation
 
 public struct Body<T>: WrappedSerializerArg {
-    private var _value: T?
-    public var value: Any {
-        return _value!
+    public let value: Any?
+    public var type: Any.Type {
+        return T.self
     }
     
     public init() {
-        
+        self.value = nil
     }
     
     public init(_ value: T) {
-        self._value = value
+        self.value = value
     }
 }

@@ -13,18 +13,24 @@ public class MultipartFormDataSerializer: OutboundSerializer {
         
     }
     
-    public func supports(outbound: [Any]) -> Bool {
-        return !outbound.contains { $0 is MultipartEncodeable == false }
+    public func supports(outbound: [BuilderArg]) -> Bool {
+        return !outbound.contains { $0.type is MultipartEncodeable.Type == false }
     }
     
-    public func apply(arguments: [Any], to request: inout URLRequest) throws {
+    public func apply(arguments: [BuilderArg], to request: inout URLRequest) throws {
         let encoder = MultipartFormData()
-        let encodeables = arguments.map { $0 as! MultipartEncodeable }
-        for encodeable in encodeables {
-            encodeable.encode(using: encoder)
+        
+        for arg in arguments {
+            if let encodeableType = arg.type as? MultipartEncodeable.Type {
+                encodeableType.encode(with: arg, using: encoder)
+            }
         }
-        request.httpBody = try encoder.encode()
-        request.setValue(encoder.contentType, forHTTPHeaderField: "Content-Type")
-        request.setValue("\(encoder.contentLength as UInt64)", forHTTPHeaderField: "Content-Length")
+        
+        let data = try encoder.encode()
+        if data.count > 0 {
+            request.httpBody = data
+            request.setValue(encoder.contentType, forHTTPHeaderField: "Content-Type")
+            request.setValue("\(encoder.contentLength as UInt64)", forHTTPHeaderField: "Content-Length")
+        }
     }
 }

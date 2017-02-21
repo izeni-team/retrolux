@@ -11,8 +11,8 @@ import Foundation
 public protocol Serializer {}
 
 public protocol OutboundSerializer: Serializer {
-    func supports(outbound: [Any]) -> Bool
-    func apply(arguments: [Any], to request: inout URLRequest) throws
+    func supports(outbound: [BuilderArg]) -> Bool
+    func apply(arguments: [BuilderArg], to request: inout URLRequest) throws
 }
 
 public protocol InboundSerializer: Serializer {
