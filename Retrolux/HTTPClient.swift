@@ -20,12 +20,11 @@ public class HTTPClient: NSObject, Client, URLSessionDelegate, URLSessionTaskDel
     }
     
     public func makeAsynchronousRequest(
-        request inputRequest: URLRequest,
+        request: inout URLRequest,
         callback: @escaping (_ response: ClientResponse) -> Void
         ) -> Task
     {
-        var request = inputRequest
-        self.interceptor?(&request)
+        interceptor?(&request)
         
         let task = session.dataTask(with: request, completionHandler: { (data: Data?, response: URLResponse?, error: Error?) in
             callback(ClientResponse(data: data, response: response, error: error))

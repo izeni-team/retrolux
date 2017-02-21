@@ -87,6 +87,7 @@ extension Builder {
                                 DispatchQueue.main.async {
                                     callback(response)
                                 }
+                                return
                             }
                         }
                     }
@@ -98,7 +99,7 @@ extension Builder {
                         }
                     }
 
-                    task = self.client.makeAsynchronousRequest(request: request, callback: { (clientResponse) in
+                    task = self.client.makeAsynchronousRequest(request: &request, callback: { (clientResponse) in
                         let result: Result<ResponseType>
                         let response: Response<ResponseType>
                         do {

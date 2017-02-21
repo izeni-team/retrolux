@@ -33,7 +33,7 @@ fileprivate class FakeClient: Client {
     
     var fakeResponse: ClientResponse!
     
-    func makeAsynchronousRequest(request: URLRequest, callback: @escaping (_ response: ClientResponse) -> Void) -> Task {
+    func makeAsynchronousRequest(request: inout URLRequest, callback: @escaping (_ response: ClientResponse) -> Void) -> Task {
         assert(fakeResponse != nil)
         let task = FakeTask()
         DispatchQueue.main.async {

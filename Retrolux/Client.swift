@@ -10,5 +10,5 @@ import Foundation
 
 public protocol Client: class {
     var interceptor: ((inout URLRequest) -> Void)? { get set }
-    func makeAsynchronousRequest(request: URLRequest, callback: @escaping (_ response: ClientResponse) -> Void) -> Task
+    func makeAsynchronousRequest(request: inout URLRequest, callback: @escaping (_ response: ClientResponse) -> Void) -> Task
 }
