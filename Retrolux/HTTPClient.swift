@@ -11,7 +11,8 @@ import Foundation
 // TODO: Add support for ignoring SSL errors.
 public class HTTPClient: NSObject, Client, URLSessionDelegate, URLSessionTaskDelegate {
     public private(set) var session: URLSession!
-    public var interceptor: ((inout URLRequest) -> Void)?
+    public var requestInterceptor: ((inout URLRequest) -> Void)?
+    public var responseInterceptor: ((inout ClientResponse) -> Void)?
     
     public override init() {
         super.init()
@@ -24,10 +25,12 @@ public class HTTPClient: NSObject, Client, URLSessionDelegate, URLSessionTaskDel
         callback: @escaping (_ response: ClientResponse) -> Void
         ) -> Task
     {
-        interceptor?(&request)
+        requestInterceptor?(&request)
         
         let task = session.dataTask(with: request, completionHandler: { (data: Data?, response: URLResponse?, error: Error?) in
-            callback(ClientResponse(data: data, response: response, error: error))
+            var clientResponse = ClientResponse(data: data, response: response, error: error)
+            self.responseInterceptor?(&clientResponse)
+            callback(clientResponse)
         }) 
         return HTTPTask(task: task)
     }

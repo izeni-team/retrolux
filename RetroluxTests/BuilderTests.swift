@@ -23,11 +23,8 @@ fileprivate class FakeTask: Task {
 }
 
 fileprivate class FakeClient: Client {
-    var interceptor: ((inout URLRequest) -> Void)? {
-        didSet {
-            fatalError("Don't set this--it does nothing.")
-        }
-    }
+    fileprivate var requestInterceptor: ((inout URLRequest) -> Void)?
+    fileprivate var responseInterceptor: ((inout ClientResponse) -> Void)?
     
     var credential: URLCredential?
     
