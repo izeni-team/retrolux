@@ -17,7 +17,7 @@ class MultipartFormDataSerializerTests: XCTestCase {
         
         let expectation = self.expectation(description: "Waiting for response")
         
-        let image = UIImage(named: "something")!
+        let image = Utils.testImage
         let data = UIImagePNGRepresentation(image)!
         
         request(Part(data)).enqueue { response in
@@ -87,7 +87,7 @@ class MultipartFormDataSerializerTests: XCTestCase {
         
         let expectation = self.expectation(description: "Waiting for response")
         
-        let image = UIImage(named: "something")!
+        let image = Utils.testImage
         let data = UIImagePNGRepresentation(image)!
         
         let requestData = RequestData(
