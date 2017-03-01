@@ -533,7 +533,7 @@
 				);
 				INFOPLIST_FILE = Retrolux/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = startstudio.Retrolux;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -562,7 +562,7 @@
 				);
 				INFOPLIST_FILE = Retrolux/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = startstudio.Retrolux;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -712,6 +712,7 @@
 				34B8ED6C1E664A7C00030FAA /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		34B8ED6D1E664A7C00030FAA /* Build configuration list for PBXNativeTarget "RetroluxTests" */ = {
 			isa = XCConfigurationList;
@@ -720,6 +721,7 @@
 				34B8ED6F1E664A7C00030FAA /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		34F26C9B1CFFE8A9008C3D9A /* Build configuration list for PBXProject "Retrolux" */ = {
 			isa = XCConfigurationList;
