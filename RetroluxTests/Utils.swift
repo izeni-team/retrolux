@@ -9,5 +9,5 @@
 import UIKit
 
 struct Utils {
-    static let testImage = UIImage(named: "something", in: Bundle(for: BuilderTests.self), compatibleWith: nil)!
+    static let testImage = UIImage(named: "something.jpg", in: Bundle(for: BuilderTests.self), compatibleWith: nil)!
 }
