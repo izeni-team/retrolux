@@ -30,7 +30,7 @@ extension Builder {
         return serializers.flatMap { $0 as? InboundSerializer }
     }
     
-    private func normalize<T>(arg: T, serializerType: OutboundSerializerType) -> [(serializer: OutboundSerializer?, value: Any?, type: Any.Type)] {
+    private func normalize(arg: Any, serializerType: OutboundSerializerType) -> [(serializer: OutboundSerializer?, value: Any?, type: Any.Type)] {
         if let wrapped = arg as? WrappedSerializerArg {
             if let value = wrapped.value {
                 return normalize(arg: value, serializerType: serializerType)
