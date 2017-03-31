@@ -76,13 +76,16 @@ class ReflectionJSONSerializerTests: XCTestCase {
         
         let serializer = ReflectionJSONSerializer()
         XCTAssert(serializer.supports(inboundType: NotSupported.self) == false)
-        XCTAssert(serializer.supports(outbound: [BuilderArg(type: NotSupported.self, creation: NotSupported(), starting: NotSupported())]) == false)
+        XCTAssert(serializer.supports(outboundType: NotSupported.self) == false)
+        XCTAssert(serializer.validate(outbound: [BuilderArg(type: NotSupported.self, creation: NotSupported(), starting: NotSupported())]) == false)
         
         XCTAssert(serializer.supports(inboundType: Supported.self) == true)
-        XCTAssert(serializer.supports(outbound: [BuilderArg(type: Supported.self, creation: Supported(), starting: Supported())]) == true)
+        XCTAssert(serializer.supports(outboundType: Supported.self) == true)
+        XCTAssert(serializer.validate(outbound: [BuilderArg(type: Supported.self, creation: Supported(), starting: Supported())]) == true)
         
         XCTAssert(serializer.supports(inboundType: AlsoSupported.self) == true)
-        XCTAssert(serializer.supports(outbound: [BuilderArg(type: AlsoSupported.self, creation: AlsoSupported(), starting: AlsoSupported())]) == true)
+        XCTAssert(serializer.supports(outboundType: AlsoSupported.self) == true)
+        XCTAssert(serializer.validate(outbound: [BuilderArg(type: AlsoSupported.self, creation: AlsoSupported(), starting: AlsoSupported())]) == true)
     }
     
     func testToJSONError() {

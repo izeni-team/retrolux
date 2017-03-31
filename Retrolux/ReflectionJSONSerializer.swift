@@ -26,16 +26,22 @@ extension Array: GetTypeFromArray {
 }
 
 public class ReflectionJSONSerializer: OutboundSerializer, InboundSerializer {
+    open let reflector = Reflector.shared
+    
     public init() {
         
     }
     
-    public func supports(inboundType: Any.Type) -> Bool {
-        return inboundType is Reflectable.Type || (inboundType as? GetTypeFromArray.Type)?.getReflectableType() != nil
+    public func supports(outboundType: Any.Type) -> Bool {
+        return outboundType is Reflectable.Type || (outboundType as? GetTypeFromArray.Type)?.getReflectableType() != nil
     }
     
-    public func supports(outbound: [BuilderArg]) -> Bool {
-        return outbound.filter { supports(inboundType: $0.type) }.count == 1
+    public func supports(inboundType: Any.Type) -> Bool {
+        return supports(outboundType: inboundType)
+    }
+    
+    public func validate(outbound: [BuilderArg]) -> Bool {
+        return outbound.filter { supports(outboundType: $0.type) }.count == 1
     }
     
     public func makeValue<T>(from clientResponse: ClientResponse, type: T.Type) throws -> T {
@@ -47,7 +53,7 @@ public class ReflectionJSONSerializer: OutboundSerializer, InboundSerializer {
             guard let dictionary = (try? JSONSerialization.jsonObject(with: data, options: [])) as? [String: Any] else {
                 throw ReflectionJSONSerializerError.invalidJSON
             }
-            return try Reflector().convert(fromDictionary: dictionary, to: reflectable) as! T
+            return try reflector.convert(fromDictionary: dictionary, to: reflectable) as! T
         } else if let array = T.self as? GetTypeFromArray.Type {
             guard let type = array.getReflectableType() else {
                 throw ReflectionJSONSerializerError.unsupportedType(type: T.self)
@@ -55,7 +61,7 @@ public class ReflectionJSONSerializer: OutboundSerializer, InboundSerializer {
             guard let array = (try? JSONSerialization.jsonObject(with: data, options: [])) as? [[String: Any]] else {
                 throw ReflectionJSONSerializerError.invalidJSON
             }
-            return try array.map { try Reflector().convert(fromDictionary: $0, to: type) } as! T
+            return try array.map { try reflector.convert(fromDictionary: $0, to: type) } as! T
         } else {
             throw ReflectionJSONSerializerError.unsupportedType(type: T.self)
         }
@@ -65,12 +71,12 @@ public class ReflectionJSONSerializer: OutboundSerializer, InboundSerializer {
         let arg = arguments.first!
         
         if let reflectable = arg.starting as? Reflectable {
-            let dictionary = try Reflector().convertToDictionary(from: reflectable)
+            let dictionary = try reflector.convertToDictionary(from: reflectable)
             let data = try JSONSerialization.data(withJSONObject: dictionary, options: [])
             request.httpBody = data
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         } else if let array = arg.starting as? [Reflectable] {
-            let dictionaries = try array.map { try Reflector().convertToDictionary(from: $0) }
+            let dictionaries = try array.map { try reflector.convertToDictionary(from: $0) }
             let data = try JSONSerialization.data(withJSONObject: dictionaries, options: [])
             request.httpBody = data
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")

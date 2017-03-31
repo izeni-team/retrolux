@@ -8,7 +8,7 @@
 
 import Foundation
 
-public struct Field: SerializerArg, MultipartEncodeable {
+public struct Field: MultipartEncodeable {
     let value: String
     
     public init(_ keyOrValue: String) {

@@ -8,7 +8,7 @@
 
 import Foundation
 
-public struct URLEncodedBody: SerializerArg {
+public struct URLEncodedBody {
     public let values: [(key: String, value: String)]
     
     public init() {

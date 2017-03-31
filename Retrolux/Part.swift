@@ -8,7 +8,7 @@
 
 import UIKit
 
-public struct Part: MultipartEncodeable, SerializerArg {
+public struct Part: MultipartEncodeable {
     private var mimeType: String?
     private var filename: String?
     private var name: String?

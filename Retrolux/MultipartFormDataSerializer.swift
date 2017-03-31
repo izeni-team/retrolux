@@ -13,8 +13,12 @@ public class MultipartFormDataSerializer: OutboundSerializer {
         
     }
     
-    public func supports(outbound: [BuilderArg]) -> Bool {
-        return !outbound.contains { $0.type is MultipartEncodeable.Type == false }
+    public func supports(outboundType: Any.Type) -> Bool {
+        return outboundType is MultipartEncodeable.Type
+    }
+    
+    public func validate(outbound: [BuilderArg]) -> Bool {
+        return !outbound.contains { !supports(outboundType: $0.type) }
     }
     
     public func apply(arguments: [BuilderArg], to request: inout URLRequest) throws {

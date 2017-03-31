@@ -8,6 +8,12 @@
 
 import Foundation
 
+public enum BuilderError: Error {
+    case unsupportedArgument(BuilderArg)
+    case tooManyMatchingSerializers(serializers: [OutboundSerializer], arguments: [BuilderArg])
+    case validationError(serializer: Serializer, arguments: [BuilderArg])
+}
+
 public protocol Builder {
     var baseURL: URL { get }
     var client: Client { get }
@@ -24,30 +30,31 @@ extension Builder {
         return serializers.flatMap { $0 as? InboundSerializer }
     }
     
-    public func isArg(arg: Any) -> Bool {
-        return arg is SelfApplyingArg || arg is SerializerArg
-    }
-    
-    public func normalize<A>(arg: A) -> [(Any?, Any.Type)] {
+    public func normalize<A>(arg: A, serializerType: OutboundSerializerType) -> [(serializer: OutboundSerializer?, value: Any?, type: Any.Type)] {
         if let wrapped = arg as? WrappedSerializerArg {
             if let value = wrapped.value {
-                return normalize(arg: value)
+                return normalize(arg: value, serializerType: serializerType)
             } else {
-                return [(nil, wrapped.type)]
+                return [(outboundSerializers.first(where: { serializerType.isDesired(serializer: $0) && $0.supports(outboundType: wrapped.type) }), nil, wrapped.type)]
             }
         } else if let opt = arg as? OptionalHelper {
             if let value = opt.value {
-                return normalize(arg: value)
+                return normalize(arg: value, serializerType: serializerType)
             } else {
-                return [(nil, opt.type)]
+                return [(outboundSerializers.first(where: { serializerType.isDesired(serializer: $0) && $0.supports(outboundType: opt.type) }), nil, opt.type)]
             }
-        } else if isArg(arg: arg) {
-            return [(arg, type(of: arg))]
+        } else if arg is SelfApplyingArg {
+            return [(nil, arg, type(of: arg))]
+        } else if let serializer = outboundSerializers.first(where: { serializerType.isDesired(serializer: $0) && $0.supports(outboundType: type(of: arg)) }) {
+            return [(serializer, arg, type(of: arg))]
         } else {
-            return Mirror(reflecting: arg).children.map {
-                let normalized = normalize(arg: $0.value)
-                assert(normalized.count == 1, "Children of arguments may not have more than one child themselves. Depth must not exceed 2.")
-                return normalized.first!
+            let beneath = Mirror(reflecting: arg).children.reduce([]) {
+                $0 + normalize(arg: $1.value, serializerType: serializerType)
+            }
+            if beneath.isEmpty {
+                return [(nil, arg, type(of: arg))]
+            } else {
+                return beneath
             }
         }
     }
@@ -66,39 +73,74 @@ extension Builder {
                     var request = URLRequest(url: url)
                     request.httpMethod = method.rawValue
                     
-                    let normalizedCreationArgs: [(Any?, Any.Type)] = self.normalize(arg: creationArgs) // Args used to create this request
-                    let normalizedStartingArgs: [(Any?, Any.Type)] = self.normalize(arg: startingArgs) // Args passed in when executing this request
+                    let normalizedCreationArgs = self.normalize(arg: creationArgs, serializerType: type) // Args used to create this request
+                    let normalizedStartingArgs = self.normalize(arg: startingArgs, serializerType: type) // Args passed in when executing this request
+                    
                     assert(normalizedCreationArgs.count == normalizedStartingArgs.count)
-                    let builderArgs: [BuilderArg] = zip(normalizedCreationArgs, normalizedStartingArgs).map {
-                        BuilderArg(type: $0.1, creation: $0.0, starting: $1.0)
+                    
+                    var selfApplying: [BuilderArg] = []
+                    
+                    var serializer: OutboundSerializer?
+                    var serializerArgs: [BuilderArg] = []
+                    
+                    let execCallback: (Error) -> Void = { error in
+                        let result = Result<ResponseType>.failure(error: ErrorResponse(error: error))
+                        let response = Response<ResponseType>(request: request, raw: nil, result: result)
+                        DispatchQueue.main.async {
+                            callback(response)
+                        }
                     }
                     
-                    let serializerArgs = builderArgs.filter {
-                        $0.type is SerializerArg.Type
+                    print("creationArgs:", creationArgs)
+                    
+                    for (creation, starting) in zip(normalizedCreationArgs, normalizedStartingArgs) {
+                        print("creation:", creation.type)
+                        print("starting:", starting.type)
+                        print("creation.type == starting.type:", creation.type == starting.type)
+                        assert((creation.serializer != nil) == (starting.serializer != nil), "Somehow normalize failed to produce the same results on both sides.")
+                        assert(creation.serializer == nil || creation.serializer === starting.serializer)
+                        assert(creation.type == starting.type)
+                        
+                        let arg = BuilderArg(type: creation.type, creation: creation.value, starting: starting.value)
+                        
+                        if creation.type is SelfApplyingArg.Type {
+                            selfApplying.append(arg)
+                        } else if let thisSerializer = creation.serializer {
+                            if serializer == nil {
+                                serializer = thisSerializer
+                            } else if serializer !== thisSerializer {
+                                let serializers = [serializer!, thisSerializer]
+                                execCallback(BuilderError.tooManyMatchingSerializers(serializers: serializers, arguments: serializerArgs + [arg]))
+                                return
+                            } else {
+                                // Serializer already set
+                            }
+                            
+                            serializerArgs.append(arg)
+                        } else {
+                            execCallback(BuilderError.unsupportedArgument(arg))
+                            return
+                        }
                     }
                     
-                    if !serializerArgs.isEmpty {
-                        if let serializer = self.outboundSerializers.first(where: { type.isDesired(serializer: $0) && $0.supports(outbound: serializerArgs) }) {
-                            do {
-                                try serializer.apply(arguments: serializerArgs, to: &request)
-                            } catch {
-                                let result = Result<ResponseType>.failure(error: ErrorResponse(error: error))
-                                let response = Response<ResponseType>(request: request, raw: nil, result: result)
-                                DispatchQueue.main.async {
-                                    callback(response)
-                                }
+                    do {
+                        if let serializer = serializer {
+                            if !serializer.validate(outbound: serializerArgs) {
+                                execCallback(BuilderError.validationError(serializer: serializer, arguments: serializerArgs))
                                 return
                             }
+                            try serializer.apply(arguments: serializerArgs, to: &request)
                         }
+                    } catch {
+                        execCallback(error)
+                        return
                     }
                     
-                    // Self applying arguments are always applied last, so as to allow the user to override the serializer's output.
-                    for arg in builderArgs {
-                        if let selfApplying = arg.type as? SelfApplyingArg.Type {
-                            selfApplying.apply(arg: arg, to: &request)
-                        }
+                    for arg in selfApplying {
+                        let type = arg.type as! SelfApplyingArg.Type
+                        type.apply(arg: arg, to: &request)
                     }
-
+                    
                     task = self.client.makeAsynchronousRequest(request: &request, callback: { (clientResponse) in
                         let result: Result<ResponseType>
                         let response: Response<ResponseType>

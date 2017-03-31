@@ -13,12 +13,16 @@ public class URLEncodedSerializer: OutboundSerializer {
         
     }
     
-    public func supports(outbound: [BuilderArg]) -> Bool {
+    public func supports(outboundType: Any.Type) -> Bool {
+        return outboundType is Field.Type || outboundType is URLEncodedBody.Type
+    }
+    
+    public func validate(outbound: [BuilderArg]) -> Bool {
         if outbound.isEmpty {
             return false
         }
         
-        return !outbound.contains(where: { $0.type is Field.Type == false && $0.type is URLEncodedBody.Type == false })
+        return !outbound.contains { !supports(outboundType: $0.type) }
     }
     
     public func apply(arguments: [BuilderArg], to request: inout URLRequest) throws {

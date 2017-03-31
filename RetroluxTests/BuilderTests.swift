@@ -8,6 +8,7 @@
 
 import XCTest
 import Retrolux
+import RetroluxReflector
 
 fileprivate class FakeTask: Task {
     var cancelled = false
@@ -90,6 +91,22 @@ fileprivate class RealBuilder: Builder {
         self.client = HTTPClient()
         self.callFactory = HTTPCallFactory()
         self.serializers = [ReflectionJSONSerializer()]
+    }
+}
+
+fileprivate class GreedyOutbound<T>: OutboundSerializer {
+    var fail = false
+    
+    fileprivate func supports(outboundType: Any.Type) -> Bool {
+        return outboundType is T.Type || T.self == Any.self
+    }
+    
+    fileprivate func validate(outbound: [BuilderArg]) -> Bool {
+        return !fail
+    }
+    
+    fileprivate func apply(arguments: [BuilderArg], to request: inout URLRequest) throws {
+        
     }
 }
 
@@ -250,6 +267,132 @@ class BuilderTests: XCTestCase {
             XCTAssert(response.request.httpBody == nil)
             
             expectation6.fulfill()
+        }
+        waitForExpectations(timeout: 1) { (error) in
+            if error != nil {
+                XCTFail("Failed with error: \(error)")
+            }
+        }
+    }
+    
+    func testDepthRecursion1() {
+        @objc(Person)
+        class Person: Reflection {
+            var name = ""
+        }
+        
+        let expectation = self.expectation(description: "Waiting for response")
+        
+        let builder = RetroluxBuilder(baseURL: URL(string: "http://127.0.0.1/")!)
+        let call = builder.makeRequest(method: .post, endpoint: "login", args: (Person()), response: Void.self)
+        call((Person())).enqueue { response in
+            XCTAssert(response.request.httpBody! == "{\"name\":\"\"}".data(using: .utf8)!)
+            expectation.fulfill()
+        }
+        waitForExpectations(timeout: 1) { (error) in
+            if error != nil {
+                XCTFail("Failed with error: \(error)")
+            }
+        }
+    }
+    
+    func testTooManyMatchingSerializers() {
+        let expectation = self.expectation(description: "Waiting for response")
+        
+        let builder = RetroluxBuilder(baseURL: URL(string: "http://127.0.0.1/")!)
+        builder.serializers = [GreedyOutbound<Int>(), GreedyOutbound<String>()]
+        let function = builder.makeRequest(method: .post, endpoint: "whatever", args: (Int(), String()), response: Void.self)
+        function((3, "a")).enqueue { response in
+            if let error = response.result.error, case BuilderError.tooManyMatchingSerializers(serializers: let serializers, arguments: let arguments) = error {
+                XCTAssert(serializers.first === builder.serializers.first! && serializers.last === builder.serializers.last!)
+                XCTAssert(arguments.first?.creation as? Int == Int())
+                XCTAssert(arguments.last?.creation as? String == String())
+                XCTAssert(arguments.first?.starting as? Int == 3)
+                XCTAssert(arguments.last?.starting as? String == "a")
+            } else {
+                XCTFail("Expected to fail with too many matching serializers.")
+            }
+            expectation.fulfill()
+        }
+        waitForExpectations(timeout: 1) { (error) in
+            if error != nil {
+                XCTFail("Failed with error: \(error)")
+            }
+        }
+    }
+    
+    func testUnsupportedArgument() {
+        let expectation = self.expectation(description: "Waiting for response")
+        
+        let builder = RetroluxBuilder(baseURL: URL(string: "http://127.0.0.1/")!)
+        builder.serializers = [GreedyOutbound<Int>()]
+        let function = builder.makeRequest(method: .post, endpoint: "whateverz", args: String(), response: Void.self)
+        function("a").enqueue { response in
+            if let error = response.result.error, case BuilderError.unsupportedArgument(let arg) = error {
+                print(arg)
+                XCTAssert(arg.type == String.self)
+                XCTAssert(arg.creation as? String == "")
+                XCTAssert(arg.starting as? String == "a")
+            } else {
+                XCTFail("Expected to fail.")
+            }
+            expectation.fulfill()
+        }
+        waitForExpectations(timeout: 1) { (error) in
+            if error != nil {
+                XCTFail("Failed with error: \(error)")
+            }
+        }
+    }
+    
+    func testNestedUnsupportedArgument() {
+        let expectation = self.expectation(description: "Waiting for response")
+        
+        struct Container {
+            let object = NSObject()
+            let arg = String()
+            let another = Int()
+        }
+        
+        let builder = RetroluxBuilder(baseURL: URL(string: "http://127.0.0.1/")!)
+        builder.serializers = [GreedyOutbound<Int>()]
+        let function = builder.makeRequest(method: .post, endpoint: "whateverz", args: Container(), response: Void.self)
+        function(Container()).enqueue { response in
+            if let error = response.result.error, case BuilderError.unsupportedArgument(let arg) = error {
+                print(arg)
+                XCTAssert(arg.type == NSObject.self)
+                XCTAssert(arg.creation is NSObject)
+                XCTAssert(arg.starting is NSObject)
+            } else {
+                XCTFail("Expected to fail.")
+            }
+            expectation.fulfill()
+        }
+        waitForExpectations(timeout: 1) { (error) in
+            if error != nil {
+                XCTFail("Failed with error: \(error)")
+            }
+        }
+    }
+    
+    func testOutboundSerializerValidationError() {
+        let expectation = self.expectation(description: "Waiting for response")
+        
+        let builder = RetroluxBuilder(baseURL: URL(string: "http://127.0.0.1/")!)
+        let serializer = GreedyOutbound<Int>()
+        serializer.fail = true
+        builder.serializers = [serializer]
+        let function = builder.makeRequest(method: .post, endpoint: "whateverz", args: Int(), response: Void.self)
+        function(3).enqueue { response in
+            if let error = response.result.error, case BuilderError.validationError(serializer: let s, arguments: let args) = error {
+                XCTAssert(s === serializer)
+                XCTAssert(args.count == 1)
+                XCTAssert(args.first?.creation as? Int == 0)
+                XCTAssert(args.first?.starting as? Int == 3)
+            } else {
+                XCTFail("Expected to fail.")
+            }
+            expectation.fulfill()
         }
         waitForExpectations(timeout: 1) { (error) in
             if error != nil {

@@ -28,7 +28,6 @@
 		34B8ED811E664B7700030FAA /* ClientResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34E5F3011DFF89B20014537C /* ClientResponse.swift */; };
 		34B8ED821E664B7700030FAA /* SelfApplyingArg.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49DE43471DAAA54C00D41572 /* SelfApplyingArg.swift */; };
 		34B8ED831E664B7700030FAA /* Serializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4990617A1DA9AFE30047F553 /* Serializer.swift */; };
-		34B8ED841E664B7700030FAA /* SerializerArg.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34B0D0151E38097C0036A65E /* SerializerArg.swift */; };
 		34B8ED851E664B7700030FAA /* Task.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498BCF611D39F9B100345E9F /* Task.swift */; };
 		34B8ED861E664B7700030FAA /* WrappedSerializerArg.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49DE43491DAAA57C00D41572 /* WrappedSerializerArg.swift */; };
 		34B8ED871E664B7B00030FAA /* Builder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49C192571DA96CE400823A55 /* Builder.swift */; };
@@ -110,7 +109,6 @@
 		3484545B1DB2C37700032ACC /* ReflectionJSONSerializerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReflectionJSONSerializerTests.swift; sourceTree = "<group>"; };
 		34926EE61E301255009E4E42 /* RetroluxTests-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "RetroluxTests-Bridging-Header.h"; sourceTree = "<group>"; };
 		34926EE71E3020CE009E4E42 /* Sensitive.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Sensitive.plist; sourceTree = "<group>"; };
-		34B0D0151E38097C0036A65E /* SerializerArg.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SerializerArg.swift; sourceTree = "<group>"; };
 		34B8ED591E664A7C00030FAA /* Retrolux.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Retrolux.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		34B8ED611E664A7C00030FAA /* RetroluxTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RetroluxTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		34B8EDA01E664BB900030FAA /* Checkouts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Checkouts; path = Carthage/Checkouts; sourceTree = "<group>"; };
@@ -321,7 +319,6 @@
 				34E5F3011DFF89B20014537C /* ClientResponse.swift */,
 				49DE43471DAAA54C00D41572 /* SelfApplyingArg.swift */,
 				4990617A1DA9AFE30047F553 /* Serializer.swift */,
-				34B0D0151E38097C0036A65E /* SerializerArg.swift */,
 				498BCF611D39F9B100345E9F /* Task.swift */,
 				49DE43491DAAA57C00D41572 /* WrappedSerializerArg.swift */,
 			);
@@ -470,7 +467,6 @@
 				34B8ED8A1E664B7B00030FAA /* OptionalHelper.swift in Sources */,
 				34B8ED8F1E664B7F00030FAA /* Query.swift in Sources */,
 				34B8ED861E664B7700030FAA /* WrappedSerializerArg.swift in Sources */,
-				34B8ED841E664B7700030FAA /* SerializerArg.swift in Sources */,
 				34B8ED7E1E664B7700030FAA /* Call.swift in Sources */,
 				34B8ED991E664B8700030FAA /* Part.swift in Sources */,
 				34B8ED981E664B8700030FAA /* MultipartEncodeable.swift in Sources */,

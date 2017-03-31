@@ -8,7 +8,7 @@
 
 import Foundation
 
-public protocol WrappedSerializerArg: SerializerArg {
+public protocol WrappedSerializerArg {
     var value: Any? { get }
     var type: Any.Type { get }
 }

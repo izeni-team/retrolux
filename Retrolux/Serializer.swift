@@ -8,10 +8,11 @@
 
 import Foundation
 
-public protocol Serializer {}
+public protocol Serializer: class {}
 
 public protocol OutboundSerializer: Serializer {
-    func supports(outbound: [BuilderArg]) -> Bool
+    func supports(outboundType: Any.Type) -> Bool
+    func validate(outbound: [BuilderArg]) -> Bool
     func apply(arguments: [BuilderArg], to request: inout URLRequest) throws
 }
 
