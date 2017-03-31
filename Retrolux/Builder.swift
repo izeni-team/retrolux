@@ -91,12 +91,7 @@ extension Builder {
                         }
                     }
                     
-                    print("creationArgs:", creationArgs)
-                    
                     for (creation, starting) in zip(normalizedCreationArgs, normalizedStartingArgs) {
-                        print("creation:", creation.type)
-                        print("starting:", starting.type)
-                        print("creation.type == starting.type:", creation.type == starting.type)
                         assert((creation.serializer != nil) == (starting.serializer != nil), "Somehow normalize failed to produce the same results on both sides.")
                         assert(creation.serializer == nil || creation.serializer === starting.serializer)
                         assert(creation.type == starting.type)
