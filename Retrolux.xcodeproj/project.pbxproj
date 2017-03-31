@@ -21,7 +21,6 @@
 		34B8ED7A1E664B3400030FAA /* PathTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34E55BF81E3A7476000DD128 /* PathTests.swift */; };
 		34B8ED7B1E664B3600030FAA /* MultipartFormDataSerializerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3424A6E81E3A7EE200D2240F /* MultipartFormDataSerializerTests.swift */; };
 		34B8ED7C1E664B3800030FAA /* HeaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F027951E3BFC79007AA8C9 /* HeaderTests.swift */; };
-		34B8ED7D1E664B5E00030FAA /* RetroluxReflector.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 497131A81DB87507007AF60E /* RetroluxReflector.framework */; };
 		34B8ED7E1E664B7700030FAA /* Call.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4999F8FA1DA8CD5B00E4C556 /* Call.swift */; };
 		34B8ED7F1E664B7700030FAA /* CallFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49C1925D1DA99B0000823A55 /* CallFactory.swift */; };
 		34B8ED801E664B7700030FAA /* Client.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4999F8FD1DA8CD7C00E4C556 /* Client.swift */; };
@@ -54,12 +53,23 @@
 		34B8ED9C1E664B8E00030FAA /* URLEncodedBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34E21CCC1E1B26F8003294D6 /* URLEncodedBody.swift */; };
 		34B8ED9D1E664B8E00030FAA /* Field.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F027911E3BE954007AA8C9 /* Field.swift */; };
 		34B8ED9E1E664B9000030FAA /* RetroluxBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34E55BF41E3A6F55000DD128 /* RetroluxBuilder.swift */; };
-		34B8EDA41E664BC400030FAA /* RetroluxReflector.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 497131A81DB87507007AF60E /* RetroluxReflector.framework */; };
-		34B8EDA61E664D5700030FAA /* RetroluxReflector.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 497131A81DB87507007AF60E /* RetroluxReflector.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		34B8EDA71E664D5700030FAA /* Retrolux.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34B8ED591E664A7C00030FAA /* Retrolux.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		34B8EDAC1E664F2200030FAA /* something.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 34B8EDAB1E664F2200030FAA /* something.jpg */; };
 		34B8EDAF1E664FF300030FAA /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34B8EDAE1E664FF300030FAA /* Utils.swift */; };
-		34B8EDB11E66509F00030FAA /* RetroluxReflector.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 497131A81DB87507007AF60E /* RetroluxReflector.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		34F6F04E1E8F0829002BA263 /* Reflectable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F6F0471E8F0829002BA263 /* Reflectable.swift */; };
+		34F6F04F1E8F0829002BA263 /* Reflector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F6F0481E8F0829002BA263 /* Reflector.swift */; };
+		34F6F0501E8F0829002BA263 /* ReflectableTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F6F0491E8F0829002BA263 /* ReflectableTransformer.swift */; };
+		34F6F0511E8F0829002BA263 /* ValueTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F6F04A1E8F0829002BA263 /* ValueTransformer.swift */; };
+		34F6F0521E8F0829002BA263 /* Reflection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F6F04B1E8F0829002BA263 /* Reflection.swift */; };
+		34F6F0531E8F0829002BA263 /* Property.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F6F04C1E8F0829002BA263 /* Property.swift */; };
+		34F6F0541E8F0829002BA263 /* PropertyType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F6F04D1E8F0829002BA263 /* PropertyType.swift */; };
+		34F6F05D1E8F0856002BA263 /* ReflectionErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F6F0561E8F0856002BA263 /* ReflectionErrorTests.swift */; };
+		34F6F05E1E8F0856002BA263 /* PerformanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F6F0571E8F0856002BA263 /* PerformanceTests.swift */; };
+		34F6F05F1E8F0856002BA263 /* ReflectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F6F0581E8F0856002BA263 /* ReflectionTests.swift */; };
+		34F6F0601E8F0856002BA263 /* ReflectorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F6F0591E8F0856002BA263 /* ReflectorTests.swift */; };
+		34F6F0611E8F0856002BA263 /* ValueTransformerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F6F05A1E8F0856002BA263 /* ValueTransformerTests.swift */; };
+		34F6F0621E8F0856002BA263 /* PropertyTypeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F6F05B1E8F0856002BA263 /* PropertyTypeTests.swift */; };
+		34F6F0631E8F0856002BA263 /* DateTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F6F05C1E8F0856002BA263 /* DateTransformer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -79,7 +89,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				34B8EDA61E664D5700030FAA /* RetroluxReflector.framework in CopyFiles */,
 				34B8EDA71E664D5700030FAA /* Retrolux.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -90,7 +99,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				34B8EDB11E66509F00030FAA /* RetroluxReflector.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -131,7 +139,20 @@
 		34F027971E3BFF9E007AA8C9 /* AFError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AFError.swift; sourceTree = "<group>"; };
 		34F027981E3BFF9E007AA8C9 /* MultipartFormData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MultipartFormData.swift; sourceTree = "<group>"; };
 		34F26CAF1CFFE8A9008C3D9A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		497131A81DB87507007AF60E /* RetroluxReflector.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RetroluxReflector.framework; path = Carthage/Build/iOS/RetroluxReflector.framework; sourceTree = "<group>"; };
+		34F6F0471E8F0829002BA263 /* Reflectable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Reflectable.swift; sourceTree = "<group>"; };
+		34F6F0481E8F0829002BA263 /* Reflector.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Reflector.swift; sourceTree = "<group>"; };
+		34F6F0491E8F0829002BA263 /* ReflectableTransformer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReflectableTransformer.swift; sourceTree = "<group>"; };
+		34F6F04A1E8F0829002BA263 /* ValueTransformer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ValueTransformer.swift; sourceTree = "<group>"; };
+		34F6F04B1E8F0829002BA263 /* Reflection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Reflection.swift; sourceTree = "<group>"; };
+		34F6F04C1E8F0829002BA263 /* Property.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Property.swift; sourceTree = "<group>"; };
+		34F6F04D1E8F0829002BA263 /* PropertyType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PropertyType.swift; sourceTree = "<group>"; };
+		34F6F0561E8F0856002BA263 /* ReflectionErrorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReflectionErrorTests.swift; sourceTree = "<group>"; };
+		34F6F0571E8F0856002BA263 /* PerformanceTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PerformanceTests.swift; sourceTree = "<group>"; };
+		34F6F0581E8F0856002BA263 /* ReflectionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReflectionTests.swift; sourceTree = "<group>"; };
+		34F6F0591E8F0856002BA263 /* ReflectorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReflectorTests.swift; sourceTree = "<group>"; };
+		34F6F05A1E8F0856002BA263 /* ValueTransformerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ValueTransformerTests.swift; sourceTree = "<group>"; };
+		34F6F05B1E8F0856002BA263 /* PropertyTypeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PropertyTypeTests.swift; sourceTree = "<group>"; };
+		34F6F05C1E8F0856002BA263 /* DateTransformer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DateTransformer.swift; sourceTree = "<group>"; };
 		4978AA8D1D35A11900E1F1A5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		498BCF611D39F9B100345E9F /* Task.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Task.swift; sourceTree = "<group>"; };
 		498BCF651D39FC5E00345E9F /* HTTPClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HTTPClient.swift; sourceTree = "<group>"; };
@@ -158,7 +179,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				34B8EDA41E664BC400030FAA /* RetroluxReflector.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -166,7 +186,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				34B8ED7D1E664B5E00030FAA /* RetroluxReflector.framework in Frameworks */,
 				34B8ED621E664A7C00030FAA /* Retrolux.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -260,7 +279,6 @@
 		34F26C971CFFE8A9008C3D9A = {
 			isa = PBXGroup;
 			children = (
-				497131A81DB87507007AF60E /* RetroluxReflector.framework */,
 				34F26CA21CFFE8A9008C3D9A /* Retrolux */,
 				4978AA8A1D35A11900E1F1A5 /* RetroluxTests */,
 				34F26CA11CFFE8A9008C3D9A /* Products */,
@@ -287,9 +305,38 @@
 			path = Retrolux;
 			sourceTree = "<group>";
 		};
+		34F6F0461E8F0801002BA263 /* Reflector */ = {
+			isa = PBXGroup;
+			children = (
+				34F6F0471E8F0829002BA263 /* Reflectable.swift */,
+				34F6F0481E8F0829002BA263 /* Reflector.swift */,
+				34F6F0491E8F0829002BA263 /* ReflectableTransformer.swift */,
+				34F6F04A1E8F0829002BA263 /* ValueTransformer.swift */,
+				34F6F04B1E8F0829002BA263 /* Reflection.swift */,
+				34F6F04C1E8F0829002BA263 /* Property.swift */,
+				34F6F04D1E8F0829002BA263 /* PropertyType.swift */,
+			);
+			name = Reflector;
+			sourceTree = "<group>";
+		};
+		34F6F0551E8F084C002BA263 /* ReflectorTests */ = {
+			isa = PBXGroup;
+			children = (
+				34F6F0561E8F0856002BA263 /* ReflectionErrorTests.swift */,
+				34F6F0571E8F0856002BA263 /* PerformanceTests.swift */,
+				34F6F0581E8F0856002BA263 /* ReflectionTests.swift */,
+				34F6F0591E8F0856002BA263 /* ReflectorTests.swift */,
+				34F6F05A1E8F0856002BA263 /* ValueTransformerTests.swift */,
+				34F6F05B1E8F0856002BA263 /* PropertyTypeTests.swift */,
+				34F6F05C1E8F0856002BA263 /* DateTransformer.swift */,
+			);
+			name = ReflectorTests;
+			sourceTree = "<group>";
+		};
 		4978AA8A1D35A11900E1F1A5 /* RetroluxTests */ = {
 			isa = PBXGroup;
 			children = (
+				34F6F0551E8F084C002BA263 /* ReflectorTests */,
 				34B8EDAB1E664F2200030FAA /* something.jpg */,
 				34F027931E3BF4B8007AA8C9 /* testmultipleparts.data */,
 				3424A6EE1E3A962700D2240F /* request.data */,
@@ -328,6 +375,7 @@
 		4999F9021DA8CDCF00E4C556 /* Additions */ = {
 			isa = PBXGroup;
 			children = (
+				34F6F0461E8F0801002BA263 /* Reflector */,
 				34E55BEF1E3A6D37000DD128 /* Args */,
 				34E55BEB1E3A6B48000DD128 /* HTTP */,
 				34E55BED1E3A6BE5000DD128 /* MultipartFormData */,
@@ -452,6 +500,7 @@
 			files = (
 				34B8ED9A1E664B8A00030FAA /* ReflectionJSONSerializer.swift in Sources */,
 				34B8ED8E1E664B7F00030FAA /* Path.swift in Sources */,
+				34F6F0531E8F0829002BA263 /* Property.swift in Sources */,
 				34B8ED851E664B7700030FAA /* Task.swift in Sources */,
 				34B8ED821E664B7700030FAA /* SelfApplyingArg.swift in Sources */,
 				34B8ED831E664B7700030FAA /* Serializer.swift in Sources */,
@@ -474,13 +523,19 @@
 				34B8ED941E664B8300030FAA /* Header.swift in Sources */,
 				34B8ED951E664B8700030FAA /* AFError.swift in Sources */,
 				34B8ED871E664B7B00030FAA /* Builder.swift in Sources */,
+				34F6F04E1E8F0829002BA263 /* Reflectable.swift in Sources */,
+				34F6F0521E8F0829002BA263 /* Reflection.swift in Sources */,
+				34F6F0511E8F0829002BA263 /* ValueTransformer.swift in Sources */,
 				34B8ED961E664B8700030FAA /* MultipartFormData.swift in Sources */,
 				34B8ED911E664B8300030FAA /* HTTPTask.swift in Sources */,
 				34B8ED8C1E664B7B00030FAA /* OutboundSerializerType.swift in Sources */,
+				34F6F04F1E8F0829002BA263 /* Reflector.swift in Sources */,
+				34F6F0541E8F0829002BA263 /* PropertyType.swift in Sources */,
 				34B8ED9B1E664B8E00030FAA /* URLEncodedSerializer.swift in Sources */,
 				34B8ED901E664B8300030FAA /* HTTPClient.swift in Sources */,
 				34B8ED921E664B8300030FAA /* HTTPCall.swift in Sources */,
 				34B8ED9E1E664B9000030FAA /* RetroluxBuilder.swift in Sources */,
+				34F6F0501E8F0829002BA263 /* ReflectableTransformer.swift in Sources */,
 				34B8ED881E664B7B00030FAA /* Method.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -489,15 +544,22 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				34F6F0621E8F0856002BA263 /* PropertyTypeTests.swift in Sources */,
+				34F6F0631E8F0856002BA263 /* DateTransformer.swift in Sources */,
 				34B8ED7C1E664B3800030FAA /* HeaderTests.swift in Sources */,
+				34F6F05D1E8F0856002BA263 /* ReflectionErrorTests.swift in Sources */,
+				34F6F05F1E8F0856002BA263 /* ReflectionTests.swift in Sources */,
 				34B8ED7A1E664B3400030FAA /* PathTests.swift in Sources */,
+				34F6F05E1E8F0856002BA263 /* PerformanceTests.swift in Sources */,
 				34B8EDAF1E664FF300030FAA /* Utils.swift in Sources */,
 				34B8ED741E664B2300030FAA /* ReflectionJSONSerializerTests.swift in Sources */,
 				34B8ED781E664B2D00030FAA /* DigestAuthTests.swift in Sources */,
 				34B8ED791E664B3300030FAA /* QueryTests.swift in Sources */,
+				34F6F0611E8F0856002BA263 /* ValueTransformerTests.swift in Sources */,
 				34B8ED761E664B2900030FAA /* URLEncodedSerializerTests.swift in Sources */,
 				34B8ED7B1E664B3600030FAA /* MultipartFormDataSerializerTests.swift in Sources */,
 				34B8ED751E664B2500030FAA /* BuilderTests.swift in Sources */,
+				34F6F0601E8F0856002BA263 /* ReflectorTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

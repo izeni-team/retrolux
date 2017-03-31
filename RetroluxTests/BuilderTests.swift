@@ -8,7 +8,6 @@
 
 import XCTest
 import Retrolux
-import RetroluxReflector
 
 fileprivate class FakeTask: Task {
     var cancelled = false

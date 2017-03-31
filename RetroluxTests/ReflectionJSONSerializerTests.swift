@@ -9,7 +9,7 @@
 import Foundation
 import XCTest
 @testable import Retrolux
-import RetroluxReflector
+import Retrolux
 
 class ReflectionJSONSerializerTests: XCTestCase {
     func makeResponse(from jsonObject: Any) -> ClientResponse {

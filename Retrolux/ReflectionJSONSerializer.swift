@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import RetroluxReflector
 
 public enum ReflectionJSONSerializerError: Error {
     case unsupportedType(type: Any.Type)
