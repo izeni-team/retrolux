@@ -103,8 +103,7 @@ class ValueTransformerTests: XCTestCase {
         do {
             _ = try transformer.transform(dictionary, targetType: Test.self, direction: .forwards) as? Test
             XCTFail("Should not have passed.")
-        } catch SerializationError.typeMismatch(expected: let expected, got: let got, property: let property, forClass: let `class`) {
-            XCTAssert(expected == .string)
+        } catch SerializationError.propertyDoesNotSupportOptionalValues(property: let property, forClass: let `class`) {
             XCTAssert(property == "name")
             XCTAssert(`class` == Test.self)
         } catch {

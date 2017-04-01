@@ -23,7 +23,6 @@ fileprivate class FakeTask: Task {
 }
 
 fileprivate class FakeClient: Client {
-    fileprivate var customLogger: (([(ClientLoggingComponent, String)]) -> Void)?
     fileprivate var requestInterceptor: ((inout URLRequest) -> Void)?
     fileprivate var responseInterceptor: ((inout ClientResponse) -> Void)?
     
@@ -31,7 +30,7 @@ fileprivate class FakeClient: Client {
     
     var fakeResponse: ClientResponse!
     
-    func makeAsynchronousRequest(request: inout URLRequest, logging: [ClientLoggingComponent], callback: @escaping (_ response: ClientResponse) -> Void) -> Task {
+    func makeAsynchronousRequest(request: inout URLRequest, callback: @escaping (_ response: ClientResponse) -> Void) -> Task {
         assert(fakeResponse != nil)
         let task = FakeTask()
         DispatchQueue.main.async {
@@ -67,14 +66,12 @@ fileprivate class FakeCallFactory: CallFactory {
 }
 
 fileprivate class FakeBuilder: Builder {
-    var loggingComponents: [ClientLoggingComponent]
     let baseURL: URL
     let client: Client
     let callFactory: CallFactory
     let serializers: [Serializer]
     
     init() {
-        self.loggingComponents = []
         self.baseURL = URL(string: "https://www.google.com/")!
         self.client = FakeClient()
         self.callFactory = FakeCallFactory()
@@ -83,14 +80,12 @@ fileprivate class FakeBuilder: Builder {
 }
 
 fileprivate class RealBuilder: Builder {
-    let loggingComponents: [ClientLoggingComponent]
     let baseURL: URL
     let client: Client
     let callFactory: CallFactory
     let serializers: [Serializer]
     
     init() {
-        self.loggingComponents = []
         self.baseURL = URL(string: "https://www.google.com/")!
         self.client = HTTPClient()
         self.callFactory = HTTPCallFactory()

@@ -162,16 +162,11 @@ class RetroluxReflectorTests: XCTestCase {
         do {
             _ = try reflector.convert(fromJSONDictionaryData: responseData, to: Car.self)
             XCTFail("Should not have passed.")
-        } catch SerializationError.typeMismatch(expected: let expected, got: let got, property: let property, forClass: let `class`) {
-            XCTAssert(expected == .string)
-            
-            // TODO: Can't check if 'got' is a String.Type.
-            
+        } catch SerializationError.propertyDoesNotSupportOptionalValues(property: let property, forClass: let `class`) {
             XCTAssert(property == "model")
             XCTAssert(`class` == Car.self)
         } catch {
-            print("Error serializing data into a basic Car: \(error)")
-            XCTFail()
+            XCTFail("\(error)")
         }
     }
     

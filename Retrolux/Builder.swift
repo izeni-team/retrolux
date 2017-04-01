@@ -15,7 +15,6 @@ public enum BuilderError: Error {
 }
 
 public protocol Builder {
-    var loggingComponents: [ClientLoggingComponent] { get }
     var baseURL: URL { get }
     var client: Client { get }
     var callFactory: CallFactory { get }
@@ -61,8 +60,6 @@ extension Builder {
     }
     
     public func makeRequest<Args, ResponseType>(type: OutboundSerializerType = .auto, method: HTTPMethod, endpoint: String, args creationArgs: Args, response: ResponseType.Type) -> (Args) -> Call<ResponseType> {
-        let loggingComponents = self.loggingComponents
-        
         return { startingArgs in
             var task: Task?
             var cancelled = false
@@ -139,7 +136,7 @@ extension Builder {
                         type.apply(arg: arg, to: &request)
                     }
                     
-                    task = self.client.makeAsynchronousRequest(request: &request, logging: loggingComponents, callback: { (clientResponse) in
+                    task = self.client.makeAsynchronousRequest(request: &request, callback: { (clientResponse) in
                         let result: Result<ResponseType>
                         let response: Response<ResponseType>
                         do {

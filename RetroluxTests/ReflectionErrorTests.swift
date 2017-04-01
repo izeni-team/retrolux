@@ -312,4 +312,38 @@ class ReflectionErrorTests: XCTestCase {
             XCTFail("Reading list of properties on empty class should not fail. Failed with error: \(error)")
         }
     }
+    
+    func testOptionalValueNotSupported() {
+        class Person: Reflection {
+            var name = ""
+        }
+        
+        let object = Person()
+        do {
+            let properties = try Reflector().reflect(object)
+            XCTAssert(properties.count == 1)
+            XCTAssert(properties.first?.name == "name")
+            XCTAssert(properties.first?.type == .string)
+            try object.set(value: nil, for: properties.first!)
+            XCTFail("Operation should not have succeeded.")
+        } catch SerializationError.propertyDoesNotSupportOptionalValues(property: let property, forClass: let `class`) {
+            XCTAssert(property == "name")
+            XCTAssert(`class` == Person.self)
+        } catch {
+            XCTFail("\(error)")
+        }
+        
+        let data = "{\"name\":null}".data(using: .utf8)!
+        
+        do {
+            let reflector = Reflector()
+            _ = try reflector.convert(fromJSONDictionaryData: data, to: Person.self)
+            XCTFail("Operation should not have succeeded.")
+        } catch SerializationError.propertyDoesNotSupportOptionalValues(property: let property, forClass: let `class`) {
+            XCTAssert(property == "name")
+            XCTAssert(`class` == Person.self)
+        } catch {
+            XCTFail("\(error)")
+        }
+    }
 }

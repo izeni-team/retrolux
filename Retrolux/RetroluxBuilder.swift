@@ -9,20 +9,12 @@
 import Foundation
 
 public class RetroluxBuilder: Builder {
-    public var loggingComponents: [LoggingComponent]
     public let baseURL: URL
     public let client: Client
     public let callFactory: CallFactory
     public var serializers: [Serializer]
     
     public init(baseURL: URL) {
-        self.loggingComponents = [
-            .requestMethod,
-            .requestURL,
-            .requestBody,
-            .responseStatusCode,
-            .responseURL
-        ]
         self.baseURL = baseURL
         self.client = HTTPClient()
         self.callFactory = HTTPCallFactory()

@@ -215,11 +215,11 @@
 			isa = PBXGroup;
 			children = (
 				49C192571DA96CE400823A55 /* Builder.swift */,
-				49C192591DA96D4500823A55 /* Method.swift */,
-				F3A3D0101D875C7A0067D03C /* Response.swift */,
-				3475A6E91E5CFE330050019D /* OptionalHelper.swift */,
 				3475A6EB1E5CFE430050019D /* BuilderArg.swift */,
+				49C192591DA96D4500823A55 /* Method.swift */,
+				3475A6E91E5CFE330050019D /* OptionalHelper.swift */,
 				3475A6ED1E5CFE600050019D /* OutboundSerializerType.swift */,
+				F3A3D0101D875C7A0067D03C /* Response.swift */,
 			);
 			name = Concrete;
 			sourceTree = "<group>";
@@ -308,13 +308,13 @@
 		34F6F0461E8F0801002BA263 /* Reflector */ = {
 			isa = PBXGroup;
 			children = (
-				34F6F0471E8F0829002BA263 /* Reflectable.swift */,
-				34F6F0481E8F0829002BA263 /* Reflector.swift */,
-				34F6F0491E8F0829002BA263 /* ReflectableTransformer.swift */,
-				34F6F04A1E8F0829002BA263 /* ValueTransformer.swift */,
-				34F6F04B1E8F0829002BA263 /* Reflection.swift */,
 				34F6F04C1E8F0829002BA263 /* Property.swift */,
 				34F6F04D1E8F0829002BA263 /* PropertyType.swift */,
+				34F6F0471E8F0829002BA263 /* Reflectable.swift */,
+				34F6F0491E8F0829002BA263 /* ReflectableTransformer.swift */,
+				34F6F04B1E8F0829002BA263 /* Reflection.swift */,
+				34F6F0481E8F0829002BA263 /* Reflector.swift */,
+				34F6F04A1E8F0829002BA263 /* ValueTransformer.swift */,
 			);
 			name = Reflector;
 			sourceTree = "<group>";
