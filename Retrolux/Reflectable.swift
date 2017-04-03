@@ -14,7 +14,7 @@ public enum SerializationError: Error {
     case invalidRootJSONType
 }
 
-internal func reflectable_setProperty(_ property: Property, value: Any?, instance: Reflectable) throws {
+public func reflectable_setProperty(_ property: Property, value: Any?, instance: Reflectable) throws {
     guard property.type.isCompatible(with: value) else {
         if property.required {
             if case PropertyType.optional = property.type {
@@ -41,7 +41,7 @@ internal func reflectable_setProperty(_ property: Property, value: Any?, instanc
     }
 }
 
-internal func reflectable_value(for property: Property, instance: Reflectable) throws -> Any? {
+public func reflectable_value(for property: Property, instance: Reflectable) throws -> Any? {
     let rawValue = instance.value(forKey: property.name)
     if let transformer = property.transformer, let rawValue = rawValue {
         let transformed = try reflectable_transform(rawValue, type: property.type, transformer: transformer, direction: .backwards)
