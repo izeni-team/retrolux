@@ -8,6 +8,10 @@
 
 import Foundation
 
+public enum ResponseError: Error {
+    case invalidHttpStatusCode(code: Int?)
+}
+
 public struct Response<T> {
     // Do we want the NSURLRequest or NSHTTPURLResponse?
     public let request: URLRequest
@@ -15,9 +19,18 @@ public struct Response<T> {
     public let error: Error?
     public let urlResponse: URLResponse?
     public let body: T?
+    internal let interpreter: (Response<T>) -> InterpretedResponse<T>
+    
+    public var interpreted: InterpretedResponse<T> {
+        return interpreter(self)
+    }
     
     public var isSuccessful: Bool {
-        return body != nil && (200...299).contains(status ?? 0)
+        return body != nil && isHttpStatusOk
+    }
+    
+    public var isHttpStatusOk: Bool {
+        return (200...299).contains(status ?? 0)
     }
     
     public var httpUrlResponse: HTTPURLResponse? {

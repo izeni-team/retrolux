@@ -168,7 +168,7 @@ class BuilderTests: XCTestCase {
             expectation.fulfill()
         }
         waitForExpectations(timeout: 10) { (error) in
-            if error != nil {
+            if let error = error {
                 XCTFail("Failed with error: \(error)")
             }
         }
@@ -185,7 +185,7 @@ class BuilderTests: XCTestCase {
             expectation.fulfill()
         }
         waitForExpectations(timeout: 1) { (error) in
-            if error != nil {
+            if let error = error {
                 XCTFail("Failed with error: \(error)")
             }
         }
@@ -198,7 +198,7 @@ class BuilderTests: XCTestCase {
             expectation2.fulfill()
         }
         waitForExpectations(timeout: 1) { (error) in
-            if error != nil {
+            if let error = error {
                 XCTFail("Failed with error: \(error)")
             }
         }
@@ -217,7 +217,7 @@ class BuilderTests: XCTestCase {
             expectation3.fulfill()
         }
         waitForExpectations(timeout: 1) { (error) in
-            if error != nil {
+            if let error = error {
                 XCTFail("Failed with error: \(error)")
             }
         }
@@ -233,7 +233,7 @@ class BuilderTests: XCTestCase {
             expectation4.fulfill()
         }
         waitForExpectations(timeout: 1) { (error) in
-            if error != nil {
+            if let error = error {
                 XCTFail("Failed with error: \(error)")
             }
         }
@@ -255,7 +255,7 @@ class BuilderTests: XCTestCase {
             expectation5.fulfill()
         }
         waitForExpectations(timeout: 1) { (error) in
-            if error != nil {
+            if let error = error {
                 XCTFail("Failed with error: \(error)")
             }
         }
@@ -276,7 +276,7 @@ class BuilderTests: XCTestCase {
             expectation6.fulfill()
         }
         waitForExpectations(timeout: 1) { (error) in
-            if error != nil {
+            if let error = error {
                 XCTFail("Failed with error: \(error)")
             }
         }
@@ -297,7 +297,7 @@ class BuilderTests: XCTestCase {
             expectation.fulfill()
         }
         waitForExpectations(timeout: 1) { (error) in
-            if error != nil {
+            if let error = error {
                 XCTFail("Failed with error: \(error)")
             }
         }
@@ -322,7 +322,7 @@ class BuilderTests: XCTestCase {
             expectation.fulfill()
         }
         waitForExpectations(timeout: 1) { (error) in
-            if error != nil {
+            if let error = error {
                 XCTFail("Failed with error: \(error)")
             }
         }
@@ -346,7 +346,7 @@ class BuilderTests: XCTestCase {
             expectation.fulfill()
         }
         waitForExpectations(timeout: 1) { (error) in
-            if error != nil {
+            if let error = error {
                 XCTFail("Failed with error: \(error)")
             }
         }
@@ -376,7 +376,7 @@ class BuilderTests: XCTestCase {
             expectation.fulfill()
         }
         waitForExpectations(timeout: 1) { (error) in
-            if error != nil {
+            if let error = error {
                 XCTFail("Failed with error: \(error)")
             }
         }
@@ -402,7 +402,7 @@ class BuilderTests: XCTestCase {
             expectation.fulfill()
         }
         waitForExpectations(timeout: 1) { (error) in
-            if error != nil {
+            if let error = error {
                 XCTFail("Failed with error: \(error)")
             }
         }

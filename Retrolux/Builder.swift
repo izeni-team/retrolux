@@ -12,7 +12,7 @@ public enum BuilderError: Error {
     case unsupportedArgument(BuilderArg)
     case tooManyMatchingSerializers(serializers: [OutboundSerializer], arguments: [BuilderArg])
     case validationError(serializer: Serializer, arguments: [BuilderArg])
-    case serializationError(serializer: Serializer, error: SerializationError, arguments: [BuilderArg])
+    case serializationError(serializer: Serializer, error: Error, arguments: [BuilderArg])
 }
 
 public protocol Builder {
@@ -79,6 +79,33 @@ extension Builder {
         }
     }
     
+    public func interpret<T>(response: Response<T>) -> InterpretedResponse<T> {
+        return defaultInterpreter(response: response)
+    }
+    
+    public func defaultInterpreter<T>(response: Response<T>) -> InterpretedResponse<T> {
+        // BuilderErrors are highest priority over other kinds of errors,
+        // because they represent errors creating the request.
+        if let error = response.error as? BuilderError {
+            return .failure(error)
+        }
+        
+        if !response.isHttpStatusOk {
+            return .failure(ResponseError.invalidHttpStatusCode(code: response.status))
+        }
+        
+        if let error = response.error {
+            return .failure(error)
+        }
+        
+        if let body = response.body {
+            return .success(body)
+        } else {
+            assert(false, "This should be impossible.")
+            return .failure(NSError(domain: "Retrolux.Error", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to serialize response for an unknown reason."]))
+        }
+    }
+    
     public func makeRequest<Args, ResponseType>(type: OutboundSerializerType = .auto, method: HTTPMethod, endpoint: String, args creationArgs: Args, response: ResponseType.Type) -> (Args) -> Call<ResponseType> {
         return { startingArgs in
             var task: Task?
@@ -104,7 +131,14 @@ extension Builder {
                     var serializerArgs: [BuilderArg] = []
                     
                     let execCallback: (BuilderError) -> Void = { error in
-                        let response = Response<ResponseType>(request: request, data: nil, error: error, urlResponse: nil, body: nil)
+                        let response = Response<ResponseType>(
+                            request: request,
+                            data: nil,
+                            error: error,
+                            urlResponse: nil,
+                            body: nil,
+                            interpreter: self.interpret
+                        )
                         DispatchQueue.main.async {
                             self.log(request: request)
                             callback(response)
@@ -146,11 +180,9 @@ extension Builder {
                         
                         do {
                             try serializer.apply(arguments: serializerArgs, to: &request)
-                        } catch let error as SerializationError {
+                        } catch {
                             execCallback(.serializationError(serializer: serializer, error: error, arguments: serializerArgs))
                             return
-                        } catch {
-                            fatalError("Unknown error returned from serializer: \(error)")
                         }
                     }
                     
@@ -192,7 +224,8 @@ extension Builder {
                             data: clientResponse.data,
                             error: error ?? clientResponse.error,
                             urlResponse: clientResponse.response,
-                            body: body
+                            body: body,
+                            interpreter: self.interpret
                         )
                         
                         DispatchQueue.main.async {
