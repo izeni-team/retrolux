@@ -533,6 +533,29 @@ class RetroluxReflectorTests: XCTestCase {
             XCTFail("Failed with error: \(error)")
         }
     }
+    
+    func testAlternativeInheritance() {
+        class Test: CustomObject {
+            var name = ""
+        }
+        let t = Test()
+        do {
+            let properties = try Reflector.shared.reflect(t)
+            XCTAssert(properties.count == 1 && properties.first?.name == "name")
+        } catch {
+            XCTFail("Failed with error: \(error)")
+        }
+    }
+}
+
+class Object: NSObject {
+}
+class CustomObject: Object {
+    required override init() {
+        super.init()
+    }
+}
+extension CustomObject: Reflectable {
 }
 
 extension Date {

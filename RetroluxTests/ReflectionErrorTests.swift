@@ -10,7 +10,7 @@ import XCTest
 import Retrolux
 
 class ReflectionErrorTests: XCTestCase {
-    func testRLObjectReflectorError_UnsupportedBaseClass() {
+    func testRLObjectReflection_customBaseClass() {
         class Object1: NSObject, Reflectable {
             required override init() {
                 super.init()
@@ -19,17 +19,37 @@ class ReflectionErrorTests: XCTestCase {
         
         class Object2: Object1 {}
         
-        // Inheriting object 1 should fail
+        // Inheriting Object1 should succeed.
         do {
             _ = try Reflector().reflect(Object2())
-            XCTFail("Operation should not have succeeded.")
-        } catch ReflectionError.unsupportedBaseClass(let type) {
-            // TODO: Return enum values instead of strings
-            XCTAssert(type == Object1.self)
-        } catch let error {
-            XCTFail("\(error)")
+        } catch {
+            XCTFail("Failed with error: \(error)")
         }
-        
+    }
+    
+    // Disabled, because this behavior prevents custom base classes + inheritance.
+//    func testRLObjectReflectorError_UnsupportedBaseClass() {
+//        class Object1: NSObject, Reflectable {
+//            required override init() {
+//                super.init()
+//            }
+//        }
+//        
+//        class Object2: Object1 {}
+//        
+//        // Inheriting object 1 should fail
+//        do {
+//            _ = try Reflector().reflect(Object2())
+//            XCTFail("Operation should not have succeeded.")
+//        } catch ReflectionError.unsupportedBaseClass(let type) {
+//            // TODO: Return enum values instead of strings
+//            XCTAssert(type == Object1.self)
+//        } catch let error {
+//            XCTFail("\(error)")
+//        }
+//    }
+    
+    func testReflectionInheritance() {
         // Inheriting from Reflection should succeed
         class Object3: Reflection {}
         class Object4: Object3 {}

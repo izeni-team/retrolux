@@ -106,8 +106,11 @@ open class Reflector {
         var children = [(label: String, valueType: Any.Type)]()
         if let superMirror = mirror.superclassMirror, superMirror.subjectType is Reflectable.Type {
             children = try getMirrorChildren(superMirror, parentMirror: mirror)
-        } else if let parent = parentMirror, parent.subjectType is Reflectable.Type && mirror.subjectType != Reflection.self {
-            throw ReflectionError.unsupportedBaseClass(mirror.subjectType)
+        } else if let parent = parentMirror, parent.subjectType is Reflectable.Type == false {
+            // Check for Reflection disabled, because it prevents mixing alternative base classes with inheritance.
+//            if mirror.subjectType != Reflection.self {
+                throw ReflectionError.unsupportedBaseClass(mirror.subjectType)
+//            }
         }
         
         // Purposefully ignores labels that are nil

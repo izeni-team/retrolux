@@ -71,8 +71,10 @@ extension Builder {
     public func log<T>(response: Response<T>) {
         let status = response.status ?? 0
         
-        let requestURL = response.request.url!.absoluteString.removingPercentEncoding!
-        print("Retrolux: \(status) \(requestURL)")
+        if response.error is BuilderError == false {
+            let requestURL = response.request.url!.absoluteString.removingPercentEncoding!
+            print("Retrolux: \(status) \(requestURL)")
+        }
         
         if let error = response.error {
             print("Retrolux: Error: \(error)")
@@ -140,7 +142,7 @@ extension Builder {
                             interpreter: self.interpret
                         )
                         DispatchQueue.main.async {
-                            self.log(request: request)
+                            self.log(response: response)
                             callback(response)
                         }
                     }
