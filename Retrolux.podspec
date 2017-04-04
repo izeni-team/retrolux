@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'Retrolux'
-  s.version          = 'v0.4.2'
+  s.version          = '0.4.2'
   s.summary          = 'An all in one networking solution, like Retrofit.'
 
 # This description is used to generate tags and improve search results.
@@ -29,7 +29,7 @@ The purpose of this framework is not just to abstract away networking details, b
   # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'Bryan Henderson' => 'bhenderson@startstudio.com' }
-  s.source           = { :git => 'https://github.com/izeni-team/retrolux.git', :tag => s.version.to_s }
+  s.source           = { :git => 'https://github.com/izeni-team/retrolux.git', :tag => 'v%s' % [s.version.to_s] }
   # s.social_media_url = 'https://twitter.com/cbh2000'
 
   s.ios.deployment_target = '8.0'
