@@ -8,29 +8,6 @@
 
 import Foundation
 
-public enum ReflectionError: Error {
-    case unsupportedBaseClass(Any.Type)
-    case cannotIgnoreNonExistantProperty(propertyName: String, forClass: Any.Type)
-    case cannotIgnoreErrorsForNonExistantProperty(propertyName: String, forClass: Any.Type)
-    case cannotIgnoreErrorsAndIgnoreProperty(propertyName: String, forClass: Any.Type)
-    case cannotMapNonExistantProperty(propertyName: String, forClass: Any.Type)
-    case cannotTransformNonExistantProperty(propertyName: String, forClass: Any.Type)
-    case mappedPropertyConflict(properties: [String], conflictKey: String, forClass: Any.Type)
-    case cannotMapAndIgnoreProperty(propertyName: String, forClass: Any.Type)
-    case cannotTransformAndIgnoreProperty(propertyName: String, forClass: Any.Type)
-    case unsupportedPropertyValueType(property: String, valueType: Any.Type, forClass: Any.Type)
-    case optionalPrimitiveNumberNotBridgable(property: String, forClass: Any.Type)
-    
-    /*
-     If you get this error, try adding dynamic keyword to your property.
-     If that still doesn't work, try adding the dynamic (or @objc) attribute.
-     If that STILL doesn't work, your property type is not supported. :-(
-     */
-    case propertyNotBridgable(property: String, valueType: Any.Type, forClass: Any.Type)
-    
-    case readOnlyProperty(property: String, forClass: Any.Type)
-}
-
 open class Reflector {
     open var cache: [ObjectIdentifier: [Property]] = [:]
     open var lock = OSSpinLock()
@@ -44,15 +21,17 @@ open class Reflector {
     public init() {}
     
     open func convert(fromJSONArrayData arrayData: Data, to type: Reflectable.Type) throws -> [Reflectable] {
-        guard let objects = try JSONSerialization.jsonObject(with: arrayData, options: []) as? [[String: Any]] else {
-            throw SerializationError.invalidRootJSONType
+        let objects_any: Any = try JSONSerialization.jsonObject(with: arrayData, options: [])
+        guard let objects = objects_any as? [[String: Any]] else {
+            throw SerializationError.expectedArrayRootButGotDictionaryRoot
         }
         return try convert(fromArray: objects, to: type)
     }
     
     open func convert(fromJSONDictionaryData dictionaryData: Data, to type: Reflectable.Type) throws -> Reflectable {
-        guard let object = try JSONSerialization.jsonObject(with: dictionaryData, options: []) as? [String: Any] else {
-            throw SerializationError.invalidRootJSONType
+        let object_any: Any = try JSONSerialization.jsonObject(with: dictionaryData, options: [])
+        guard let object = object_any as? [String: Any] else {
+            throw SerializationError.expectedDictionaryRootButGotArrayRoot
         }
         return try convert(fromDictionary: object, to: type)
     }
@@ -106,11 +85,10 @@ open class Reflector {
         var children = [(label: String, valueType: Any.Type)]()
         if let superMirror = mirror.superclassMirror, superMirror.subjectType is Reflectable.Type {
             children = try getMirrorChildren(superMirror, parentMirror: mirror)
-        } else if let parent = parentMirror, parent.subjectType is Reflectable.Type == false {
-            // Check for Reflection disabled, because it prevents mixing alternative base classes with inheritance.
-//            if mirror.subjectType != Reflection.self {
-                throw ReflectionError.unsupportedBaseClass(mirror.subjectType)
-//            }
+        } else if parentMirror != nil {
+            if mirror.subjectType is ReflectableSubclassingIsAllowed.Type == false {
+                throw ReflectionError.subclassingNotAllowed(mirror.subjectType)
+            }
         }
         
         // Purposefully ignores labels that are nil
@@ -229,7 +207,7 @@ open class Reflector {
                 // We don't know what type this property is, so it's unsupported.
                 // The user should probably add this to their list of ignored properties if it reaches this point.
                 
-                throw ReflectionError.unsupportedPropertyValueType(
+                throw ReflectionError.propertyNotSupported(
                     property: label,
                     valueType: valueType,
                     forClass: subjectType
@@ -251,10 +229,8 @@ open class Reflector {
                 case .optional(let wrapped):
                     switch wrapped {
                     case .number, .bool:
-                        // Optional primitives cannot be bridged to Objective-C as of Swift 3.0.0 (Xcode 8.0).
-                        // It might change in Swift 3.0.1 (Xcode 8.1).
-                        // https://github.com/apple/swift-evolution/blob/master/proposals/0139-bridge-nsnumber-and-nsvalue.md
-                        throw ReflectionError.optionalPrimitiveNumberNotBridgable(
+                        // Optional numeric primitives (i.e., Int?) cannot be bridged to Objective-C as of Swift 3.1.0.
+                        throw ReflectionError.optionalNumericTypesAreNotSupported(
                             property: label,
                             forClass: subjectType
                         )
@@ -266,7 +242,7 @@ open class Reflector {
                 }
                 
                 // We have no clue what this property type is.
-                throw ReflectionError.propertyNotBridgable(
+                throw ReflectionError.propertyNotSupported(
                     property: label,
                     valueType: valueType,
                     forClass: subjectType

@@ -89,7 +89,7 @@ class ReflectionErrorTests: XCTestCase {
     }
     
     func testRLObjectReflection_customBaseClass() {
-        class Object1: NSObject, Reflectable {
+        class Object1: NSObject, Reflectable, ReflectableSubclassingIsAllowed {
             required override init() {
                 super.init()
             }
@@ -103,29 +103,47 @@ class ReflectionErrorTests: XCTestCase {
         } catch {
             XCTFail("Failed with error: \(error)")
         }
+        
+        class Object3: NSObject, Reflectable {
+            required override init() {
+                super.init()
+            }
+        }
+        
+        class Object4: Object3 {}
+        
+        // Inheriting Object3 should fail.
+        do {
+            _ = try Reflector().reflect(Object4())
+            XCTFail("Should not have succeeded.")
+        } catch ReflectionError.subclassingNotAllowed(let type) {
+            XCTAssert(type == Object3.self)
+        } catch {
+            XCTFail("Failed with error: \(error)")
+        }
     }
     
     // Disabled, because this behavior prevents custom base classes + inheritance.
-//    func testRLObjectReflectorError_UnsupportedBaseClass() {
-//        class Object1: NSObject, Reflectable {
-//            required override init() {
-//                super.init()
-//            }
-//        }
-//        
-//        class Object2: Object1 {}
-//        
-//        // Inheriting object 1 should fail
-//        do {
-//            _ = try Reflector().reflect(Object2())
-//            XCTFail("Operation should not have succeeded.")
-//        } catch ReflectionError.unsupportedBaseClass(let type) {
-//            // TODO: Return enum values instead of strings
-//            XCTAssert(type == Object1.self)
-//        } catch let error {
-//            XCTFail("\(error)")
-//        }
-//    }
+    func testRLObjectReflectorError_UnsupportedBaseClass() {
+        class Object1: NSObject, Reflectable {
+            required override init() {
+                super.init()
+            }
+        }
+        
+        class Object2: Object1 {}
+        
+        // Inheriting object 1 should fail
+        do {
+            _ = try Reflector().reflect(Object2())
+            XCTFail("Operation should not have succeeded.")
+        } catch ReflectionError.subclassingNotAllowed(let type) {
+            // TODO: Return enum values instead of strings
+            XCTAssert(type == Object1.self)
+        } catch let error {
+            XCTFail("\(error)")
+        }
+    }
     
     func testReflectionInheritance() {
         // Inheriting from Reflection should succeed
@@ -323,7 +341,7 @@ class ReflectionErrorTests: XCTestCase {
         do {
             _ = try Reflector().reflect(object)
             XCTFail("Operation should not have succeeded.")
-        } catch ReflectionError.unsupportedPropertyValueType(property: let property, valueType: let valueType, forClass: let classType) {
+        } catch ReflectionError.propertyNotSupported(property: let property, valueType: let valueType, forClass: let classType) {
             XCTAssert(property == "test")
             XCTAssert(valueType is Data.Type)
             XCTAssert(classType == Object1.self)
@@ -344,7 +362,7 @@ class ReflectionErrorTests: XCTestCase {
         do {
             _ = try Reflector().reflect(object)
             XCTFail("Operation should not have succeeded.")
-        } catch ReflectionError.optionalPrimitiveNumberNotBridgable(property: let property, forClass: let classType) {
+        } catch ReflectionError.optionalNumericTypesAreNotSupported(property: let property, forClass: let classType) {
             XCTAssert(property == "test")
             XCTAssert(classType == Object1.self)
         } catch let error {
@@ -365,7 +383,7 @@ class ReflectionErrorTests: XCTestCase {
         do {
             _ = try Reflector().reflect(object)
             XCTFail("Operation should not have succeeded.")
-        } catch ReflectionError.propertyNotBridgable(property: let property, valueType: let valueType, forClass: let classType) {
+        } catch ReflectionError.propertyNotSupported(property: let property, valueType: let valueType, forClass: let classType) {
             XCTAssert(property == "test")
             XCTAssert(valueType == Bool.self)
             XCTAssert(classType == Object1.self)
@@ -476,6 +494,37 @@ class ReflectionErrorTests: XCTestCase {
             XCTAssert(property.mappedTo == "name")
             XCTAssert(property.name == "name")
             XCTAssert(`class` == Person.self)
+        } catch {
+            XCTFail("\(error)")
+        }
+    }
+    
+    func testInvalidRootJSONType() {
+        class Person: Reflection {}
+        
+        do {
+            _ = try Reflector().convert(fromJSONDictionaryData: "[{}]".data(using: .utf8)!, to: Person.self)
+            XCTFail("Should not have succeeded.")
+        } catch SerializationError.expectedDictionaryRootButGotArrayRoot {
+            /* Success! */
+        } catch {
+            XCTFail("\(error)")
+        }
+        
+        do {
+            _ = try Reflector().convert(fromJSONArrayData: "{}".data(using: .utf8)!, to: Person.self)
+            XCTFail("Should not have succeeded.")
+        } catch SerializationError.expectedArrayRootButGotDictionaryRoot {
+            /* Success! */
+        } catch {
+            XCTFail("\(error)")
+        }
+        
+        do {
+            _ = try Reflector().convert(fromJSONArrayData: "null".data(using: .utf8)!, to: Person.self)
+            XCTFail("Should not have succeeded.")
+        } catch let error as NSError {
+            XCTAssert(error.code == 3840)
         } catch {
             XCTFail("\(error)")
         }

@@ -8,13 +8,6 @@
 
 import Foundation
 
-public enum BuilderError: Error {
-    case unsupportedArgument(BuilderArg)
-    case tooManyMatchingSerializers(serializers: [OutboundSerializer], arguments: [BuilderArg])
-    case validationError(serializer: Serializer, arguments: [BuilderArg])
-    case serializationError(serializer: Serializer, error: Error, arguments: [BuilderArg])
-}
-
 public protocol Builder {
     var baseURL: URL { get }
     var client: Client { get }
@@ -22,9 +15,50 @@ public protocol Builder {
     var serializers: [Serializer] { get }
     var requestInterceptor: ((inout URLRequest) -> Void)? { get }
     var responseInterceptor: ((inout ClientResponse) -> Void)? { get }
+    
+    func interpret<T>(response: Response<T>) -> InterpretedResponse<T>
+    func log(request: URLRequest)
+    func log<T>(response: Response<T>)
+    func makeRequest<Args, ResponseType>(
+        type: OutboundSerializerType,
+        method: HTTPMethod,
+        endpoint: String,
+        args creationArgs: Args,
+        response: ResponseType.Type
+        ) -> (Args) -> Call<ResponseType>
 }
 
 extension Builder {
+    public func interpret<T>(response: Response<T>) -> InterpretedResponse<T> {
+        return defaultInterpreter(response: response)
+    }
+    
+    public func defaultInterpreter<T>(response: Response<T>) -> InterpretedResponse<T> {
+        // BuilderErrors are highest priority over other kinds of errors,
+        // because they represent errors creating the request.
+        if let error = response.error as? BuilderError {
+            return .failure(error)
+        }
+        
+        if !response.isHttpStatusOk {
+            return .failure(ResponseError.invalidHttpStatusCode(code: response.status))
+        }
+        
+        if let error = response.error {
+            return .failure(error)
+        }
+        
+        if let body = response.body {
+            return .success(body)
+        } else {
+            assert(false, "This should be impossible.")
+            return .failure(NSError(domain: "Retrolux.Error", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to serialize response for an unknown reason."]))
+        }
+    }
+    
+    public func log(request: URLRequest) {}
+    public func log<T>(response: Response<T>) {}
+    
     public var outboundSerializers: [OutboundSerializer] {
         return serializers.flatMap { $0 as? OutboundSerializer }
     }
@@ -61,50 +95,6 @@ extension Builder {
             } else {
                 return beneath
             }
-        }
-    }
-    
-    public func log(request: URLRequest) {
-        print("Retrolux: \(request.httpMethod!) \(request.url!.absoluteString.removingPercentEncoding!)")
-    }
-    
-    public func log<T>(response: Response<T>) {
-        let status = response.status ?? 0
-        
-        if response.error is BuilderError == false {
-            let requestURL = response.request.url!.absoluteString.removingPercentEncoding!
-            print("Retrolux: \(status) \(requestURL)")
-        }
-        
-        if let error = response.error {
-            print("Retrolux: Error: \(error)")
-        }
-    }
-    
-    public func interpret<T>(response: Response<T>) -> InterpretedResponse<T> {
-        return defaultInterpreter(response: response)
-    }
-    
-    public func defaultInterpreter<T>(response: Response<T>) -> InterpretedResponse<T> {
-        // BuilderErrors are highest priority over other kinds of errors,
-        // because they represent errors creating the request.
-        if let error = response.error as? BuilderError {
-            return .failure(error)
-        }
-        
-        if !response.isHttpStatusOk {
-            return .failure(ResponseError.invalidHttpStatusCode(code: response.status))
-        }
-        
-        if let error = response.error {
-            return .failure(error)
-        }
-        
-        if let body = response.body {
-            return .success(body)
-        } else {
-            assert(false, "This should be impossible.")
-            return .failure(NSError(domain: "Retrolux.Error", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to serialize response for an unknown reason."]))
         }
     }
     

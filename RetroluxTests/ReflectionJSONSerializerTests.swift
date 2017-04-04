@@ -46,7 +46,7 @@ class ReflectionJSONSerializerTests: XCTestCase {
             XCTAssert(request.value(forHTTPHeaderField: "Content-Type") == "application/json", "Missing Content-Type header.")
             XCTAssert(request.allHTTPHeaderFields?.count == 1, "Only Content-Type should be set.")
             XCTAssert(request.httpBody?.count == "{\"name\":\"Bob\",\"age\":24}".characters.count)
-            XCTAssert(request.httpMethod == "GET", "Default value should be GET, but the serializer changed it to \(request.httpMethod).")
+            XCTAssert(request.httpMethod == "GET", "Default value should be GET, but the serializer changed it to \(request.httpMethod!).")
             
             guard let body = request.httpBody else {
                 XCTFail("Missing body on URL request")
@@ -99,7 +99,7 @@ class ReflectionJSONSerializerTests: XCTestCase {
         do {
             try serializer.apply(arguments: [BuilderArg(type: Invalid.self, creation: nil, starting: Invalid())], to: &request)
             XCTFail("Should not have succeeded.")
-        } catch ReflectionError.unsupportedPropertyValueType(let property, let valueType, let forClass) {
+        } catch ReflectionError.propertyNotSupported(let property, let valueType, let forClass) {
             XCTAssert(property == "name")
             XCTAssert(valueType == Data.self)
             XCTAssert(forClass == Invalid.self)

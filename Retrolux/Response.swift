@@ -8,10 +8,6 @@
 
 import Foundation
 
-public enum ResponseError: Error {
-    case invalidHttpStatusCode(code: Int?)
-}
-
 public struct Response<T> {
     // Do we want the NSURLRequest or NSHTTPURLResponse?
     public let request: URLRequest

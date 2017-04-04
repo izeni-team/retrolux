@@ -59,6 +59,13 @@
 		34B8EDAC1E664F2200030FAA /* something.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 34B8EDAB1E664F2200030FAA /* something.jpg */; };
 		34B8EDAF1E664FF300030FAA /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34B8EDAE1E664FF300030FAA /* Utils.swift */; };
 		34CA58701E93FF88001F5E54 /* InterpretedResponseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34CA586F1E93FF88001F5E54 /* InterpretedResponseTests.swift */; };
+		34CA58721E94224B001F5E54 /* BuilderError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34CA58711E94224B001F5E54 /* BuilderError.swift */; };
+		34CA58741E9422A6001F5E54 /* ResponseError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34CA58731E9422A6001F5E54 /* ResponseError.swift */; };
+		34CA58761E9422E4001F5E54 /* SerializationError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34CA58751E9422E4001F5E54 /* SerializationError.swift */; };
+		34CA58781E942343001F5E54 /* ReflectionError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34CA58771E942343001F5E54 /* ReflectionError.swift */; };
+		34CA587A1E943EC5001F5E54 /* CustomSerializerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34CA58791E943EC5001F5E54 /* CustomSerializerTests.swift */; };
+		34CA587C1E943EE5001F5E54 /* SwiftyJSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34CA587B1E943EE5001F5E54 /* SwiftyJSON.swift */; };
+		34CA587E1E943F40001F5E54 /* SwiftyJSONSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34CA587D1E943F40001F5E54 /* SwiftyJSONSerializer.swift */; };
 		34F6F04E1E8F0829002BA263 /* Reflectable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F6F0471E8F0829002BA263 /* Reflectable.swift */; };
 		34F6F04F1E8F0829002BA263 /* Reflector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F6F0481E8F0829002BA263 /* Reflector.swift */; };
 		34F6F0501E8F0829002BA263 /* ReflectableTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F6F0491E8F0829002BA263 /* ReflectableTransformer.swift */; };
@@ -129,6 +136,13 @@
 		34B8EDAB1E664F2200030FAA /* something.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = something.jpg; sourceTree = "<group>"; };
 		34B8EDAE1E664FF300030FAA /* Utils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 		34CA586F1E93FF88001F5E54 /* InterpretedResponseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InterpretedResponseTests.swift; sourceTree = "<group>"; };
+		34CA58711E94224B001F5E54 /* BuilderError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BuilderError.swift; sourceTree = "<group>"; };
+		34CA58731E9422A6001F5E54 /* ResponseError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResponseError.swift; sourceTree = "<group>"; };
+		34CA58751E9422E4001F5E54 /* SerializationError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SerializationError.swift; sourceTree = "<group>"; };
+		34CA58771E942343001F5E54 /* ReflectionError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReflectionError.swift; sourceTree = "<group>"; };
+		34CA58791E943EC5001F5E54 /* CustomSerializerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomSerializerTests.swift; sourceTree = "<group>"; };
+		34CA587B1E943EE5001F5E54 /* SwiftyJSON.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftyJSON.swift; sourceTree = "<group>"; };
+		34CA587D1E943F40001F5E54 /* SwiftyJSONSerializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftyJSONSerializer.swift; sourceTree = "<group>"; };
 		34E21CCC1E1B26F8003294D6 /* URLEncodedBody.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = URLEncodedBody.swift; sourceTree = "<group>"; };
 		34E21CCE1E1B2A20003294D6 /* URLEncodedSerializerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = URLEncodedSerializerTests.swift; sourceTree = "<group>"; };
 		34E55BF01E3A6D49000DD128 /* Query.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Query.swift; sourceTree = "<group>"; };
@@ -222,11 +236,13 @@
 			children = (
 				49C192571DA96CE400823A55 /* Builder.swift */,
 				3475A6EB1E5CFE430050019D /* BuilderArg.swift */,
+				34CA58711E94224B001F5E54 /* BuilderError.swift */,
+				3433839F1E93EFAD0090C184 /* InterpretedResponse.swift */,
 				49C192591DA96D4500823A55 /* Method.swift */,
 				3475A6E91E5CFE330050019D /* OptionalHelper.swift */,
 				3475A6ED1E5CFE600050019D /* OutboundSerializerType.swift */,
 				F3A3D0101D875C7A0067D03C /* Response.swift */,
-				3433839F1E93EFAD0090C184 /* InterpretedResponse.swift */,
+				34CA58731E9422A6001F5E54 /* ResponseError.swift */,
 			);
 			name = Concrete;
 			sourceTree = "<group>";
@@ -321,7 +337,9 @@
 				34F6F0491E8F0829002BA263 /* ReflectableTransformer.swift */,
 				34F6F04B1E8F0829002BA263 /* Reflection.swift */,
 				34F6F0481E8F0829002BA263 /* Reflector.swift */,
+				34CA58751E9422E4001F5E54 /* SerializationError.swift */,
 				34F6F04A1E8F0829002BA263 /* ValueTransformer.swift */,
+				34CA58771E942343001F5E54 /* ReflectionError.swift */,
 			);
 			name = Reflector;
 			sourceTree = "<group>";
@@ -362,6 +380,9 @@
 				34B8EDAE1E664FF300030FAA /* Utils.swift */,
 				343383A11E93F7E90090C184 /* ClientResponseExtensions.swift */,
 				34CA586F1E93FF88001F5E54 /* InterpretedResponseTests.swift */,
+				34CA58791E943EC5001F5E54 /* CustomSerializerTests.swift */,
+				34CA587B1E943EE5001F5E54 /* SwiftyJSON.swift */,
+				34CA587D1E943F40001F5E54 /* SwiftyJSONSerializer.swift */,
 			);
 			path = RetroluxTests;
 			sourceTree = "<group>";
@@ -524,15 +545,19 @@
 				34B8ED931E664B8300030FAA /* HTTPCallFactory.swift in Sources */,
 				34B8ED811E664B7700030FAA /* ClientResponse.swift in Sources */,
 				34B8ED8A1E664B7B00030FAA /* OptionalHelper.swift in Sources */,
+				34CA58781E942343001F5E54 /* ReflectionError.swift in Sources */,
 				34B8ED8F1E664B7F00030FAA /* Query.swift in Sources */,
+				34CA58721E94224B001F5E54 /* BuilderError.swift in Sources */,
 				34B8ED861E664B7700030FAA /* WrappedSerializerArg.swift in Sources */,
 				34B8ED7E1E664B7700030FAA /* Call.swift in Sources */,
 				34B8ED991E664B8700030FAA /* Part.swift in Sources */,
+				34CA58761E9422E4001F5E54 /* SerializationError.swift in Sources */,
 				34B8ED981E664B8700030FAA /* MultipartEncodeable.swift in Sources */,
 				34B8ED801E664B7700030FAA /* Client.swift in Sources */,
 				34B8ED941E664B8300030FAA /* Header.swift in Sources */,
 				34B8ED951E664B8700030FAA /* AFError.swift in Sources */,
 				34B8ED871E664B7B00030FAA /* Builder.swift in Sources */,
+				34CA58741E9422A6001F5E54 /* ResponseError.swift in Sources */,
 				34F6F04E1E8F0829002BA263 /* Reflectable.swift in Sources */,
 				34F6F0521E8F0829002BA263 /* Reflection.swift in Sources */,
 				34F6F0511E8F0829002BA263 /* ValueTransformer.swift in Sources */,
@@ -554,9 +579,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				34CA587E1E943F40001F5E54 /* SwiftyJSONSerializer.swift in Sources */,
 				34F6F0621E8F0856002BA263 /* PropertyTypeTests.swift in Sources */,
 				34F6F0631E8F0856002BA263 /* DateTransformer.swift in Sources */,
 				34B8ED7C1E664B3800030FAA /* HeaderTests.swift in Sources */,
+				34CA587C1E943EE5001F5E54 /* SwiftyJSON.swift in Sources */,
 				34F6F05D1E8F0856002BA263 /* ReflectionErrorTests.swift in Sources */,
 				34F6F05F1E8F0856002BA263 /* ReflectionTests.swift in Sources */,
 				34B8ED7A1E664B3400030FAA /* PathTests.swift in Sources */,
@@ -565,6 +592,7 @@
 				34B8ED741E664B2300030FAA /* ReflectionJSONSerializerTests.swift in Sources */,
 				34B8ED781E664B2D00030FAA /* DigestAuthTests.swift in Sources */,
 				34B8ED791E664B3300030FAA /* QueryTests.swift in Sources */,
+				34CA587A1E943EC5001F5E54 /* CustomSerializerTests.swift in Sources */,
 				34CA58701E93FF88001F5E54 /* InterpretedResponseTests.swift in Sources */,
 				34F6F0611E8F0856002BA263 /* ValueTransformerTests.swift in Sources */,
 				343383A21E93F7E90090C184 /* ClientResponseExtensions.swift in Sources */,

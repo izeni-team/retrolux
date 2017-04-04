@@ -23,7 +23,7 @@ class QueryTests: XCTestCase {
         }
         
         waitForExpectations(timeout: 1) { (error) in
-            if error != nil {
+            if let error = error {
                 XCTFail("Failed with error: \(error)")
             }
         }
@@ -41,7 +41,7 @@ class QueryTests: XCTestCase {
         }
         
         waitForExpectations(timeout: 1) { (error) in
-            if error != nil {
+            if let error = error {
                 XCTFail("Failed with error: \(error)")
             }
         }

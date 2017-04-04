@@ -555,8 +555,8 @@ class CustomObject: Object {
         super.init()
     }
 }
-extension CustomObject: Reflectable {
-}
+extension CustomObject: ReflectableSubclassingIsAllowed {}
+extension CustomObject: Reflectable {}
 
 extension Date {
     fileprivate func toString() -> String {

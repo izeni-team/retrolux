@@ -21,7 +21,7 @@ class HeaderTests: XCTestCase {
             expectation.fulfill()
         }
         waitForExpectations(timeout: 1) { (error) in
-            if error != nil {
+            if let error = error {
                 XCTFail("Failed with error: \(error)")
             }
         }

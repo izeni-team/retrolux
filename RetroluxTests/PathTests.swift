@@ -23,7 +23,7 @@ class PathTests: XCTestCase {
         }
         
         waitForExpectations(timeout: 1) { (error) in
-            if error != nil {
+            if let error = error {
                 XCTFail("Failed with error: \(error)")
             }
         }
@@ -41,7 +41,25 @@ class PathTests: XCTestCase {
         }
         
         waitForExpectations(timeout: 1) { (error) in
-            if error != nil {
+            if let error = error {
+                XCTFail("Failed with error: \(error)")
+            }
+        }
+    }
+    
+    func testStringLiteralConversion() {
+        let builder = RetroluxBuilder(baseURL: URL(string: "http://127.0.0.1/")!)
+        let request = builder.makeRequest(method: .get, endpoint: "whatever/{id}/{id2}/", args: ("id" as Path, Path("id2")), response: Void.self)
+        
+        let expectation = self.expectation(description: "Waiting for response")
+        
+        request(("some_id_thing", "another_id_thing")).enqueue { response in
+            XCTAssert(response.request.url?.absoluteString.hasSuffix("whatever/some_id_thing/another_id_thing/") == true)
+            expectation.fulfill()
+        }
+        
+        waitForExpectations(timeout: 1) { (error) in
+            if let error = error {
                 XCTFail("Failed with error: \(error)")
             }
         }

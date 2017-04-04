@@ -8,13 +8,6 @@
 
 import Foundation
 
-public enum SerializationError: Error {
-    case keyNotFound(property: Property, forClass: Any.Type)
-    case propertyDoesNotSupportNullValues(property: Property, forClass: Any.Type)
-    case typeMismatch(expected: PropertyType, got: Any.Type?, property: String, forClass: Any.Type)
-    case invalidRootJSONType
-}
-
 public func reflectable_setProperty(_ property: Property, value: Any?, instance: Reflectable) throws {
     guard property.type.isCompatible(with: value) else {
         if property.required {
@@ -89,6 +82,7 @@ extension Reflectable {
 
     // TODO: This isn't internationalizable.
     // Return value is just an error message.
+    // TODO: Return an error object instead or make it throw?
     public func validate() -> String? {
         return nil
     }
