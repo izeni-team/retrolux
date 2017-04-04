@@ -9,7 +9,8 @@
 import Foundation
 
 public enum SerializationError: Error {
-    case propertyDoesNotSupportOptionalValues(property: String, forClass: Any.Type)
+    case keyNotFound(property: Property, forClass: Any.Type)
+    case propertyDoesNotSupportNullValues(property: Property, forClass: Any.Type)
     case typeMismatch(expected: PropertyType, got: Any.Type?, property: String, forClass: Any.Type)
     case invalidRootJSONType
 }
@@ -19,8 +20,10 @@ public func reflectable_setProperty(_ property: Property, value: Any?, instance:
         if property.required {
             if case PropertyType.optional = property.type {
                 /* Nothing */
-            } else if value == nil || value is NSNull {
-                throw SerializationError.propertyDoesNotSupportOptionalValues(property: property.name, forClass: type(of: instance))
+            } else if value == nil {
+                throw SerializationError.keyNotFound(property: property, forClass: type(of: instance))
+            } else if value is NSNull {
+                throw SerializationError.propertyDoesNotSupportNullValues(property: property, forClass: type(of: instance))
             } else {
                 throw SerializationError.typeMismatch(expected: property.type, got: type(of: value), property: property.name, forClass: type(of: instance))
             }

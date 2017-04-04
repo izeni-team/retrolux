@@ -324,10 +324,10 @@ class ReflectionErrorTests: XCTestCase {
             XCTAssert(properties.count == 1)
             XCTAssert(properties.first?.name == "name")
             XCTAssert(properties.first?.type == .string)
-            try object.set(value: nil, for: properties.first!)
+            try object.set(value: NSNull(), for: properties.first!)
             XCTFail("Operation should not have succeeded.")
-        } catch SerializationError.propertyDoesNotSupportOptionalValues(property: let property, forClass: let `class`) {
-            XCTAssert(property == "name")
+        } catch SerializationError.propertyDoesNotSupportNullValues(property: let property, forClass: let `class`) {
+            XCTAssert(property.name == "name")
             XCTAssert(`class` == Person.self)
         } catch {
             XCTFail("\(error)")
@@ -339,8 +339,44 @@ class ReflectionErrorTests: XCTestCase {
             let reflector = Reflector()
             _ = try reflector.convert(fromJSONDictionaryData: data, to: Person.self)
             XCTFail("Operation should not have succeeded.")
-        } catch SerializationError.propertyDoesNotSupportOptionalValues(property: let property, forClass: let `class`) {
-            XCTAssert(property == "name")
+        } catch SerializationError.propertyDoesNotSupportNullValues(property: let property, forClass: let `class`) {
+            XCTAssert(property.name == "name")
+            XCTAssert(`class` == Person.self)
+        } catch {
+            XCTFail("\(error)")
+        }
+    }
+    
+    func testKeyNotFound() {
+        class Person: Reflection {
+            var name = ""
+        }
+        
+        let object = Person()
+        do {
+            let properties = try Reflector().reflect(object)
+            XCTAssert(properties.count == 1)
+            XCTAssert(properties.first?.name == "name")
+            XCTAssert(properties.first?.type == .string)
+            try object.set(value: nil, for: properties.first!)
+            XCTFail("Operation should not have succeeded.")
+        } catch SerializationError.keyNotFound(property: let property, forClass: let `class`) {
+            XCTAssert(property.mappedTo == "name")
+            XCTAssert(property.name == "name")
+            XCTAssert(`class` == Person.self)
+        } catch {
+            XCTFail("\(error)")
+        }
+        
+        let data = "{}".data(using: .utf8)!
+        
+        do {
+            let reflector = Reflector()
+            _ = try reflector.convert(fromJSONDictionaryData: data, to: Person.self)
+            XCTFail("Operation should not have succeeded.")
+        } catch SerializationError.keyNotFound(property: let property, forClass: let `class`) {
+            XCTAssert(property.mappedTo == "name")
+            XCTAssert(property.name == "name")
             XCTAssert(`class` == Person.self)
         } catch {
             XCTFail("\(error)")

@@ -101,8 +101,8 @@ class InterpretedResponseTests: XCTestCase {
             case .success(_):
                 XCTFail("Should not have succeeded.")
             case .failure(let error):
-                if case SerializationError.propertyDoesNotSupportOptionalValues(property: let property, forClass: let `class`) = error {
-                    XCTAssert(property == "name")
+                if case SerializationError.propertyDoesNotSupportNullValues(property: let property, forClass: let `class`) = error {
+                    XCTAssert(property.name == "name")
                     XCTAssert(`class` == Person.self)
                 } else {
                     XCTFail("Wrong error returned: \(error).")

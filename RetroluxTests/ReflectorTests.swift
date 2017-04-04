@@ -162,8 +162,8 @@ class RetroluxReflectorTests: XCTestCase {
         do {
             _ = try reflector.convert(fromJSONDictionaryData: responseData, to: Car.self)
             XCTFail("Should not have passed.")
-        } catch SerializationError.propertyDoesNotSupportOptionalValues(property: let property, forClass: let `class`) {
-            XCTAssert(property == "model")
+        } catch SerializationError.propertyDoesNotSupportNullValues(property: let property, forClass: let `class`) {
+            XCTAssert(property.name == "model")
             XCTAssert(`class` == Car.self)
         } catch {
             XCTFail("\(error)")
