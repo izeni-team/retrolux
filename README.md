@@ -6,7 +6,7 @@ Retrolux is an all in one networking framework. It is intended to become the equ
 
 There are many good networking libraries out there already for iOS. [Alamofire](https://github.com/Alamofire/Alamofire), [AFNetworking](https://github.com/AFNetworking/AFNetworking), and [Moya](https://github.com/Moya/Moya), etc. are all great libraries.
 
-What makes this framework unique is that each endpoint can be consicely described and implemented. No subclassing, protocol implementations, functions to implement, or extra modules to download. It comes with JSON, Multipart, and URL Encoding support out of the box. In short, it aims to optimize, as much as possible, the end-to-end process of network API consumption.
+What makes this framework unique is that each endpoint can be consicely described. No subclassing, protocol implementations, functions to implement, or extra modules to download. It comes with JSON, Multipart, and URL Encoding support out of the box. In short, it aims to optimize, as much as possible, the end-to-end process of network API consumption.
 
 The purpose of this framework is not just to abstract away networking details, but also to provide a Retrofit-like workflow, where endpoints can be described--not implemented.
 
