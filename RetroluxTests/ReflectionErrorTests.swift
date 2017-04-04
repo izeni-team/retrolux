@@ -9,7 +9,85 @@
 import XCTest
 import Retrolux
 
+protocol TestProtocol {
+    var instanceTest: Bool { get }
+    static var test: Bool { get }
+    static func testFunc() -> Bool
+}
+
+extension TestProtocol {
+    var instanceTest: Bool {
+        return false
+    }
+    static var test: Bool {
+        return false
+    }
+    static func testFunc() -> Bool {
+        return false
+    }
+}
+
 class ReflectionErrorTests: XCTestCase {
+    func helper<T: TestProtocol>(t: T) -> Bool {
+        return t.instanceTest
+    }
+    
+    // This test checks Swift protocol inheritance behavior for protocols.
+    func testSwiftProtocolLimitations() {
+        class ImproperBase: TestProtocol {
+            
+        }
+        
+        class ImproperChild: ImproperBase {
+            var instanceTest: Bool {
+                return true
+            }
+            
+            static var test: Bool {
+                return true
+            }
+            
+            static func testFunc() -> Bool {
+                return true
+            }
+        }
+        
+        let improper = ImproperChild()
+        XCTAssert(improper.instanceTest == true)
+        XCTAssert((improper as TestProtocol).instanceTest == false)
+        XCTAssert(helper(t: improper) == false)
+        
+        let improperProto: TestProtocol.Type = type(of: ImproperChild())
+        XCTAssert(improperProto.test == false)
+        XCTAssert(improperProto.testFunc() == false)
+        
+        /// This is the way inheritance should be to work properly. ///
+        
+        class ProperBase: TestProtocol {
+            class var test: Bool {
+                return false
+            }
+            
+            class func testFunc() -> Bool {
+                return false
+            }
+        }
+        
+        class ProperChild: ProperBase {
+            override class var test: Bool {
+                return true
+            }
+            
+            override class func testFunc() -> Bool {
+                return true
+            }
+        }
+        
+        let properProto: TestProtocol.Type = type(of: ProperChild())
+        XCTAssert(properProto.test == true)
+        XCTAssert(properProto.testFunc() == true)
+    }
+    
     func testRLObjectReflection_customBaseClass() {
         class Object1: NSObject, Reflectable {
             required override init() {
