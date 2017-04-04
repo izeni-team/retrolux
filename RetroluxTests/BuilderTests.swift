@@ -70,12 +70,16 @@ fileprivate class FakeBuilder: Builder {
     let client: Client
     let callFactory: CallFactory
     let serializers: [Serializer]
+    let requestInterceptor: ((inout URLRequest) -> Void)?
+    let responseInterceptor: ((inout ClientResponse) -> Void)?
     
     init() {
         self.baseURL = URL(string: "https://www.google.com/")!
         self.client = FakeClient()
         self.callFactory = FakeCallFactory()
         self.serializers = [ReflectionJSONSerializer()]
+        self.requestInterceptor = nil
+        self.responseInterceptor = nil
     }
 }
 
@@ -84,12 +88,16 @@ fileprivate class RealBuilder: Builder {
     let client: Client
     let callFactory: CallFactory
     let serializers: [Serializer]
+    let requestInterceptor: ((inout URLRequest) -> Void)?
+    let responseInterceptor: ((inout ClientResponse) -> Void)?
     
     init() {
         self.baseURL = URL(string: "https://www.google.com/")!
         self.client = HTTPClient()
         self.callFactory = HTTPCallFactory()
         self.serializers = [ReflectionJSONSerializer()]
+        self.requestInterceptor = nil
+        self.responseInterceptor = nil
     }
 }
 
@@ -302,7 +310,7 @@ class BuilderTests: XCTestCase {
         builder.serializers = [GreedyOutbound<Int>(), GreedyOutbound<String>()]
         let function = builder.makeRequest(method: .post, endpoint: "whatever", args: (Int(), String()), response: Void.self)
         function((3, "a")).enqueue { response in
-            if let error = response.result.error, case BuilderError.tooManyMatchingSerializers(serializers: let serializers, arguments: let arguments) = error {
+            if let error = response.error, case BuilderError.tooManyMatchingSerializers(serializers: let serializers, arguments: let arguments) = error {
                 XCTAssert(serializers.first === builder.serializers.first! && serializers.last === builder.serializers.last!)
                 XCTAssert(arguments.first?.creation as? Int == Int())
                 XCTAssert(arguments.last?.creation as? String == String())
@@ -327,7 +335,7 @@ class BuilderTests: XCTestCase {
         builder.serializers = [GreedyOutbound<Int>()]
         let function = builder.makeRequest(method: .post, endpoint: "whateverz", args: String(), response: Void.self)
         function("a").enqueue { response in
-            if let error = response.result.error, case BuilderError.unsupportedArgument(let arg) = error {
+            if let error = response.error, case BuilderError.unsupportedArgument(let arg) = error {
                 print(arg)
                 XCTAssert(arg.type == String.self)
                 XCTAssert(arg.creation as? String == "")
@@ -357,7 +365,7 @@ class BuilderTests: XCTestCase {
         builder.serializers = [GreedyOutbound<Int>()]
         let function = builder.makeRequest(method: .post, endpoint: "whateverz", args: Container(), response: Void.self)
         function(Container()).enqueue { response in
-            if let error = response.result.error, case BuilderError.unsupportedArgument(let arg) = error {
+            if let error = response.error, case BuilderError.unsupportedArgument(let arg) = error {
                 print(arg)
                 XCTAssert(arg.type == NSObject.self)
                 XCTAssert(arg.creation is NSObject)
@@ -383,7 +391,7 @@ class BuilderTests: XCTestCase {
         builder.serializers = [serializer]
         let function = builder.makeRequest(method: .post, endpoint: "whateverz", args: Int(), response: Void.self)
         function(3).enqueue { response in
-            if let error = response.result.error, case BuilderError.validationError(serializer: let s, arguments: let args) = error {
+            if let error = response.error, case BuilderError.validationError(serializer: let s, arguments: let args) = error {
                 XCTAssert(s === serializer)
                 XCTAssert(args.count == 1)
                 XCTAssert(args.first?.creation as? Int == 0)

@@ -12,6 +12,7 @@ public enum BuilderError: Error {
     case unsupportedArgument(BuilderArg)
     case tooManyMatchingSerializers(serializers: [OutboundSerializer], arguments: [BuilderArg])
     case validationError(serializer: Serializer, arguments: [BuilderArg])
+    case serializationError(serializer: Serializer, error: SerializationError, arguments: [BuilderArg])
 }
 
 public protocol Builder {
@@ -19,6 +20,8 @@ public protocol Builder {
     var client: Client { get }
     var callFactory: CallFactory { get }
     var serializers: [Serializer] { get }
+    var requestInterceptor: ((inout URLRequest) -> Void)? { get }
+    var responseInterceptor: ((inout ClientResponse) -> Void)? { get }
 }
 
 extension Builder {
@@ -31,7 +34,9 @@ extension Builder {
     }
     
     private func normalize(arg: Any, serializerType: OutboundSerializerType) -> [(serializer: OutboundSerializer?, value: Any?, type: Any.Type)] {
-        if let wrapped = arg as? WrappedSerializerArg {
+        if type(of: arg) == Void.self {
+            return []
+        } else if let wrapped = arg as? WrappedSerializerArg {
             if let value = wrapped.value {
                 return normalize(arg: value, serializerType: serializerType)
             } else {
@@ -59,6 +64,21 @@ extension Builder {
         }
     }
     
+    public func log(request: URLRequest) {
+        print("Retrolux: \(request.httpMethod!) \(request.url!.absoluteString.removingPercentEncoding!)")
+    }
+    
+    public func log<T>(response: Response<T>) {
+        let status = response.status ?? 0
+        
+        let requestURL = response.request.url!.absoluteString.removingPercentEncoding!
+        print("Retrolux: \(status) \(requestURL)")
+        
+        if let error = response.error {
+            print("Retrolux: Error: \(error)")
+        }
+    }
+    
     public func makeRequest<Args, ResponseType>(type: OutboundSerializerType = .auto, method: HTTPMethod, endpoint: String, args creationArgs: Args, response: ResponseType.Type) -> (Args) -> Call<ResponseType> {
         return { startingArgs in
             var task: Task?
@@ -83,10 +103,10 @@ extension Builder {
                     var serializer: OutboundSerializer?
                     var serializerArgs: [BuilderArg] = []
                     
-                    let execCallback: (Error) -> Void = { error in
-                        let result = Result<ResponseType>.failure(error: ErrorResponse(error: error))
-                        let response = Response<ResponseType>(request: request, raw: nil, result: result)
+                    let execCallback: (BuilderError) -> Void = { error in
+                        let response = Response<ResponseType>(request: request, data: nil, error: error, urlResponse: nil, body: nil)
                         DispatchQueue.main.async {
+                            self.log(request: request)
                             callback(response)
                         }
                     }
@@ -105,7 +125,7 @@ extension Builder {
                                 serializer = thisSerializer
                             } else if serializer !== thisSerializer {
                                 let serializers = [serializer!, thisSerializer]
-                                execCallback(BuilderError.tooManyMatchingSerializers(serializers: serializers, arguments: serializerArgs + [arg]))
+                                execCallback(.tooManyMatchingSerializers(serializers: serializers, arguments: serializerArgs + [arg]))
                                 return
                             } else {
                                 // Serializer already set
@@ -113,22 +133,25 @@ extension Builder {
                             
                             serializerArgs.append(arg)
                         } else {
-                            execCallback(BuilderError.unsupportedArgument(arg))
+                            execCallback(.unsupportedArgument(arg))
                             return
                         }
                     }
                     
-                    do {
-                        if let serializer = serializer {
-                            if !serializer.validate(outbound: serializerArgs) {
-                                execCallback(BuilderError.validationError(serializer: serializer, arguments: serializerArgs))
-                                return
-                            }
-                            try serializer.apply(arguments: serializerArgs, to: &request)
+                    if let serializer = serializer {
+                        if !serializer.validate(outbound: serializerArgs) {
+                            execCallback(.validationError(serializer: serializer, arguments: serializerArgs))
+                            return
                         }
-                    } catch {
-                        execCallback(error)
-                        return
+                        
+                        do {
+                            try serializer.apply(arguments: serializerArgs, to: &request)
+                        } catch let error as SerializationError {
+                            execCallback(.serializationError(serializer: serializer, error: error, arguments: serializerArgs))
+                            return
+                        } catch {
+                            fatalError("Unknown error returned from serializer: \(error)")
+                        }
                     }
                     
                     for arg in selfApplying {
@@ -136,26 +159,44 @@ extension Builder {
                         type.apply(arg: arg, to: &request)
                     }
                     
-                    task = self.client.makeAsynchronousRequest(request: &request, callback: { (clientResponse) in
-                        let result: Result<ResponseType>
-                        let response: Response<ResponseType>
-                        do {
-                            if ResponseType.self == Void.self {
-                                result = .success(value: () as! ResponseType)
-                            } else if let serializer = self.inboundSerializers.first(where: { $0.supports(inboundType: ResponseType.self) }) {
-                                result = .success(value: try serializer.makeValue(from: clientResponse, type: ResponseType.self))
+                    self.requestInterceptor?(&request)
+                    self.log(request: request)
+                    
+                    task = self.client.makeAsynchronousRequest(request: &request, callback: { (immutableClientResponse) in
+                        var clientResponse = immutableClientResponse
+                        self.responseInterceptor?(&clientResponse)
+                        
+                        let body: ResponseType?
+                        let error: Error?
+                        
+                        if ResponseType.self == Void.self {
+                            body = nil
+                            error = nil
+                        } else {
+                            if let serializer = self.inboundSerializers.first(where: { $0.supports(inboundType: ResponseType.self) }) {
+                                do {
+                                    body = try serializer.makeValue(from: clientResponse, type: ResponseType.self)
+                                    error = nil
+                                } catch let serializerError {
+                                    body = nil
+                                    error = serializerError
+                                }
                             } else {
                                 // This is incorrect usage of Retrolux, hence it is a fatal error.
                                 fatalError("Unsupported argument type when processing request: \(ResponseType.self)")
                             }
-                            response = Response(request: request, raw: clientResponse, result: result)
-                        } catch {
-                            print("Error serializing response: \(error)")
-                            result = .failure(error: ErrorResponse(error: error))
-                            response = Response(request: request, raw: clientResponse, result: result)
                         }
                         
+                        let response: Response<ResponseType> = Response(
+                            request: request,
+                            data: clientResponse.data,
+                            error: error ?? clientResponse.error,
+                            urlResponse: clientResponse.response,
+                            body: body
+                        )
+                        
                         DispatchQueue.main.async {
+                            self.log(response: response)
                             callback(response)
                         }
                     })

@@ -9,6 +9,9 @@
 import Foundation
 
 public class RetroluxBuilder: Builder {
+    public var requestInterceptor: ((inout URLRequest) -> Void)?
+    public var responseInterceptor: ((inout ClientResponse) -> Void)?
+
     public let baseURL: URL
     public let client: Client
     public let callFactory: CallFactory
