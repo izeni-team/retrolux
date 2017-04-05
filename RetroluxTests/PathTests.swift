@@ -12,56 +12,20 @@ import Retrolux
 
 class PathTests: XCTestCase {
     func testSinglePath() {
-        let builder = Builder(base: URL(string: "http://127.0.0.1/")!)
-        let request = builder.makeRequest(method: .get, endpoint: "whatever/{id}/", args: Path("id"), response: Void.self)
-        
-        let expectation = self.expectation(description: "Waiting for response")
-        
-        request(Path("some_id_thing")).enqueue { response in
-            XCTAssert(response.request.url?.absoluteString.hasSuffix("whatever/some_id_thing/") == true)
-            expectation.fulfill()
-        }
-        
-        waitForExpectations(timeout: 1) { (error) in
-            if let error = error {
-                XCTFail("Failed with error: \(error)")
-            }
-        }
+        let request = Builder.dummy().makeRequest(method: .get, endpoint: "whatever/{id}/", args: Path("id"), response: Void.self)
+        let response = request(Path("some_id_thing")).test()
+        XCTAssert(response.request.url?.absoluteString.hasSuffix("whatever/some_id_thing/") == true)
     }
     
     func testMultiplePaths() {
-        let builder = Builder(base: URL(string: "http://127.0.0.1/")!)
-        let request = builder.makeRequest(method: .get, endpoint: "whatever/{id}/{id2}/", args: (Path("id"), Path("id2")), response: Void.self)
-        
-        let expectation = self.expectation(description: "Waiting for response")
-        
-        request((Path("some_id_thing"), Path("another_id_thing"))).enqueue { response in
-            XCTAssert(response.request.url?.absoluteString.hasSuffix("whatever/some_id_thing/another_id_thing/") == true)
-            expectation.fulfill()
-        }
-        
-        waitForExpectations(timeout: 1) { (error) in
-            if let error = error {
-                XCTFail("Failed with error: \(error)")
-            }
-        }
+        let request = Builder.dummy().makeRequest(method: .get, endpoint: "whatever/{id}/{id2}/", args: (Path("id"), Path("id2")), response: Void.self)
+        let response = request((Path("some_id_thing"), Path("another_id_thing"))).test()
+        XCTAssert(response.request.url?.absoluteString.hasSuffix("whatever/some_id_thing/another_id_thing/") == true)
     }
     
     func testStringLiteralConversion() {
-        let builder = Builder(base: URL(string: "http://127.0.0.1/")!)
-        let request = builder.makeRequest(method: .get, endpoint: "whatever/{id}/{id2}/", args: ("id" as Path, Path("id2")), response: Void.self)
-        
-        let expectation = self.expectation(description: "Waiting for response")
-        
-        request(("some_id_thing", "another_id_thing")).enqueue { response in
-            XCTAssert(response.request.url?.absoluteString.hasSuffix("whatever/some_id_thing/another_id_thing/") == true)
-            expectation.fulfill()
-        }
-        
-        waitForExpectations(timeout: 1) { (error) in
-            if let error = error {
-                XCTFail("Failed with error: \(error)")
-            }
-        }
+        let request = Builder.dummy().makeRequest(method: .get, endpoint: "whatever/{id}/{id2}/", args: ("id" as Path, Path("id2")), response: Void.self)
+        let response = request(("some_id_thing", "another_id_thing")).test()
+        XCTAssert(response.request.url?.absoluteString.hasSuffix("whatever/some_id_thing/another_id_thing/") == true)
     }
 }

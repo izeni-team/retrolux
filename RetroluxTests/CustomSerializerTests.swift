@@ -12,7 +12,7 @@ import XCTest
 
 class CustomSerializerTests: XCTestCase {
     func testCustomSerializer() {
-        let builder = Builder(base: URL(string: "https://127.0.0.1/")!)
+        let builder = Builder.dummy()
         builder.serializers.append(SwiftyJSONSerializer())
         let function = builder.makeRequest(
             method: .post,
@@ -24,29 +24,18 @@ class CustomSerializerTests: XCTestCase {
             response = ClientResponse(base: response, status: 200, data: "{\"token\":\"123\",\"id\":\"abc\"}".data(using: .utf8)!)
         }
         
-        let expectation = self.expectation(description: "Waiting for network response.")
+        let response = function(JSON(["username": "bobby", "password": "abc123"])).perform()
+        let requestDictionary = try! JSONSerialization.jsonObject(with: response.request.httpBody!, options: []) as! [String: Any]
+        XCTAssert(requestDictionary.keys.count == 2)
+        XCTAssert(requestDictionary["username"] as? String == "bobby")
+        XCTAssert(requestDictionary["username"] as? String == "bobby")
         
-        function(JSON(["username": "bobby", "password": "abc123"])).enqueue { response in
-            let requestDictionary = try! JSONSerialization.jsonObject(with: response.request.httpBody!, options: []) as! [String: Any]
-            XCTAssert(requestDictionary.keys.count == 2)
-            XCTAssert(requestDictionary["username"] as? String == "bobby")
-            XCTAssert(requestDictionary["username"] as? String == "bobby")
-            
-            let responseDictionary = try! JSONSerialization.jsonObject(with: response.data!, options: []) as! [String: Any]
-            XCTAssert(responseDictionary.keys.count == 2)
-            XCTAssert(responseDictionary["token"] as? String == "123")
-            XCTAssert(responseDictionary["id"] as? String == "abc")
-            
-            XCTAssert(response.body!["token"] == "123")
-            XCTAssert(response.body!["id"] == "abc")
-            
-            expectation.fulfill()
-        }
+        let responseDictionary = try! JSONSerialization.jsonObject(with: response.data!, options: []) as! [String: Any]
+        XCTAssert(responseDictionary.keys.count == 2)
+        XCTAssert(responseDictionary["token"] as? String == "123")
+        XCTAssert(responseDictionary["id"] as? String == "abc")
         
-        self.waitForExpectations(timeout: 1) { error in
-            if let error = error {
-                XCTFail("Failed with error: \(error)")
-            }
-        }
+        XCTAssert(response.body!["token"] == "123")
+        XCTAssert(response.body!["id"] == "abc")
     }
 }

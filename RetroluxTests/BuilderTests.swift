@@ -9,73 +9,6 @@
 import XCTest
 import Retrolux
 
-fileprivate class FakeTask: Task {
-    var cancelled = false
-    var resumed = false
-    
-    func cancel() {
-        cancelled = true
-    }
-    
-    func resume() {
-        resumed = true
-    }
-}
-
-fileprivate class FakeClient: Client {
-    fileprivate var requestInterceptor: ((inout URLRequest) -> Void)?
-    fileprivate var responseInterceptor: ((inout ClientResponse) -> Void)?
-    
-    var credential: URLCredential?
-    
-    var fakeResponse: ClientResponse!
-    
-    func makeAsynchronousRequest(request: inout URLRequest, callback: @escaping (_ response: ClientResponse) -> Void) -> Task {
-        assert(fakeResponse != nil)
-        let task = FakeTask()
-        DispatchQueue.main.async {
-            callback(self.fakeResponse)
-        }
-        return task
-    }
-}
-
-fileprivate class FakeCall<T>: Call<T> {
-    fileprivate var delegatedStart: (@escaping (Response<T>) -> Void) -> Void
-    fileprivate var delegatedCancel: () -> Void
-    
-    init(start: @escaping (@escaping (Response<T>) -> Void) -> Void, cancel: @escaping () -> Void) {
-        self.delegatedStart = start
-        self.delegatedCancel = cancel
-        super.init()
-    }
-    
-    override func enqueue(callback: @escaping (Response<T>) -> Void) {
-        delegatedStart(callback)
-    }
-    
-    override func cancel() {
-        delegatedCancel()
-    }
-}
-
-fileprivate class FakeCallFactory: CallFactory {
-    func makeCall<T>(start: @escaping (@escaping (Response<T>) -> Void) -> Void, cancel: @escaping () -> Void) -> Call<T> {
-        return FakeCall(start: start, cancel: cancel)
-    }
-}
-
-fileprivate class FakeBuilder: Builder {
-    init() {
-        super.init(base: URL(string: "https://www.google.com/")!)
-        self.client = FakeClient()
-        self.callFactory = FakeCallFactory()
-        self.serializers = [ReflectionJSONSerializer()]
-        self.requestInterceptor = nil
-        self.responseInterceptor = nil
-    }
-}
-
 fileprivate class GreedyOutbound<T>: OutboundSerializer {
     var fail = false
     
@@ -93,128 +26,75 @@ fileprivate class GreedyOutbound<T>: OutboundSerializer {
 }
 
 class BuilderTests: XCTestCase {
-    func testStartAndCancelCalls() {
-        let builder = FakeBuilder()
-        (builder.client as! FakeClient).fakeResponse = ClientResponse(data: nil, response: nil, error: nil)
-
-        let function = builder.makeRequest(method: .delete, endpoint: "endpoint", args: (), response: Void.self)
-        function().test { response in
-            
-        }
-        
-        let call = function() as! FakeCall<()>
-        
-        let oldStart = call.delegatedStart
-        var startCalled = 0
-        call.delegatedStart = { response in
-            startCalled += 1
-            oldStart(response)
-        }
-        
-        let oldCancel = call.delegatedCancel
-        var cancelCalled = 0
-        call.delegatedCancel = {
-            cancelCalled += 1
-            oldCancel()
-        }
-        
-        let expectation = self.expectation(description: "Waiting for network callback")
-        
-        call.enqueue { response in
-            XCTAssert(startCalled == 1)
-            XCTAssert(cancelCalled == 0)
-            
-            call.cancel()
-            XCTAssert(cancelCalled == 1)
-            
+    func testAsyncCapturing() {
+        let builder = Builder.dummy()
+        let request = builder.makeRequest(method: .get, endpoint: "", args: (), response: Void.self)
+        let originalURL = builder.base
+        let expectation = self.expectation(description: "Waiting for response.")
+        request().enqueue { response in
+            XCTAssert(response.request.url == originalURL)
+            XCTAssert(response.error != nil) // Error should be non-nil, since the builder's dummy baseURL is invalid.
             expectation.fulfill()
         }
-        
+        let newURL = URL(string: "8.8.8.8/")!
+        builder.base = newURL
+        builder.isDryModeEnabled = true
         waitForExpectations(timeout: 1) { (error) in
             if let error = error {
-                XCTFail("Failed to wait for expectation: \(error)")
+                XCTFail("\(error)")
+            }
+        }
+        
+        let expectation2 = self.expectation(description: "Waiting for response.")
+        request().enqueue { response in
+            XCTAssert(response.request.url == newURL)
+            XCTAssert(response.error == nil) // Error will always be nil when dry mode is enabled.
+            expectation2.fulfill()
+        }
+        waitForExpectations(timeout: 1) { (error) in
+            if let error = error {
+                XCTFail("\(error)")
             }
         }
     }
     
     func testURLEscaping() {
-        let builder = Builder(base: URL(string: "http://127.0.0.1/")!)
+        let builder = Builder.dummy()
         let request = builder.makeRequest(method: .post, endpoint: "some_endpoint/?query=value a", args: (), response: Void.self)
-        let expectation = self.expectation(description: "Waiting for response")
-        request().enqueue { response in
-            XCTAssert(response.request.url?.absoluteString == "http://127.0.0.1/some_endpoint/%3Fquery=value%20a")
-            expectation.fulfill()
-        }
-        waitForExpectations(timeout: 10) { (error) in
-            if let error = error {
-                XCTFail("Failed with error: \(error)")
-            }
-        }
+        let response = request().test()
+        XCTAssert(response.request.url?.absoluteString == "\(builder.base.absoluteString)some_endpoint/%3Fquery=value%20a")
     }
     
     func testOptionalArgs() {
-        let builder = Builder(base: URL(string: "http://127.0.0.1/")!)
+        let builder = Builder.dummy()
         
         let arg: Path? = Path("id")
         let request = builder.makeRequest(method: .post, endpoint: "/some_endpoint/{id}/", args: arg, response: Void.self)
-        let expectation = self.expectation(description: "Waiting for response")
-        request(Path("it_worked")).enqueue { response in
-            XCTAssert(response.request.url!.absoluteString.contains("it_worked"))
-            expectation.fulfill()
-        }
-        waitForExpectations(timeout: 1) { (error) in
-            if let error = error {
-                XCTFail("Failed with error: \(error)")
-            }
-        }
+        let response = request(Path("it_worked")).test()
+        XCTAssert(response.request.url!.absoluteString.contains("it_worked"))
         
         let arg2: Path? = Path("id")
         let request2 = builder.makeRequest(method: .post, endpoint: "/some_endpoint/{id}/", args: arg2, response: Void.self)
-        let expectation2 = self.expectation(description: "Waiting for response")
-        request2(nil).enqueue { response in
-            XCTAssert(response.request.url!.absoluteString.removingPercentEncoding!.contains("{id}"))
-            expectation2.fulfill()
-        }
-        waitForExpectations(timeout: 1) { (error) in
-            if let error = error {
-                XCTFail("Failed with error: \(error)")
-            }
-        }
+        let response2 = request2(nil).test()
+        XCTAssert(response2.request.url!.absoluteString.removingPercentEncoding!.contains("{id}"))
         
         struct Args3 {
             let field: Field?
         }
         let args3 = Args3(field: Field("username"))
         let request3 = builder.makeRequest(method: .post, endpoint: "/some_endpoint/", args: args3, response: Void.self)
-        let expectation3 = self.expectation(description: "Waiting for response")
-        request3(Args3(field: Field("IT_WORKED"))).enqueue { response in
-            let data = response.request.httpBody!
-            let string = String(data: data, encoding: .utf8)!
-            XCTAssert(string.contains("IT_WORKED"))
-            
-            expectation3.fulfill()
-        }
-        waitForExpectations(timeout: 1) { (error) in
-            if let error = error {
-                XCTFail("Failed with error: \(error)")
-            }
-        }
+        let response3 = request3(Args3(field: Field("IT_WORKED"))).test()
+        let data = response3.request.httpBody!
+        let string = String(data: data, encoding: .utf8)!
+        XCTAssert(string.contains("IT_WORKED"))
         
         struct Args4 {
             let field: Field?
         }
         let args4 = Args4(field: Field("username"))
         let request4 = builder.makeRequest(method: .post, endpoint: "/some_endpoint/", args: args4, response: Void.self)
-        let expectation4 = self.expectation(description: "Waiting for response")
-        request4(Args4(field: nil)).enqueue { response in
-            XCTAssert(response.request.httpBody == nil)
-            expectation4.fulfill()
-        }
-        waitForExpectations(timeout: 1) { (error) in
-            if let error = error {
-                XCTFail("Failed with error: \(error)")
-            }
-        }
+        let response4 = request4(Args4(field: nil)).test()
+        XCTAssert(response4.request.httpBody == nil)
         
         struct Args5 {
             let field: Field?
@@ -224,19 +104,10 @@ class BuilderTests: XCTestCase {
         }
         let args5 = Args5(field: nil, field2: Field("username"), field3: Field("password"), field4: nil)
         let request5 = builder.makeRequest(method: .post, endpoint: "/some_endpoint/", args: args5, response: Void.self)
-        let expectation5 = self.expectation(description: "Waiting for response")
-        request5(Args5(field: nil, field2: Field("TEST_USERNAME"), field3: Field("TEST_PASSWORD"), field4: nil)).enqueue { response in
-            let data = response.request.httpBody!
-            let string = String(data: data, encoding: .utf8)!
-            XCTAssert(string.contains("TEST_USERNAME") && string.contains("TEST_PASSWORD"))
-            
-            expectation5.fulfill()
-        }
-        waitForExpectations(timeout: 1) { (error) in
-            if let error = error {
-                XCTFail("Failed with error: \(error)")
-            }
-        }
+        let response5 = request5(Args5(field: nil, field2: Field("TEST_USERNAME"), field3: Field("TEST_PASSWORD"), field4: nil)).test()
+        let data5 = response5.request.httpBody!
+        let string5 = String(data: data5, encoding: .utf8)!
+        XCTAssert(string5.contains("TEST_USERNAME") && string5.contains("TEST_PASSWORD"))
         
         let args6: Field? = nil
         let request6 = builder.makeRequest(
@@ -245,19 +116,8 @@ class BuilderTests: XCTestCase {
             args: args6,
             response: Void.self
         )
-        
-        let expectation6 = self.expectation(description: "Waiting for response")
-        
-        request6(nil).enqueue { response in
-            XCTAssert(response.request.httpBody == nil)
-            
-            expectation6.fulfill()
-        }
-        waitForExpectations(timeout: 1) { (error) in
-            if let error = error {
-                XCTFail("Failed with error: \(error)")
-            }
-        }
+        let response6 = request6(nil).test()
+        XCTAssert(response6.request.httpBody == nil)
     }
     
     func testDepthRecursion1() {
@@ -266,123 +126,77 @@ class BuilderTests: XCTestCase {
             var name = ""
         }
         
-        let expectation = self.expectation(description: "Waiting for response")
-        
-        let builder = Builder(base: URL(string: "http://127.0.0.1/")!)
-        let call = builder.makeRequest(method: .post, endpoint: "login", args: (Person()), response: Void.self)
-        call((Person())).enqueue { response in
-            XCTAssert(response.request.httpBody! == "{\"name\":\"\"}".data(using: .utf8)!)
-            expectation.fulfill()
-        }
-        waitForExpectations(timeout: 1) { (error) in
-            if let error = error {
-                XCTFail("Failed with error: \(error)")
-            }
-        }
+        let call = Builder.dummy().makeRequest(method: .post, endpoint: "login", args: (Person()), response: Void.self)
+        let response = call((Person())).test()
+        XCTAssert(response.request.httpBody! == "{\"name\":\"\"}".data(using: .utf8)!)
     }
     
     func testTooManyMatchingSerializers() {
-        let expectation = self.expectation(description: "Waiting for response")
-        
-        let builder = Builder(base: URL(string: "http://127.0.0.1/")!)
+        let builder = Builder.dummy()
         builder.serializers = [GreedyOutbound<Int>(), GreedyOutbound<String>()]
         let function = builder.makeRequest(method: .post, endpoint: "whatever", args: (Int(), String()), response: Void.self)
-        function((3, "a")).enqueue { response in
-            if let error = response.error, case BuilderError.tooManyMatchingSerializers(serializers: let serializers, arguments: let arguments) = error {
-                XCTAssert(serializers.first === builder.serializers.first! && serializers.last === builder.serializers.last!)
-                XCTAssert(arguments.first?.creation as? Int == Int())
-                XCTAssert(arguments.last?.creation as? String == String())
-                XCTAssert(arguments.first?.starting as? Int == 3)
-                XCTAssert(arguments.last?.starting as? String == "a")
-            } else {
-                XCTFail("Expected to fail with too many matching serializers.")
-            }
-            expectation.fulfill()
-        }
-        waitForExpectations(timeout: 1) { (error) in
-            if let error = error {
-                XCTFail("Failed with error: \(error)")
-            }
+        let response = function((3, "a")).test()
+        if let error = response.error, case BuilderError.tooManyMatchingSerializers(serializers: let serializers, arguments: let arguments) = error {
+            XCTAssert(serializers.first === builder.serializers.first! && serializers.last === builder.serializers.last!)
+            XCTAssert(arguments.first?.creation as? Int == Int())
+            XCTAssert(arguments.last?.creation as? String == String())
+            XCTAssert(arguments.first?.starting as? Int == 3)
+            XCTAssert(arguments.last?.starting as? String == "a")
+        } else {
+            XCTFail("Expected to fail with too many matching serializers.")
         }
     }
     
     func testUnsupportedArgument() {
-        let expectation = self.expectation(description: "Waiting for response")
-        
-        let builder = Builder(base: URL(string: "http://127.0.0.1/")!)
+        let builder = Builder.dummy()
         builder.serializers = [GreedyOutbound<Int>()]
         let function = builder.makeRequest(method: .post, endpoint: "whateverz", args: String(), response: Void.self)
-        function("a").enqueue { response in
-            if let error = response.error, case BuilderError.unsupportedArgument(let arg) = error {
-                print(arg)
-                XCTAssert(arg.type == String.self)
-                XCTAssert(arg.creation as? String == "")
-                XCTAssert(arg.starting as? String == "a")
-            } else {
-                XCTFail("Expected to fail.")
-            }
-            expectation.fulfill()
-        }
-        waitForExpectations(timeout: 1) { (error) in
-            if let error = error {
-                XCTFail("Failed with error: \(error)")
-            }
+        let response = function("a").test()
+        if let error = response.error, case BuilderError.unsupportedArgument(let arg) = error {
+            print(arg)
+            XCTAssert(arg.type == String.self)
+            XCTAssert(arg.creation as? String == "")
+            XCTAssert(arg.starting as? String == "a")
+        } else {
+            XCTFail("Expected to fail.")
         }
     }
     
     func testNestedUnsupportedArgument() {
-        let expectation = self.expectation(description: "Waiting for response")
-        
         struct Container {
             let object = NSObject()
             let arg = String()
             let another = Int()
         }
         
-        let builder = Builder(base: URL(string: "http://127.0.0.1/")!)
+        let builder = Builder.dummy()
         builder.serializers = [GreedyOutbound<Int>()]
         let function = builder.makeRequest(method: .post, endpoint: "whateverz", args: Container(), response: Void.self)
-        function(Container()).enqueue { response in
-            if let error = response.error, case BuilderError.unsupportedArgument(let arg) = error {
-                print(arg)
-                XCTAssert(arg.type == NSObject.self)
-                XCTAssert(arg.creation is NSObject)
-                XCTAssert(arg.starting is NSObject)
-            } else {
-                XCTFail("Expected to fail.")
-            }
-            expectation.fulfill()
-        }
-        waitForExpectations(timeout: 1) { (error) in
-            if let error = error {
-                XCTFail("Failed with error: \(error)")
-            }
+        let response = function(Container()).test()
+        if let error = response.error, case BuilderError.unsupportedArgument(let arg) = error {
+            print(arg)
+            XCTAssert(arg.type == NSObject.self)
+            XCTAssert(arg.creation is NSObject)
+            XCTAssert(arg.starting is NSObject)
+        } else {
+            XCTFail("Expected to fail.")
         }
     }
     
     func testOutboundSerializerValidationError() {
-        let expectation = self.expectation(description: "Waiting for response")
-        
-        let builder = Builder(base: URL(string: "http://127.0.0.1/")!)
+        let builder = Builder.dummy()
         let serializer = GreedyOutbound<Int>()
         serializer.fail = true
         builder.serializers = [serializer]
         let function = builder.makeRequest(method: .post, endpoint: "whateverz", args: Int(), response: Void.self)
-        function(3).enqueue { response in
-            if let error = response.error, case BuilderError.validationError(serializer: let s, arguments: let args) = error {
-                XCTAssert(s === serializer)
-                XCTAssert(args.count == 1)
-                XCTAssert(args.first?.creation as? Int == 0)
-                XCTAssert(args.first?.starting as? Int == 3)
-            } else {
-                XCTFail("Expected to fail.")
-            }
-            expectation.fulfill()
-        }
-        waitForExpectations(timeout: 1) { (error) in
-            if let error = error {
-                XCTFail("Failed with error: \(error)")
-            }
+        let response = function(3).test()
+        if let error = response.error, case BuilderError.validationError(serializer: let s, arguments: let args) = error {
+            XCTAssert(s === serializer)
+            XCTAssert(args.count == 1)
+            XCTAssert(args.first?.creation as? Int == 0)
+            XCTAssert(args.first?.starting as? Int == 3)
+        } else {
+            XCTFail("Expected to fail.")
         }
     }
 }

@@ -22,4 +22,10 @@ public struct ClientResponse {
         self.response = response
         self.error = error
     }
+    
+    public init(url: URL, data: Data? = nil, headers: [String: String] = [:], status: Int? = nil, error: Error? = nil) {
+        self.data = data
+        self.error = error
+        self.response = HTTPURLResponse(url: url, statusCode: status ?? 0, httpVersion: "1.1", headerFields: headers)
+    }
 }

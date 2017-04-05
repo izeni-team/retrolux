@@ -52,6 +52,7 @@ public class ReflectionJSONSerializer: OutboundSerializer, InboundSerializer {
             guard let dictionary = (try? JSONSerialization.jsonObject(with: data, options: [])) as? [String: Any] else {
                 throw ReflectionJSONSerializerError.invalidJSON
             }
+            print(dictionary)
             return try reflector.convert(fromDictionary: dictionary, to: reflectable) as! T
         } else if let array = T.self as? GetTypeFromArray.Type {
             guard let type = array.getReflectableType() else {
