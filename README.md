@@ -56,7 +56,7 @@ class Person: Reflection {
     var age = 0
 }
 
-let builder = RetroluxBuilder(baseURL: URL(string: "https://my.api.com/")!)
+let builder = Builder(base: URL(string: "https://my.api.com/")!)
 let getUsers = builder.makeRequest(
     method: .get,
     endpoint: "users/",
@@ -83,7 +83,7 @@ class Person: Reflection {
     var age = 0
 }
 
-let builder = RetroluxBuilder(baseURL: URL(string: "https://my.api.com/")!)
+let builder = Builder(base: URL(string: "https://my.api.com/")!)
 let createUser = builder.makeRequest(
     method: .post,
     endpoint: "users/",
@@ -113,7 +113,7 @@ class Person: Reflection {
     var age = 0
 }
 
-let builder = RetroluxBuilder(baseURL: URL(string: "https://my.api.com/")!)
+let builder = Builder(base: URL(string: "https://my.api.com/")!)
 let patchUser = builder.makeRequest(
     method: .patch,
     endpoint: "users/{id}/",
@@ -137,7 +137,7 @@ patchUser((newUser, Path(existingUser.id)).enqueue { response in
 To delete an item:
 
 ```swift
-let builder = RetroluxBuilder(baseURL: URL(string: "https://my.api.com/")!)
+let builder = Builder(base: URL(string: "https://my.api.com/")!)
 let deleteUser = builder.makeRequest(
     method: .delete,
     endpoint: "users/{id}/",
@@ -166,7 +166,7 @@ class LoginResponse: Reflection {
     var user_id = ""
 }
 
-let builder = RetroluxBuilder(baseURL: "https://my.api.com/")!)
+let builder = Builder(base: "https://my.api.com/")!)
 let login = builder.makeRequest(
     method: .post,
     endpoint: "login/",
@@ -194,7 +194,7 @@ class User: Reflection {
     var image_url: URL?
 }
 
-let builder = RetroluxBuilder(baseURL: "https://my.api.com/")!)
+let builder = Builder(base: "https://my.api.com/")!)
 let uploadImage = builder.makeRequest(
     method: .post,
     endpoint: "media_upload/{user_id}/",
@@ -235,7 +235,7 @@ class LoginResponse: Reflection {
     var token = ""
 }
 
-let builder = RetroluxBuilder(baseURL: "https://my.api.com/")!)
+let builder = Builder(base: "https://my.api.com/")!)
 let login = builder.makeRequest(
     type: .urlEncoded,
     method: .post,
@@ -318,7 +318,7 @@ class SwiftyJSONSerializer: InboundSerializer, OutboundSerializer {
 And once you've created the serializer, you can send/receive using SwiftyJSON:
 
 ```swift
-let builder = RetroluxBuilder(baseURL: URL(string: "https://my.api.com/")!)
+let builder = Builder(base: URL(string: "https://my.api.com/")!)
 
 // This is how you tell Retrolux to use your serializer.
 builder.serializers.append(SwiftyJSONSerializer())
