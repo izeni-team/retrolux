@@ -2,38 +2,49 @@
 //  Builder.swift
 //  Retrolux
 //
-//  Created by Christopher Bryan Henderson on 10/8/16.
-//  Copyright © 2016 Bryan. All rights reserved.
+//  Created by Bryan Henderson on 1/26/17.
+//  Copyright © 2017 Bryan. All rights reserved.
 //
 
 import Foundation
 
-public protocol Builder {
-    var baseURL: URL { get }
-    var client: Client { get }
-    var callFactory: CallFactory { get }
-    var serializers: [Serializer] { get }
-    var requestInterceptor: ((inout URLRequest) -> Void)? { get }
-    var responseInterceptor: ((inout ClientResponse) -> Void)? { get }
+open class Builder {
+    open var base: URL
+    open var client: Client
+    open var callFactory: CallFactory
+    open var serializers: [Serializer]
+    open var requestInterceptor: ((inout URLRequest) -> Void)?
+    open var responseInterceptor: ((inout ClientResponse) -> Void)?
     
-    func interpret<T>(response: Response<T>) -> InterpretedResponse<T>
-    func log(request: URLRequest)
-    func log<T>(response: Response<T>)
-    func makeRequest<Args, ResponseType>(
-        type: OutboundSerializerType,
-        method: HTTPMethod,
-        endpoint: String,
-        args creationArgs: Args,
-        response: ResponseType.Type
-        ) -> (Args) -> Call<ResponseType>
-}
-
-extension Builder {
-    public func interpret<T>(response: Response<T>) -> InterpretedResponse<T> {
-        return defaultInterpreter(response: response)
+    public init(base: URL) {
+        self.base = base
+        self.client = HTTPClient()
+        self.callFactory = HTTPCallFactory()
+        self.serializers = [
+            ReflectionJSONSerializer(),
+            MultipartFormDataSerializer(),
+            URLEncodedSerializer()
+        ]
     }
     
-    public func defaultInterpreter<T>(response: Response<T>) -> InterpretedResponse<T> {
+    open func log(request: URLRequest) {
+        print("Retrolux: \(request.httpMethod!) \(request.url!.absoluteString.removingPercentEncoding!)")
+    }
+    
+    open func log<T>(response: Response<T>) {
+        let status = response.status ?? 0
+        
+        if response.error is BuilderError == false {
+            let requestURL = response.request.url!.absoluteString.removingPercentEncoding!
+            print("Retrolux: \(status) \(requestURL)")
+        }
+        
+        if let error = response.error {
+            print("Retrolux: Error: \(error)")
+        }
+    }
+    
+    open func interpret<T>(response: Response<T>) -> InterpretedResponse<T> {
         // BuilderErrors are highest priority over other kinds of errors,
         // because they represent errors creating the request.
         if let error = response.error as? BuilderError {
@@ -56,39 +67,36 @@ extension Builder {
         }
     }
     
-    public func log(request: URLRequest) {}
-    public func log<T>(response: Response<T>) {}
-    
-    public var outboundSerializers: [OutboundSerializer] {
+    open var outboundSerializers: [OutboundSerializer] {
         return serializers.flatMap { $0 as? OutboundSerializer }
     }
     
-    public var inboundSerializers: [InboundSerializer] {
+    open var inboundSerializers: [InboundSerializer] {
         return serializers.flatMap { $0 as? InboundSerializer }
     }
     
-    private func normalize(arg: Any, serializerType: OutboundSerializerType) -> [(serializer: OutboundSerializer?, value: Any?, type: Any.Type)] {
+    private func normalize(arg: Any, serializerType: OutboundSerializerType, serializers: [OutboundSerializer]) -> [(serializer: OutboundSerializer?, value: Any?, type: Any.Type)] {
         if type(of: arg) == Void.self {
             return []
         } else if let wrapped = arg as? WrappedSerializerArg {
             if let value = wrapped.value {
-                return normalize(arg: value, serializerType: serializerType)
+                return normalize(arg: value, serializerType: serializerType, serializers: serializers)
             } else {
-                return [(outboundSerializers.first(where: { serializerType.isDesired(serializer: $0) && $0.supports(outboundType: wrapped.type) }), nil, wrapped.type)]
+                return [(serializers.first(where: { serializerType.isDesired(serializer: $0) && $0.supports(outboundType: wrapped.type) }), nil, wrapped.type)]
             }
         } else if let opt = arg as? OptionalHelper {
             if let value = opt.value {
-                return normalize(arg: value, serializerType: serializerType)
+                return normalize(arg: value, serializerType: serializerType, serializers: serializers)
             } else {
-                return [(outboundSerializers.first(where: { serializerType.isDesired(serializer: $0) && $0.supports(outboundType: opt.type) }), nil, opt.type)]
+                return [(serializers.first(where: { serializerType.isDesired(serializer: $0) && $0.supports(outboundType: opt.type) }), nil, opt.type)]
             }
         } else if arg is SelfApplyingArg {
             return [(nil, arg, type(of: arg))]
-        } else if let serializer = outboundSerializers.first(where: { serializerType.isDesired(serializer: $0) && $0.supports(outboundType: type(of: arg)) }) {
+        } else if let serializer = serializers.first(where: { serializerType.isDesired(serializer: $0) && $0.supports(outboundType: type(of: arg)) }) {
             return [(serializer, arg, type(of: arg))]
         } else {
             let beneath = Mirror(reflecting: arg).children.reduce([]) {
-                $0 + normalize(arg: $1.value, serializerType: serializerType)
+                $0 + normalize(arg: $1.value, serializerType: serializerType, serializers: serializers)
             }
             if beneath.isEmpty {
                 return [(nil, arg, type(of: arg))]
@@ -98,7 +106,11 @@ extension Builder {
         }
     }
     
-    public func makeRequest<Args, ResponseType>(type: OutboundSerializerType = .auto, method: HTTPMethod, endpoint: String, args creationArgs: Args, response: ResponseType.Type) -> (Args) -> Call<ResponseType> {
+    open func makeRequest<Args, ResponseType>(type: OutboundSerializerType = .auto, method: HTTPMethod, endpoint: String, args creationArgs: Args, response: ResponseType.Type) -> (Args) -> Call<ResponseType> {
+        let base = self.base
+        let client = self.client
+        let inboundSerializers = self.inboundSerializers
+        let outboundSerializers = self.outboundSerializers
         return { startingArgs in
             var task: Task?
             var cancelled = false
@@ -108,12 +120,12 @@ extension Builder {
                     if cancelled {
                         return
                     }
-                    let url = self.baseURL.appendingPathComponent(endpoint)
+                    let url = base.appendingPathComponent(endpoint)
                     var request = URLRequest(url: url)
                     request.httpMethod = method.rawValue
                     
-                    let normalizedCreationArgs = self.normalize(arg: creationArgs, serializerType: type) // Args used to create this request
-                    let normalizedStartingArgs = self.normalize(arg: startingArgs, serializerType: type) // Args passed in when executing this request
+                    let normalizedCreationArgs = self.normalize(arg: creationArgs, serializerType: type, serializers: outboundSerializers) // Args used to create this request
+                    let normalizedStartingArgs = self.normalize(arg: startingArgs, serializerType: type, serializers: outboundSerializers) // Args passed in when executing this request
                     
                     assert(normalizedCreationArgs.count == normalizedStartingArgs.count)
                     
@@ -186,7 +198,7 @@ extension Builder {
                     self.requestInterceptor?(&request)
                     self.log(request: request)
                     
-                    task = self.client.makeAsynchronousRequest(request: &request, callback: { (immutableClientResponse) in
+                    task = client.makeAsynchronousRequest(request: &request, callback: { (immutableClientResponse) in
                         var clientResponse = immutableClientResponse
                         self.responseInterceptor?(&clientResponse)
                         
@@ -197,7 +209,7 @@ extension Builder {
                             body = nil
                             error = nil
                         } else {
-                            if let serializer = self.inboundSerializers.first(where: { $0.supports(inboundType: ResponseType.self) }) {
+                            if let serializer = inboundSerializers.first(where: { $0.supports(inboundType: ResponseType.self) }) {
                                 do {
                                     body = try serializer.makeValue(from: clientResponse, type: ResponseType.self)
                                     error = nil

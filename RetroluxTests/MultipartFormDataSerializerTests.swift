@@ -12,7 +12,7 @@ import Retrolux
 
 class MultipartFormDataSerializerTests: XCTestCase {
     func testSinglePart() {
-        let builder = RetroluxBuilder(baseURL: URL(string: "http://127.0.0.1/")!)
+        let builder = Builder(base: URL(string: "http://127.0.0.1/")!)
         let request = builder.makeRequest(method: .post, endpoint: "whatever/", args: Part(name: "file", filename: "image.png", mimeType: "image/png"), response: Void.self)
         
         let expectation = self.expectation(description: "Waiting for response")
@@ -43,7 +43,7 @@ class MultipartFormDataSerializerTests: XCTestCase {
     }
     
     func testMultipleParts() {
-        let builder = RetroluxBuilder(baseURL: URL(string: "http://127.0.0.1/")!)
+        let builder = Builder(base: URL(string: "http://127.0.0.1/")!)
         let request = builder.makeRequest(method: .post, endpoint: "whatever/", args: (Field("first_name"), Field("last_name")), response: Void.self)
         
         let expectation = self.expectation(description: "Waiting for response")
@@ -71,7 +71,7 @@ class MultipartFormDataSerializerTests: XCTestCase {
     }
     
     func testFieldsAndPartsCombined() {
-        let builder = RetroluxBuilder(baseURL: URL(string: "http://lxer.com/")!)
+        let builder = Builder(base: URL(string: "http://lxer.com/")!)
         
         struct RequestData {
             let firstName: Field

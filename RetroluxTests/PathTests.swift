@@ -12,7 +12,7 @@ import Retrolux
 
 class PathTests: XCTestCase {
     func testSinglePath() {
-        let builder = RetroluxBuilder(baseURL: URL(string: "http://127.0.0.1/")!)
+        let builder = Builder(base: URL(string: "http://127.0.0.1/")!)
         let request = builder.makeRequest(method: .get, endpoint: "whatever/{id}/", args: Path("id"), response: Void.self)
         
         let expectation = self.expectation(description: "Waiting for response")
@@ -30,7 +30,7 @@ class PathTests: XCTestCase {
     }
     
     func testMultiplePaths() {
-        let builder = RetroluxBuilder(baseURL: URL(string: "http://127.0.0.1/")!)
+        let builder = Builder(base: URL(string: "http://127.0.0.1/")!)
         let request = builder.makeRequest(method: .get, endpoint: "whatever/{id}/{id2}/", args: (Path("id"), Path("id2")), response: Void.self)
         
         let expectation = self.expectation(description: "Waiting for response")
@@ -48,7 +48,7 @@ class PathTests: XCTestCase {
     }
     
     func testStringLiteralConversion() {
-        let builder = RetroluxBuilder(baseURL: URL(string: "http://127.0.0.1/")!)
+        let builder = Builder(base: URL(string: "http://127.0.0.1/")!)
         let request = builder.makeRequest(method: .get, endpoint: "whatever/{id}/{id2}/", args: ("id" as Path, Path("id2")), response: Void.self)
         
         let expectation = self.expectation(description: "Waiting for response")

@@ -12,7 +12,7 @@ import Retrolux
 
 class URLEncodedSerializerTests: XCTestCase {
     func makeDummyBuilder() -> Builder {
-        return RetroluxBuilder(baseURL: URL(string: "http://127.0.0.1/")!)
+        return Builder(base: URL(string: "http://127.0.0.1/")!)
     }
     
     func testSerializer() {

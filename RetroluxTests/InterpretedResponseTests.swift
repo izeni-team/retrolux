@@ -14,14 +14,14 @@ class InterpretedResponseTests: XCTestCase {
     func testUnsupportedArg() {
         let expectation = self.expectation(description: "Waiting for response")
         
-        let builder = RetroluxBuilder(baseURL: URL(string: "http://www.google.com/")!)
+        let builder = Builder(base: URL(string: "http://www.google.com/")!)
         builder.responseInterceptor = { response in
             response = ClientResponse(base: response, status: 200, data: nil)
         }
         let function = builder.makeRequest(method: .get, endpoint: "whateverz", args: 1, response: Void.self)
         function(2).enqueue { response in
             switch response.interpreted {
-            case .success(let void):
+            case .success(_):
                 XCTFail("Should not have succeeded.")
             case .failure(let error):
                 if case BuilderError.unsupportedArgument(let arg) = error {
@@ -57,7 +57,7 @@ class InterpretedResponseTests: XCTestCase {
             }
         }
         
-        let builder = RetroluxBuilder(baseURL: URL(string: "http://127.0.0.1/")!)
+        let builder = Builder(base: URL(string: "http://127.0.0.1/")!)
         builder.responseInterceptor = { response in
             response = ClientResponse(base: response, status: 400, data: "{\"name\":null}".data(using: .utf8)!)
         }
@@ -68,7 +68,6 @@ class InterpretedResponseTests: XCTestCase {
                 XCTFail("Should not have succeeded.")
             case .failure(let error):
                 if case ResponseError.invalidHttpStatusCode(code: let code) = error {
-                    print("code:", code)
                     XCTAssert(code == 400)
                 } else {
                     XCTFail("Wrong error returned: \(error); expected an invalid HTTP status code error instead.")
@@ -91,7 +90,7 @@ class InterpretedResponseTests: XCTestCase {
             var name: String = ""
         }
         
-        let builder = RetroluxBuilder(baseURL: URL(string: "http://127.0.0.1/")!)
+        let builder = Builder(base: URL(string: "http://127.0.0.1/")!)
         builder.responseInterceptor = { response in
             response = ClientResponse(base: response, status: 200, data: "{\"name\":null}".data(using: .utf8)!)
         }
@@ -125,7 +124,7 @@ class InterpretedResponseTests: XCTestCase {
             var name: String = ""
         }
         
-        let builder = RetroluxBuilder(baseURL: URL(string: "http://127.0.0.1/")!)
+        let builder = Builder(base: URL(string: "http://127.0.0.1/")!)
         builder.responseInterceptor = { response in
             response = ClientResponse(base: response, status: 200, data: "{\"name\":\"bobby\"}".data(using: .utf8)!)
         }

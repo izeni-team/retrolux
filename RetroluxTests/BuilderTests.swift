@@ -66,35 +66,10 @@ fileprivate class FakeCallFactory: CallFactory {
 }
 
 fileprivate class FakeBuilder: Builder {
-    let baseURL: URL
-    let client: Client
-    let callFactory: CallFactory
-    let serializers: [Serializer]
-    let requestInterceptor: ((inout URLRequest) -> Void)?
-    let responseInterceptor: ((inout ClientResponse) -> Void)?
-    
     init() {
-        self.baseURL = URL(string: "https://www.google.com/")!
+        super.init(base: URL(string: "https://www.google.com/")!)
         self.client = FakeClient()
         self.callFactory = FakeCallFactory()
-        self.serializers = [ReflectionJSONSerializer()]
-        self.requestInterceptor = nil
-        self.responseInterceptor = nil
-    }
-}
-
-fileprivate class RealBuilder: Builder {
-    let baseURL: URL
-    let client: Client
-    let callFactory: CallFactory
-    let serializers: [Serializer]
-    let requestInterceptor: ((inout URLRequest) -> Void)?
-    let responseInterceptor: ((inout ClientResponse) -> Void)?
-    
-    init() {
-        self.baseURL = URL(string: "https://www.google.com/")!
-        self.client = HTTPClient()
-        self.callFactory = HTTPCallFactory()
         self.serializers = [ReflectionJSONSerializer()]
         self.requestInterceptor = nil
         self.responseInterceptor = nil
@@ -123,6 +98,9 @@ class BuilderTests: XCTestCase {
         (builder.client as! FakeClient).fakeResponse = ClientResponse(data: nil, response: nil, error: nil)
 
         let function = builder.makeRequest(method: .delete, endpoint: "endpoint", args: (), response: Void.self)
+        function().test { response in
+            
+        }
         
         let call = function() as! FakeCall<()>
         
@@ -160,7 +138,7 @@ class BuilderTests: XCTestCase {
     }
     
     func testURLEscaping() {
-        let builder = RetroluxBuilder(baseURL: URL(string: "http://127.0.0.1/")!)
+        let builder = Builder(base: URL(string: "http://127.0.0.1/")!)
         let request = builder.makeRequest(method: .post, endpoint: "some_endpoint/?query=value a", args: (), response: Void.self)
         let expectation = self.expectation(description: "Waiting for response")
         request().enqueue { response in
@@ -175,7 +153,7 @@ class BuilderTests: XCTestCase {
     }
     
     func testOptionalArgs() {
-        let builder = RetroluxBuilder(baseURL: URL(string: "http://127.0.0.1/")!)
+        let builder = Builder(base: URL(string: "http://127.0.0.1/")!)
         
         let arg: Path? = Path("id")
         let request = builder.makeRequest(method: .post, endpoint: "/some_endpoint/{id}/", args: arg, response: Void.self)
@@ -290,7 +268,7 @@ class BuilderTests: XCTestCase {
         
         let expectation = self.expectation(description: "Waiting for response")
         
-        let builder = RetroluxBuilder(baseURL: URL(string: "http://127.0.0.1/")!)
+        let builder = Builder(base: URL(string: "http://127.0.0.1/")!)
         let call = builder.makeRequest(method: .post, endpoint: "login", args: (Person()), response: Void.self)
         call((Person())).enqueue { response in
             XCTAssert(response.request.httpBody! == "{\"name\":\"\"}".data(using: .utf8)!)
@@ -306,7 +284,7 @@ class BuilderTests: XCTestCase {
     func testTooManyMatchingSerializers() {
         let expectation = self.expectation(description: "Waiting for response")
         
-        let builder = RetroluxBuilder(baseURL: URL(string: "http://127.0.0.1/")!)
+        let builder = Builder(base: URL(string: "http://127.0.0.1/")!)
         builder.serializers = [GreedyOutbound<Int>(), GreedyOutbound<String>()]
         let function = builder.makeRequest(method: .post, endpoint: "whatever", args: (Int(), String()), response: Void.self)
         function((3, "a")).enqueue { response in
@@ -331,7 +309,7 @@ class BuilderTests: XCTestCase {
     func testUnsupportedArgument() {
         let expectation = self.expectation(description: "Waiting for response")
         
-        let builder = RetroluxBuilder(baseURL: URL(string: "http://127.0.0.1/")!)
+        let builder = Builder(base: URL(string: "http://127.0.0.1/")!)
         builder.serializers = [GreedyOutbound<Int>()]
         let function = builder.makeRequest(method: .post, endpoint: "whateverz", args: String(), response: Void.self)
         function("a").enqueue { response in
@@ -361,7 +339,7 @@ class BuilderTests: XCTestCase {
             let another = Int()
         }
         
-        let builder = RetroluxBuilder(baseURL: URL(string: "http://127.0.0.1/")!)
+        let builder = Builder(base: URL(string: "http://127.0.0.1/")!)
         builder.serializers = [GreedyOutbound<Int>()]
         let function = builder.makeRequest(method: .post, endpoint: "whateverz", args: Container(), response: Void.self)
         function(Container()).enqueue { response in
@@ -385,7 +363,7 @@ class BuilderTests: XCTestCase {
     func testOutboundSerializerValidationError() {
         let expectation = self.expectation(description: "Waiting for response")
         
-        let builder = RetroluxBuilder(baseURL: URL(string: "http://127.0.0.1/")!)
+        let builder = Builder(base: URL(string: "http://127.0.0.1/")!)
         let serializer = GreedyOutbound<Int>()
         serializer.fail = true
         builder.serializers = [serializer]

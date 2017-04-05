@@ -11,6 +11,10 @@ open class Call<T> {
         
     }
     
+    open func test(callback: (Response<T>) -> Void) {
+        fatalError("Unimplemented. Should be overridden.")
+    }
+    
     open func enqueue(callback: @escaping (Response<T>) -> Void) {
         fatalError("Unimplemented. Should be overridden.")
     }

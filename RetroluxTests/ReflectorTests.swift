@@ -387,7 +387,7 @@ class RetroluxReflectorTests: XCTestCase {
         } catch SerializationError.typeMismatch(expected: let expected, got: let got, property: let property, forClass: let `class`) {
             XCTAssert(expected == .number)
             
-            // TODO: Cannot check got type.
+            // TODO: Cannot check got type. It's always Optional<Optional<Any>> it seems... :-(
             
             XCTAssert(property == "year")
             XCTAssert(`class` == Car.self)

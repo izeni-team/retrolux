@@ -12,7 +12,7 @@ import XCTest
 
 class CustomSerializerTests: XCTestCase {
     func testCustomSerializer() {
-        let builder = RetroluxBuilder(baseURL: URL(string: "https://127.0.0.1/")!)
+        let builder = Builder(base: URL(string: "https://127.0.0.1/")!)
         builder.serializers.append(SwiftyJSONSerializer())
         let function = builder.makeRequest(
             method: .post,
