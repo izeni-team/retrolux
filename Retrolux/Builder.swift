@@ -12,12 +12,16 @@ import Foundation
 // It is assumed that this behavior is more intuitive.
 public struct RequestCapturedState {
     public var base: URL
-    public var isDryModeEnabled = false
 }
 
 open class Builder {
+    private static let dryBase = URL(string: "e7c37c97-5483-4522-b400-106505fbf6ff/")!
+    open class func dry() -> Builder {
+        return Builder(base: self.dryBase)
+    }
+    
     open var base: URL
-    open var isDryModeEnabled: Bool
+    open let isDryModeEnabled: Bool
     open var callFactory: CallFactory
     open var client: Client
     open var serializers: [Serializer]
@@ -25,8 +29,7 @@ open class Builder {
     open var responseInterceptor: ((inout ClientResponse) -> Void)?
     open var stateToCapture: RequestCapturedState {
         return RequestCapturedState(
-            base: base,
-            isDryModeEnabled: isDryModeEnabled
+            base: base
         )
     }
     open var outboundSerializers: [OutboundSerializer] {
@@ -39,7 +42,7 @@ open class Builder {
     
     public init(base: URL) {
         self.base = base
-        self.isDryModeEnabled = false
+        self.isDryModeEnabled = base == type(of: self).dryBase
         self.callFactory = HTTPCallFactory()
         self.client = HTTPClient()
         self.serializers = [
@@ -131,7 +134,7 @@ open class Builder {
                 let client = self.client
                 let inboundSerializers = self.inboundSerializers
                 let outboundSerializers = self.outboundSerializers
-                let isDryModeEnabled = state.isDryModeEnabled
+                let isDryModeEnabled = self.isDryModeEnabled
                 let url = base.appendingPathComponent(endpoint)
                 var request = URLRequest(url: url)
                 request.httpMethod = method.rawValue
@@ -205,7 +208,7 @@ open class Builder {
                 self.log(request: request)
                 
                 let immutableClientResponse: ClientResponse
-                if state.isDryModeEnabled {
+                if isDryModeEnabled {
                     let provider = testProvider ?? { _ in ClientResponse(data: nil, response: nil, error: nil) }
                     immutableClientResponse = provider(creationArgs, startingArgs, request)
                 } else {
@@ -252,6 +255,8 @@ open class Builder {
                     body: body,
                     interpreter: self.interpret
                 )
+                
+                self.log(response: response)
                 
                 return response
             }

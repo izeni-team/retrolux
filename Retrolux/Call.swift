@@ -21,13 +21,6 @@ open class Call<T> {
         self.delegatedCancel = cancel
     }
     
-    // Skips the network client and uses the testProvider passed into Builder.makeRequest to simulate a network response.
-    open func test() -> Response<T> {
-        var state = delegatedCapture()
-        state.isDryModeEnabled = true
-        return delegatedPerform(state)
-    }
-    
     open func perform() -> Response<T> {
         let state = delegatedCapture()
         return delegatedPerform(state)

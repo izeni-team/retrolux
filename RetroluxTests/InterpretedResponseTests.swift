@@ -12,12 +12,12 @@ import XCTest
 
 class InterpretedResponseTests: XCTestCase {
     func testUnsupportedArg() {
-        let builder = Builder.dummy()
+        let builder = Builder.dry()
         builder.responseInterceptor = { response in
             response = ClientResponse(base: response, status: 200, data: nil)
         }
         let function = builder.makeRequest(method: .get, endpoint: "whateverz", args: 1, response: Void.self)
-        switch function(2).test().interpreted {
+        switch function(2).perform().interpreted {
         case .success(_):
             XCTFail("Should not have succeeded.")
         case .failure(let error):
@@ -44,10 +44,10 @@ class InterpretedResponseTests: XCTestCase {
             }
         }
         
-        let function = Builder.dummy().makeRequest(method: .post, endpoint: "whateverz", args: Person(name: "Alice"), response: Person.self, testProvider: {
+        let function = Builder.dry().makeRequest(method: .post, endpoint: "whateverz", args: Person(name: "Alice"), response: Person.self, testProvider: {
             ClientResponse(url: $0.2.url!, data: "{\"name\":null}".data(using: .utf8)!, headers: [:], status: 400, error: nil)
         })
-        switch function(Person(name: "Bob")).test().interpreted {
+        switch function(Person(name: "Bob")).perform().interpreted {
         case .success(_):
             XCTFail("Should not have succeeded.")
         case .failure(let error):
@@ -64,10 +64,10 @@ class InterpretedResponseTests: XCTestCase {
             var name: String = ""
         }
         
-        let function = Builder.dummy().makeRequest(method: .post, endpoint: "whateverz", args: (), response: Person.self) {
+        let function = Builder.dry().makeRequest(method: .post, endpoint: "whateverz", args: (), response: Person.self) {
             ClientResponse(url: $0.2.url!, data: "{\"name\":null}".data(using: .utf8)!, status: 200)
         }
-        switch function().test().interpreted {
+        switch function().perform().interpreted {
         case .success(_):
             XCTFail("Should not have succeeded.")
         case .failure(let error):
@@ -85,10 +85,10 @@ class InterpretedResponseTests: XCTestCase {
             var name: String = ""
         }
         
-        let function = Builder.dummy().makeRequest(method: .post, endpoint: "whateverz", args: (), response: Person.self) {
+        let function = Builder.dry().makeRequest(method: .post, endpoint: "whateverz", args: (), response: Person.self) {
             ClientResponse(url: $0.2.url!, data: "{\"name\":\"bobby\"}".data(using: .utf8)!, status: 200)
         }
-        switch function().test().interpreted {
+        switch function().perform().interpreted {
         case .success(let person):
             XCTAssert(person.name == "bobby")
         case .failure(let error):

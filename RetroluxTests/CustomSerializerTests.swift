@@ -12,7 +12,7 @@ import XCTest
 
 class CustomSerializerTests: XCTestCase {
     func testCustomSerializer() {
-        let builder = Builder.dummy()
+        let builder = Builder.dry()
         builder.serializers.append(SwiftyJSONSerializer())
         let function = builder.makeRequest(
             method: .post,

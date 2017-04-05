@@ -16,8 +16,9 @@ class TestingTests: XCTestCase {
             var name = ""
         }
         
-        let builder = Builder.dummy()
-        XCTAssert(builder.isDryModeEnabled == false)
+        let builder = Builder.dry()
+        XCTAssert(builder.isDryModeEnabled == true)
+        XCTAssert(Builder(base: URL(string: "https://www.google.com/")!).isDryModeEnabled == false)
         
         let createUser = builder.makeRequest(
             method: .post,
@@ -37,26 +38,25 @@ class TestingTests: XCTestCase {
         
         let newPerson = Person()
         newPerson.name = "George"
-        var response = createUser(newPerson).test()
+        var response = createUser(newPerson).perform()
         print(response.body!.name)
-        XCTAssert(response.body!.name == "George")
-        XCTAssert(response.isSuccessful)
-        
-        builder.isDryModeEnabled = true
-        
-        response = createUser(newPerson).perform()
         XCTAssert(response.status == 200)
+        XCTAssert(response.error == nil)
         XCTAssert(response.body!.name == "George")
         XCTAssert(response.headers.isEmpty)
         XCTAssert(response.isSuccessful)
         
-        XCTAssert(builder.isDryModeEnabled == true)
-        builder.isDryModeEnabled = false
+        let wetBuilder = Builder(base: URL(string: "8.8.8.8/")!)
+        XCTAssert(wetBuilder.isDryModeEnabled == false)
+        let wetCreateUser = wetBuilder.makeRequest(
+            method: .post,
+            endpoint: "users/",
+            args: Person(),
+            response: Person.self
+        )
         
-        response = createUser(newPerson).perform()
-        XCTAssert(response.body == nil)
+        response = wetCreateUser(newPerson).perform()
+        XCTAssert(response.body?.name == nil)
         XCTAssert(response.isSuccessful == false)
-        
-        XCTAssert(builder.isDryModeEnabled == false)
     }
 }

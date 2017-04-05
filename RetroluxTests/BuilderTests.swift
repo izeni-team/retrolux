@@ -27,7 +27,7 @@ fileprivate class GreedyOutbound<T>: OutboundSerializer {
 
 class BuilderTests: XCTestCase {
     func testAsyncCapturing() {
-        let builder = Builder.dummy()
+        let builder = Builder(base: URL(string: "8.8.8.8/")!)
         let request = builder.makeRequest(method: .get, endpoint: "", args: (), response: Void.self)
         let originalURL = builder.base
         let expectation = self.expectation(description: "Waiting for response.")
@@ -38,7 +38,6 @@ class BuilderTests: XCTestCase {
         }
         let newURL = URL(string: "8.8.8.8/")!
         builder.base = newURL
-        builder.isDryModeEnabled = true
         waitForExpectations(timeout: 1) { (error) in
             if let error = error {
                 XCTFail("\(error)")
@@ -48,7 +47,7 @@ class BuilderTests: XCTestCase {
         let expectation2 = self.expectation(description: "Waiting for response.")
         request().enqueue { response in
             XCTAssert(response.request.url == newURL)
-            XCTAssert(response.error == nil) // Error will always be nil when dry mode is enabled.
+            XCTAssert(response.error != nil) // Error should be non-nil, since the builder's dummy baseURL is invalid.
             expectation2.fulfill()
         }
         waitForExpectations(timeout: 1) { (error) in
@@ -59,23 +58,23 @@ class BuilderTests: XCTestCase {
     }
     
     func testURLEscaping() {
-        let builder = Builder.dummy()
+        let builder = Builder.dry()
         let request = builder.makeRequest(method: .post, endpoint: "some_endpoint/?query=value a", args: (), response: Void.self)
-        let response = request().test()
+        let response = request().perform()
         XCTAssert(response.request.url?.absoluteString == "\(builder.base.absoluteString)some_endpoint/%3Fquery=value%20a")
     }
     
     func testOptionalArgs() {
-        let builder = Builder.dummy()
+        let builder = Builder.dry()
         
         let arg: Path? = Path("id")
         let request = builder.makeRequest(method: .post, endpoint: "/some_endpoint/{id}/", args: arg, response: Void.self)
-        let response = request(Path("it_worked")).test()
+        let response = request(Path("it_worked")).perform()
         XCTAssert(response.request.url!.absoluteString.contains("it_worked"))
         
         let arg2: Path? = Path("id")
         let request2 = builder.makeRequest(method: .post, endpoint: "/some_endpoint/{id}/", args: arg2, response: Void.self)
-        let response2 = request2(nil).test()
+        let response2 = request2(nil).perform()
         XCTAssert(response2.request.url!.absoluteString.removingPercentEncoding!.contains("{id}"))
         
         struct Args3 {
@@ -83,7 +82,7 @@ class BuilderTests: XCTestCase {
         }
         let args3 = Args3(field: Field("username"))
         let request3 = builder.makeRequest(method: .post, endpoint: "/some_endpoint/", args: args3, response: Void.self)
-        let response3 = request3(Args3(field: Field("IT_WORKED"))).test()
+        let response3 = request3(Args3(field: Field("IT_WORKED"))).perform()
         let data = response3.request.httpBody!
         let string = String(data: data, encoding: .utf8)!
         XCTAssert(string.contains("IT_WORKED"))
@@ -93,7 +92,7 @@ class BuilderTests: XCTestCase {
         }
         let args4 = Args4(field: Field("username"))
         let request4 = builder.makeRequest(method: .post, endpoint: "/some_endpoint/", args: args4, response: Void.self)
-        let response4 = request4(Args4(field: nil)).test()
+        let response4 = request4(Args4(field: nil)).perform()
         XCTAssert(response4.request.httpBody == nil)
         
         struct Args5 {
@@ -104,7 +103,7 @@ class BuilderTests: XCTestCase {
         }
         let args5 = Args5(field: nil, field2: Field("username"), field3: Field("password"), field4: nil)
         let request5 = builder.makeRequest(method: .post, endpoint: "/some_endpoint/", args: args5, response: Void.self)
-        let response5 = request5(Args5(field: nil, field2: Field("TEST_USERNAME"), field3: Field("TEST_PASSWORD"), field4: nil)).test()
+        let response5 = request5(Args5(field: nil, field2: Field("TEST_USERNAME"), field3: Field("TEST_PASSWORD"), field4: nil)).perform()
         let data5 = response5.request.httpBody!
         let string5 = String(data: data5, encoding: .utf8)!
         XCTAssert(string5.contains("TEST_USERNAME") && string5.contains("TEST_PASSWORD"))
@@ -116,7 +115,7 @@ class BuilderTests: XCTestCase {
             args: args6,
             response: Void.self
         )
-        let response6 = request6(nil).test()
+        let response6 = request6(nil).perform()
         XCTAssert(response6.request.httpBody == nil)
     }
     
@@ -126,16 +125,16 @@ class BuilderTests: XCTestCase {
             var name = ""
         }
         
-        let call = Builder.dummy().makeRequest(method: .post, endpoint: "login", args: (Person()), response: Void.self)
-        let response = call((Person())).test()
+        let call = Builder.dry().makeRequest(method: .post, endpoint: "login", args: (Person()), response: Void.self)
+        let response = call((Person())).perform()
         XCTAssert(response.request.httpBody! == "{\"name\":\"\"}".data(using: .utf8)!)
     }
     
     func testTooManyMatchingSerializers() {
-        let builder = Builder.dummy()
+        let builder = Builder.dry()
         builder.serializers = [GreedyOutbound<Int>(), GreedyOutbound<String>()]
         let function = builder.makeRequest(method: .post, endpoint: "whatever", args: (Int(), String()), response: Void.self)
-        let response = function((3, "a")).test()
+        let response = function((3, "a")).perform()
         if let error = response.error, case BuilderError.tooManyMatchingSerializers(serializers: let serializers, arguments: let arguments) = error {
             XCTAssert(serializers.first === builder.serializers.first! && serializers.last === builder.serializers.last!)
             XCTAssert(arguments.first?.creation as? Int == Int())
@@ -148,10 +147,10 @@ class BuilderTests: XCTestCase {
     }
     
     func testUnsupportedArgument() {
-        let builder = Builder.dummy()
+        let builder = Builder.dry()
         builder.serializers = [GreedyOutbound<Int>()]
         let function = builder.makeRequest(method: .post, endpoint: "whateverz", args: String(), response: Void.self)
-        let response = function("a").test()
+        let response = function("a").perform()
         if let error = response.error, case BuilderError.unsupportedArgument(let arg) = error {
             print(arg)
             XCTAssert(arg.type == String.self)
@@ -169,10 +168,10 @@ class BuilderTests: XCTestCase {
             let another = Int()
         }
         
-        let builder = Builder.dummy()
+        let builder = Builder.dry()
         builder.serializers = [GreedyOutbound<Int>()]
         let function = builder.makeRequest(method: .post, endpoint: "whateverz", args: Container(), response: Void.self)
-        let response = function(Container()).test()
+        let response = function(Container()).perform()
         if let error = response.error, case BuilderError.unsupportedArgument(let arg) = error {
             print(arg)
             XCTAssert(arg.type == NSObject.self)
@@ -184,12 +183,12 @@ class BuilderTests: XCTestCase {
     }
     
     func testOutboundSerializerValidationError() {
-        let builder = Builder.dummy()
+        let builder = Builder.dry()
         let serializer = GreedyOutbound<Int>()
         serializer.fail = true
         builder.serializers = [serializer]
         let function = builder.makeRequest(method: .post, endpoint: "whateverz", args: Int(), response: Void.self)
-        let response = function(3).test()
+        let response = function(3).perform()
         if let error = response.error, case BuilderError.validationError(serializer: let s, arguments: let args) = error {
             XCTAssert(s === serializer)
             XCTAssert(args.count == 1)

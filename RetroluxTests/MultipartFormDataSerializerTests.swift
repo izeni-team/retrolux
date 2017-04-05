@@ -12,12 +12,12 @@ import Retrolux
 
 class MultipartFormDataSerializerTests: XCTestCase {
     func testSinglePart() {
-        let request = Builder.dummy().makeRequest(method: .post, endpoint: "whatever/", args: Part(name: "file", filename: "image.png", mimeType: "image/png"), response: Void.self)
+        let request = Builder.dry().makeRequest(method: .post, endpoint: "whatever/", args: Part(name: "file", filename: "image.png", mimeType: "image/png"), response: Void.self)
         
         let image = Utils.testImage
         let imageData = UIImagePNGRepresentation(image)!
         
-        let response = request(Part(imageData)).test()
+        let response = request(Part(imageData)).perform()
         let bundle = Bundle(for: type(of: self))
         let url = bundle.url(forResource: "request", withExtension: "data")!
         let responseData = try! Data(contentsOf: url)
@@ -32,9 +32,9 @@ class MultipartFormDataSerializerTests: XCTestCase {
     }
     
     func testMultipleParts() {
-        let request = Builder.dummy().makeRequest(method: .post, endpoint: "whatever/", args: (Field("first_name"), Field("last_name")), response: Void.self)
+        let request = Builder.dry().makeRequest(method: .post, endpoint: "whatever/", args: (Field("first_name"), Field("last_name")), response: Void.self)
         
-        let response = request((Field("Bryan"), Field("Henderson"))).test()
+        let response = request((Field("Bryan"), Field("Henderson"))).perform()
         let bundle = Bundle(for: type(of: self))
         let url = bundle.url(forResource: "testmultipleparts", withExtension: "data")!
         let data = try! Data(contentsOf: url)
@@ -54,7 +54,7 @@ class MultipartFormDataSerializerTests: XCTestCase {
             let imagePart: Part
         }
         
-        let request = Builder.dummy().makeRequest(
+        let request = Builder.dry().makeRequest(
             method: .post,
             endpoint: "whatever/",
             args: RequestData(firstName: Field("first_name"), imagePart: Part(name: "file", filename: "image.png", mimeType: "image/png")),
@@ -69,7 +69,7 @@ class MultipartFormDataSerializerTests: XCTestCase {
             imagePart: Part(imageData)
         )
         
-        let response = request(requestData).test()
+        let response = request(requestData).perform()
         let bundle = Bundle(for: type(of: self))
         let url = bundle.url(forResource: "fieldsandpartscombined", withExtension: "data")!
         let data = try! Data(contentsOf: url)

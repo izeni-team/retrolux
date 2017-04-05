@@ -14,7 +14,5 @@ struct Utils {
 }
 
 extension Builder {
-    static func dummy() -> Builder {
-        return Builder(base: URL(string: "https://e7c37c97-5483-4522-b400-106505fbf6ff.com/")!)
-    }
+    static let dummy = dry
 }
