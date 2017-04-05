@@ -145,7 +145,7 @@ let deleteUser = builder.makeRequest(
     response: Void.self
 )
 
-deleteUser().enqueue { response in
+deleteUser(Path(someUser.id)).enqueue { response in
     print("User was deleted? \(response.isSuccessful)")
 }
 ```
