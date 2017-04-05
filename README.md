@@ -62,10 +62,11 @@ let getUsers = builder.makeRequest(
     response: [Person].self
 )
 getUsers().enqueue { response in
-    if let users = response.body {
+    switch response.interpreted { // What .interpreted means can be customized by overriding RetroluxBuilder's interpret function
+    case .success(let users):
         print("Got \(users.count) users!")
-    } else {
-        print("Failed to get users")
+    case .failure(let error):
+        print("Failed to get users: \(error)")
     }
 }
 ```
