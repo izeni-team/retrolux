@@ -39,6 +39,7 @@ Then follow the instructions mentioned in [Carthage's documentation](https://git
 * [Custom Serializers](#custom-serializers)
 * [Testing](#testing)
 * [Changing Base URL](#changing-base-url)
+* [Logging](#logging)
 
 # JSON
 
@@ -407,5 +408,21 @@ call.enqueue { response in
 builder.base = URL(string: "https://www.something.else/")!
 call.enqueue { response in
     // response.request.url == "https://www.something.else/something"
+}
+```
+
+# Logging
+
+Debug print statements are enabled by default. To customize logging, subclass Builder and override the `log` functions like so:
+
+```swift
+class MyBuilder: Builder {
+    open override func log(request: URLRequest) {
+        // To silence logging, do nothing here.
+    }
+    
+    open override func log<T>(response: Response<T>) {
+        // To silence logging, do nothing here.
+    }
 }
 ```
