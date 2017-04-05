@@ -37,6 +37,8 @@ Then follow the instructions mentioned in [Carthage's documentation](https://git
 * [URL Encoded](#url-encoded)
 * [Queries](#queries)
 * [Custom Serializers](#custom-serializers)
+* [Testing](#testing)
+* [Changing Base URL](#changing-base-url)
 
 # JSON
 
@@ -337,5 +339,73 @@ login(JSON(["username": "bobby", "password": "abc123"])).enqueue { response in
     case .failure(let error):
         print("Request failed: \(error)")
     }
+}
+```
+
+# Testing
+
+Retrolux makes unit testing easier with the concept of "dry mode." When [Builder](Builder) is run in dry mode by using the builder returned by `Builder.dry()`, then all requests skip the HTTP client and fake responses are used instead. If no fake response is provided in the endpoint, then an empty response is returned instead.
+
+To specify what data you'd like to use in the fake response, do so like the following:
+
+```swift
+class LoginArgs: Reflection {
+    var username = ""
+    var password = ""
+}
+
+class LoginResponse: Reflection {
+    var id = ""
+    var token = ""
+}
+
+let builder = Builder.dry()
+let login = builder.makeRequest(
+    method: .post,
+    endpoint: "login/",
+    args: LoginArgs(),
+    response: LoginResponse.self,
+    testProvider: { (creation, starting, request) in
+        ClientResponse(
+            url: request.url!,
+            data: "{\"id\":\"qs492s37\",\"token\":\"0s98q3wj5s5\",\"username\":\"\(starting.username)\"}".data(using: .utf8)!,
+            status: 200
+        )
+    }
+)
+
+let args = LoginArgs()
+login.username = "bobby"
+login.password = "impenetrable"
+let response = login(args).perform()
+XCTAssert(response.isSuccessful)
+XCTAssert(response.body?.id == "qs492s37")
+XCTAssert(response.body?.token == "0s98q3wj5s5")
+XCTAssert(response.body?.username == args.username)
+```
+
+# Changing Base URL
+
+Requests capture the base URL when calling `.enqueue(...)` or `.perform()`.
+
+For example:
+
+```swift
+let builder = Builder(base: URL(string: "https://www.google.com/")!)
+let first = builder.makeRequest(
+    method: .get,
+    endpoint: "something",
+    args: (),
+    Response: Void.self
+)
+
+let call = first()
+call.enqueue { response in
+    // response.request.url == "https://www.google.com/something"
+}
+
+builder.base = URL(string: "https://www.something.else/")!
+call.enqueue { response in
+    // response.request.url == "https://www.something.else/something"
 }
 ```
