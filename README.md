@@ -39,6 +39,7 @@ Then follow the instructions mentioned in [Carthage's documentation](https://git
 * [Custom Serializers](#custom-serializers)
 * [Testing](#testing)
 * [Changing Base URL](#changing-base-url)
+* [Logging](#logging)
 
 # JSON
 
@@ -56,7 +57,7 @@ class Person: Reflection {
     var age = 0
 }
 
-let builder = RetroluxBuilder(baseURL: URL(string: "https://my.api.com/")!)
+let builder = Builder(base: URL(string: "https://my.api.com/")!)
 let getUsers = builder.makeRequest(
     method: .get,
     endpoint: "users/",
@@ -83,7 +84,7 @@ class Person: Reflection {
     var age = 0
 }
 
-let builder = RetroluxBuilder(baseURL: URL(string: "https://my.api.com/")!)
+let builder = Builder(base: URL(string: "https://my.api.com/")!)
 let createUser = builder.makeRequest(
     method: .post,
     endpoint: "users/",
@@ -113,7 +114,7 @@ class Person: Reflection {
     var age = 0
 }
 
-let builder = RetroluxBuilder(baseURL: URL(string: "https://my.api.com/")!)
+let builder = Builder(base: URL(string: "https://my.api.com/")!)
 let patchUser = builder.makeRequest(
     method: .patch,
     endpoint: "users/{id}/",
@@ -137,7 +138,7 @@ patchUser((newUser, Path(existingUser.id)).enqueue { response in
 To delete an item:
 
 ```swift
-let builder = RetroluxBuilder(baseURL: URL(string: "https://my.api.com/")!)
+let builder = Builder(base: URL(string: "https://my.api.com/")!)
 let deleteUser = builder.makeRequest(
     method: .delete,
     endpoint: "users/{id}/",
@@ -145,7 +146,7 @@ let deleteUser = builder.makeRequest(
     response: Void.self
 )
 
-deleteUser().enqueue { response in
+deleteUser(Path(someUser.id)).enqueue { response in
     print("User was deleted? \(response.isSuccessful)")
 }
 ```
@@ -166,7 +167,7 @@ class LoginResponse: Reflection {
     var user_id = ""
 }
 
-let builder = RetroluxBuilder(baseURL: "https://my.api.com/")!)
+let builder = Builder(base: "https://my.api.com/")!)
 let login = builder.makeRequest(
     method: .post,
     endpoint: "login/",
@@ -194,7 +195,7 @@ class User: Reflection {
     var image_url: URL?
 }
 
-let builder = RetroluxBuilder(baseURL: "https://my.api.com/")!)
+let builder = Builder(base: "https://my.api.com/")!)
 let uploadImage = builder.makeRequest(
     method: .post,
     endpoint: "media_upload/{user_id}/",
@@ -235,7 +236,7 @@ class LoginResponse: Reflection {
     var token = ""
 }
 
-let builder = RetroluxBuilder(baseURL: "https://my.api.com/")!)
+let builder = Builder(base: "https://my.api.com/")!)
 let login = builder.makeRequest(
     type: .urlEncoded,
     method: .post,
@@ -318,7 +319,7 @@ class SwiftyJSONSerializer: InboundSerializer, OutboundSerializer {
 And once you've created the serializer, you can send/receive using SwiftyJSON:
 
 ```swift
-let builder = RetroluxBuilder(baseURL: URL(string: "https://my.api.com/")!)
+let builder = Builder(base: URL(string: "https://my.api.com/")!)
 
 // This is how you tell Retrolux to use your serializer.
 builder.serializers.append(SwiftyJSONSerializer())
@@ -407,5 +408,21 @@ call.enqueue { response in
 builder.base = URL(string: "https://www.something.else/")!
 call.enqueue { response in
     // response.request.url == "https://www.something.else/something"
+}
+```
+
+# Logging
+
+Debug print statements are enabled by default. To customize logging, subclass Builder and override the `log` functions like so:
+
+```swift
+class MyBuilder: Builder {
+    open override func log(request: URLRequest) {
+        // To silence logging, do nothing here.
+    }
+    
+    open override func log<T>(response: Response<T>) {
+        // To silence logging, do nothing here.
+    }
 }
 ```
