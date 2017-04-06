@@ -26,6 +26,19 @@ fileprivate class GreedyOutbound<T>: OutboundSerializer {
 }
 
 class BuilderTests: XCTestCase {
+    func testVoidResponse() {
+        let builder = Builder.dummy()
+        let request = builder.makeRequest(method: .post, endpoint: "something", args: (), response: Void.self) { (creation, starting, request) in
+            ClientResponse(
+                url: request.url!,
+                data: "Something happened!".data(using: .utf8)!,
+                status: 200
+                )
+        }
+        let response = request().perform()
+        XCTAssert(response.isSuccessful)
+    }
+    
     func testAsyncCapturing() {
         let builder = Builder(base: URL(string: "8.8.8.8/")!)
         let request = builder.makeRequest(method: .get, endpoint: "", args: (), response: Void.self)

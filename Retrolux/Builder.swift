@@ -230,7 +230,7 @@ open class Builder {
                 let error: Error?
                 
                 if ResponseType.self == Void.self {
-                    body = nil
+                    body = (() as! ResponseType)
                     error = nil
                 } else {
                     if let serializer = inboundSerializers.first(where: { $0.supports(inboundType: ResponseType.self) }) {
