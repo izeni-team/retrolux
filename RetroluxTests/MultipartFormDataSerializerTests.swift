@@ -82,4 +82,9 @@ class MultipartFormDataSerializerTests: XCTestCase {
         XCTAssert(asciiExpected == asciiRequest)
         XCTAssert(response.request.value(forHTTPHeaderField: "Content-Type")?.hasPrefix("multipart/form-data; boundary=alamofire.boundary.") == true)
     }
+    
+    func testScopeForField() {
+        let f = Field("username")
+        XCTAssert(f.value == "username")
+    }
 }

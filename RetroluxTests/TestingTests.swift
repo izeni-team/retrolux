@@ -39,7 +39,6 @@ class TestingTests: XCTestCase {
         let newPerson = Person()
         newPerson.name = "George"
         var response = createUser(newPerson).perform()
-        print(response.body!.name)
         XCTAssert(response.status == 200)
         XCTAssert(response.error == nil)
         XCTAssert(response.body!.name == "George")

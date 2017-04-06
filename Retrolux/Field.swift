@@ -9,7 +9,7 @@
 import Foundation
 
 public struct Field: MultipartEncodeable {
-    let value: String
+    public let value: String
     
     public init(_ keyOrValue: String) {
         self.value = keyOrValue
