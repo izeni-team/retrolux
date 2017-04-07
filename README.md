@@ -17,7 +17,7 @@ The purpose of this framework is not just to abstract away networking details, b
 In your `Podfile`:
 
 ```
-pod "Retrolux", "~> 0.4.0"
+pod "Retrolux", "~> 0.5"
 ```
 
 ## Carthage
@@ -25,7 +25,7 @@ pod "Retrolux", "~> 0.4.0"
 In your `Cartfile`:
 
 ```
-github "izeni-team/retrolux" ~> 0.4.0
+github "izeni-team/retrolux" ~> 0.5
 ```
 
 Then follow the instructions mentioned in [Carthage's documentation](https://github.com/Carthage/Carthage#adding-frameworks-to-an-application).
