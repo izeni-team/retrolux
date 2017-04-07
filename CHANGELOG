@@ -1,0 +1,40 @@
+v0.5.2
+- Fixed a bug where responses with Void.self as the return type would always fail, with isSuccessful always returning false.
+
+v0.5.1
+- Made Field.value public.
+
+v0.5.0
+- Added Builder.dry() for easier testing
+- Added Call<T>.perform() for synchronous network calls
+- Added testProvider: as a parameter to Builder.makeRequest
+- Requests capture base URL when starting requests, not when creating requests
+
+v0.4.2
+- Added support for Cocoapods.
+
+v0.4.1
+- Added keyNotFound error
+- Here be dragons: Removed "base class must be a Reflection" check. If your overridden functions/properties on Reflectable aren't being called, be sure to make sure they are implemented in your base class and overridden properly! This exposes a limitation of Swift protocols.
+
+v0.4.0
+- Added Response<T>.interpreted, removed Response<T>.result. This enables you to customize how the response from the server is interpreted.
+- Simplified Response<T> by moving ClientResponse's members directly into Response<T>.
+- Fixed a regression where requests that have no parameters (i.e., HTTP GET) would fail.
+- Added overridable logging.
+- Moved requestInterceptor and responseInterceptor from Client to Builder.
+
+v0.3.2
+- Made reflectable_setValue public, for all your hacking needs!
+
+v0.3.1
+- Fixed git submodule error by deleting .gitsubmodules file.
+
+v0.3
+- RetroluxReflector is now vendored in, because it prevents uploading App Store builds when installed via Carthage
+- Faster reflection thanks to caching
+- More errors handled by Builder
+- "Max depth 2" bug fixed
+
+v0.2.4
+- Initial release
