@@ -1,3 +1,6 @@
+v0.5.3
+- Error messages are more human readable and have recovery suggestions
+
 v0.5.2
 - Fixed a bug where responses with Void.self as the return type would always fail, with isSuccessful always returning false.
 
