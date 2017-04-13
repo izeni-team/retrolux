@@ -67,7 +67,20 @@ open class Builder {
         }
         
         if let error = response.error {
-            print("Retrolux: Error: \(error)")
+            if let localized = error as? LocalizedError {
+                if let errorDescription = localized.errorDescription {
+                    print("Retrolux: Error: \(errorDescription)")
+                }
+                if let recoverySuggestion = localized.recoverySuggestion {
+                    print("Retrolux: Suggestion: \(recoverySuggestion)")
+                }
+                
+                if localized.errorDescription == nil && localized.recoverySuggestion == nil {
+                    print("Retrolux: Error: \(error)")
+                }
+            } else {
+                print("Retrolux: Error: \(error)")
+            }
         }
     }
     
@@ -174,9 +187,6 @@ open class Builder {
                     } else if let thisSerializer = creation.serializer {
                         if serializer == nil {
                             serializer = thisSerializer
-                        } else if serializer !== thisSerializer {
-                            let serializers = [serializer!, thisSerializer]
-                            return createAndLogErrorResponse(.tooManyMatchingSerializers(serializers: serializers, arguments: serializerArgs + [arg]))
                         } else {
                             // Serializer already set
                         }
@@ -188,14 +198,10 @@ open class Builder {
                 }
                 
                 if let serializer = serializer {
-                    if !serializer.validate(outbound: serializerArgs) {
-                        return createAndLogErrorResponse(.validationError(serializer: serializer, arguments: serializerArgs))
-                    }
-                    
                     do {
                         try serializer.apply(arguments: serializerArgs, to: &request)
                     } catch {
-                        return createAndLogErrorResponse(.serializationError(serializer: serializer, error: error, arguments: serializerArgs))
+                        return createAndLogErrorResponse(.serializerError(serializer: serializer, error: error, arguments: serializerArgs))
                     }
                 }
                 

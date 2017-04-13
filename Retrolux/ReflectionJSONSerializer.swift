@@ -8,10 +8,24 @@
 
 import Foundation
 
-public enum ReflectionJSONSerializerError: Error {
+public enum ReflectionJSONSerializerError: RetroluxError {
     case unsupportedType(type: Any.Type)
     case noData
-    case invalidJSON
+    
+    public var rl_error: RetroluxErrorDescription {
+        switch self {
+        case .unsupportedType(type: let type):
+            return RetroluxErrorDescription(
+                description: "The type given, \(type), is not supported.",
+                suggestion: "Make sure to pass in an object that conforms to the \(Reflectable.self) protocol. The type given, \(type), does not conform to \(Reflectable.self)."
+            )
+        case .noData:
+            return RetroluxErrorDescription(
+                description: "The HTTP body was empty, but a response was expected.",
+                suggestion: nil
+            )
+        }
+    }
 }
 
 fileprivate protocol GetTypeFromArray {
@@ -49,18 +63,12 @@ public class ReflectionJSONSerializer: OutboundSerializer, InboundSerializer {
         }
         
         if let reflectable = T.self as? Reflectable.Type {
-            guard let dictionary = (try? JSONSerialization.jsonObject(with: data, options: [])) as? [String: Any] else {
-                throw ReflectionJSONSerializerError.invalidJSON
-            }
-            return try reflector.convert(fromDictionary: dictionary, to: reflectable) as! T
+            return try reflector.convert(fromJSONDictionaryData: data, to: reflectable) as! T
         } else if let array = T.self as? GetTypeFromArray.Type {
             guard let type = array.getReflectableType() else {
                 throw ReflectionJSONSerializerError.unsupportedType(type: T.self)
             }
-            guard let array = (try? JSONSerialization.jsonObject(with: data, options: [])) as? [[String: Any]] else {
-                throw ReflectionJSONSerializerError.invalidJSON
-            }
-            return try array.map { try reflector.convert(fromDictionary: $0, to: type) } as! T
+            return try reflector.convert(fromJSONArrayData: data, to: type) as! T
         } else {
             throw ReflectionJSONSerializerError.unsupportedType(type: T.self)
         }

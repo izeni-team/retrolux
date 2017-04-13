@@ -10,18 +10,27 @@ import XCTest
 import Retrolux
 
 fileprivate class GreedyOutbound<T>: OutboundSerializer {
-    var fail = false
+    enum Error: Swift.Error {
+        case whatever
+    }
+    var forceFail = false
+    var supports: Bool?
+    var applyWasCalled = false
     
     fileprivate func supports(outboundType: Any.Type) -> Bool {
-        return outboundType is T.Type || T.self == Any.self
+        supports = outboundType is T.Type || T.self == Any.self
+        return supports!
     }
     
     fileprivate func validate(outbound: [BuilderArg]) -> Bool {
-        return !fail
+        return !forceFail
     }
     
     fileprivate func apply(arguments: [BuilderArg], to request: inout URLRequest) throws {
-        
+        if forceFail {
+            throw Error.whatever
+        }
+        applyWasCalled = true
     }
 }
 
@@ -143,20 +152,13 @@ class BuilderTests: XCTestCase {
         XCTAssert(response.request.httpBody! == "{\"name\":\"\"}".data(using: .utf8)!)
     }
     
-    func testTooManyMatchingSerializers() {
+    func testMultipleMatchingSerializers() {
         let builder = Builder.dry()
         builder.serializers = [GreedyOutbound<Int>(), GreedyOutbound<String>()]
         let function = builder.makeRequest(method: .post, endpoint: "whatever", args: (Int(), String()), response: Void.self)
-        let response = function((3, "a")).perform()
-        if let error = response.error, case BuilderError.tooManyMatchingSerializers(serializers: let serializers, arguments: let arguments) = error {
-            XCTAssert(serializers.first === builder.serializers.first! && serializers.last === builder.serializers.last!)
-            XCTAssert(arguments.first?.creation as? Int == Int())
-            XCTAssert(arguments.last?.creation as? String == String())
-            XCTAssert(arguments.first?.starting as? Int == 3)
-            XCTAssert(arguments.last?.starting as? String == "a")
-        } else {
-            XCTFail("Expected to fail with too many matching serializers.")
-        }
+        _ = function((3, "a")).perform()
+        XCTAssert((builder.serializers[0] as! GreedyOutbound<Int>).applyWasCalled == true)
+        XCTAssert((builder.serializers[1] as! GreedyOutbound<String>).applyWasCalled == false)
     }
     
     func testUnsupportedArgument() {
@@ -198,14 +200,15 @@ class BuilderTests: XCTestCase {
     func testOutboundSerializerValidationError() {
         let builder = Builder.dry()
         let serializer = GreedyOutbound<Int>()
-        serializer.fail = true
+        serializer.forceFail = true
         builder.serializers = [serializer]
         let function = builder.makeRequest(method: .post, endpoint: "whateverz", args: Int(), response: Void.self)
         let response = function(3).perform()
-        if let error = response.error, case BuilderError.validationError(serializer: let s, arguments: let args) = error {
+        if let error = response.error, case BuilderError.serializerError(serializer: let s, error: let e, arguments: let args) = error {
             XCTAssert(s === serializer)
+            XCTAssert(e is GreedyOutbound<Int>.Error)
             XCTAssert(args.count == 1)
-            XCTAssert(args.first?.creation as? Int == 0)
+            XCTAssert(args.first?.creation as? Int == Int())
             XCTAssert(args.first?.starting as? Int == 3)
         } else {
             XCTFail("Expected to fail.")

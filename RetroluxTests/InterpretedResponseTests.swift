@@ -71,8 +71,8 @@ class InterpretedResponseTests: XCTestCase {
         case .success(_):
             XCTFail("Should not have succeeded.")
         case .failure(let error):
-            if case SerializationError.propertyDoesNotSupportNullValues(property: let property, forClass: let `class`) = error {
-                XCTAssert(property.name == "name")
+            if case ReflectorSerializationError.propertyDoesNotSupportNullValues(propertyName: let propertyName, forClass: let `class`) = error {
+                XCTAssert(propertyName == "name")
                 XCTAssert(`class` == Person.self)
             } else {
                 XCTFail("Wrong error returned: \(error).")

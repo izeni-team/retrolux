@@ -14,11 +14,11 @@ public func reflectable_setProperty(_ property: Property, value: Any?, instance:
             if case PropertyType.optional = property.type {
                 /* Nothing */
             } else if value == nil {
-                throw SerializationError.keyNotFound(property: property, forClass: type(of: instance))
+                throw ReflectorSerializationError.keyNotFound(propertyName: property.name, key: property.mappedTo, forClass: type(of: instance))
             } else if value is NSNull {
-                throw SerializationError.propertyDoesNotSupportNullValues(property: property, forClass: type(of: instance))
+                throw ReflectorSerializationError.propertyDoesNotSupportNullValues(propertyName: property.name, forClass: type(of: instance))
             } else {
-                throw SerializationError.typeMismatch(expected: property.type, got: type(of: value), property: property.name, forClass: type(of: instance))
+                throw ReflectorSerializationError.typeMismatch(expected: property.type, got: type(of: value), propertyName: property.name, forClass: type(of: instance))
             }
         }
         return
@@ -30,7 +30,14 @@ public func reflectable_setProperty(_ property: Property, value: Any?, instance:
     }
     
     if let transformer = property.transformer {
-        let transformed = try reflectable_transform(value, type: property.type, transformer: transformer, direction: .forwards)        
+        let transformed = try reflectable_transform(
+            value: value,
+            propertyName: property.name,
+            classType: type(of: instance),
+            type: property.type,
+            transformer: transformer,
+            direction: .forwards
+        )
         instance.setValue(transformed, forKey: property.name)
     } else {
         instance.setValue(value, forKey: property.name)
@@ -40,7 +47,14 @@ public func reflectable_setProperty(_ property: Property, value: Any?, instance:
 public func reflectable_value(for property: Property, instance: Reflectable) throws -> Any? {
     let rawValue = instance.value(forKey: property.name)
     if let transformer = property.transformer, let rawValue = rawValue {
-        let transformed = try reflectable_transform(rawValue, type: property.type, transformer: transformer, direction: .backwards)
+        let transformed = try reflectable_transform(
+            value: rawValue,
+            propertyName: property.name,
+            classType: type(of: instance),
+            type: property.type,
+            transformer: transformer,
+            direction: .backwards
+        )
         return transformed
     }
     return rawValue ?? NSNull()

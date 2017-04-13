@@ -41,7 +41,7 @@ extension NSDictionary: RLDictionaryType {
     }
 }
 
-private protocol RLOptionalType {
+fileprivate protocol RLOptionalType {
     static func rl_type() -> Any.Type
 }
 
@@ -74,7 +74,7 @@ public indirect enum PropertyType: CustomStringConvertible, Equatable {
     case anyObject
     case optional(wrapped: PropertyType)
     case bool
-    case number
+    case number(exactType: Any.Type)
     case string
     case array(type: PropertyType)
     case dictionary(type: PropertyType)
@@ -97,7 +97,7 @@ public indirect enum PropertyType: CustomStringConvertible, Equatable {
         } else if type is RLStringType.Type {
             return PropertyType.string
         } else if type is RLNumberType.Type {
-            return PropertyType.number
+            return PropertyType.number(exactType: type)
         } else if let arr = type as? RLArrayType.Type, let innerType = from(arr.rl_type(), transformer: transformer, transformerMatched: &transformerMatched) {
             return PropertyType.array(type: innerType)
         } else if let opt = type as? RLOptionalType.Type, let wrapped = from(opt.rl_type(), transformer: transformer, transformerMatched: &transformerMatched) {
@@ -177,9 +177,9 @@ public func ==(lhs: PropertyType, rhs: PropertyType) -> Bool {
         if case PropertyType.dictionary(let innerType2) = rhs {
             return innerType == innerType2
         }
-    case .number:
-        if case PropertyType.number = rhs {
-            return true
+    case .number(let exactType):
+        if case PropertyType.number(let otherExactType) = rhs {
+            return exactType == otherExactType
         }
     case .transformable(transformer: let transformer, targetType: let targetType):
         if case PropertyType.transformable(transformer: let transformer2, targetType: let targetType2) = rhs {

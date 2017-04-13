@@ -12,18 +12,18 @@ import Retrolux
 class PropertyTypeTests: XCTestCase {
     func testPropertyTypeInference() {
         XCTAssert(PropertyType.from(AnyObject.self) == .anyObject)
-        XCTAssert(PropertyType.from(Optional<Int>.self) == .optional(wrapped: .number))
+        XCTAssert(PropertyType.from(Optional<Int>.self) == .optional(wrapped: .number(exactType: Int.self)))
         XCTAssert(PropertyType.from(Bool.self) == .bool)
-        XCTAssert(PropertyType.from(Int.self) == .number)
-        XCTAssert(PropertyType.from(Double.self) == .number)
+        XCTAssert(PropertyType.from(Int.self) == .number(exactType: Int.self))
+        XCTAssert(PropertyType.from(Double.self) == .number(exactType: Double.self))
         
         let transformer = ReflectableTransformer(reflector: Reflector())
         var matched = false
         XCTAssert(PropertyType.from(Reflection.self, transformer: transformer, transformerMatched: &matched) == .transformable(transformer: transformer, targetType: Reflection.self))
         XCTAssert(matched)
         
-        XCTAssert(PropertyType.from([Int?].self) == .array(type: .optional(wrapped: .number)))
-        XCTAssert(PropertyType.from([String: Int?].self) == .dictionary(type: .optional(wrapped: .number)))
+        XCTAssert(PropertyType.from([Int?].self) == .array(type: .optional(wrapped: .number(exactType: Int.self))))
+        XCTAssert(PropertyType.from([String: Int?].self) == .dictionary(type: .optional(wrapped: .number(exactType: Int.self))))
         XCTAssert(PropertyType.from(NSDictionary.self) == .dictionary(type: .anyObject))
         XCTAssert(PropertyType.from(NSMutableDictionary.self) == .dictionary(type: .anyObject))
         let jsonDictionaryData = "{\"test\": true}".data(using: String.Encoding.utf8)!
@@ -54,7 +54,7 @@ class PropertyTypeTests: XCTestCase {
             let propertyTypes = properties.map({ $0.type })
             XCTAssert(propertyTypes == [
                 PropertyType.string,
-                PropertyType.dictionary(type: .array(type: .number)),
+                PropertyType.dictionary(type: .array(type: .number(exactType: Int.self))),
                 PropertyType.array(type: PropertyType.transformable(transformer: ReflectableTransformer(reflector: Reflector()), targetType: Object2.self))
                 ])
         } catch let error {

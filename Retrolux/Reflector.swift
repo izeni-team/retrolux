@@ -1,3 +1,4 @@
+
 //
 //  Reflector.swift
 //  Retrolux
@@ -21,17 +22,29 @@ open class Reflector {
     public init() {}
     
     open func convert(fromJSONArrayData arrayData: Data, to type: Reflectable.Type) throws -> [Reflectable] {
-        let objects_any: Any = try JSONSerialization.jsonObject(with: arrayData, options: [])
+        let objects_any: Any
+        do {
+            objects_any = try JSONSerialization.jsonObject(with: arrayData, options: [])
+        } catch {
+            throw ReflectorSerializationError.invalidJSONData(error)
+        }
         guard let objects = objects_any as? [[String: Any]] else {
-            throw SerializationError.expectedArrayRootButGotDictionaryRoot
+            assert(objects_any as? [String: Any] != nil)
+            throw ReflectorSerializationError.expectedArrayRootButGotDictionaryRoot(type: type)
         }
         return try convert(fromArray: objects, to: type)
     }
     
     open func convert(fromJSONDictionaryData dictionaryData: Data, to type: Reflectable.Type) throws -> Reflectable {
-        let object_any: Any = try JSONSerialization.jsonObject(with: dictionaryData, options: [])
+        let object_any: Any
+        do {
+            object_any = try JSONSerialization.jsonObject(with: dictionaryData, options: [])
+        } catch {
+            throw ReflectorSerializationError.invalidJSONData(error)
+        }
         guard let object = object_any as? [String: Any] else {
-            throw SerializationError.expectedDictionaryRootButGotArrayRoot
+            assert(object_any as? [Any] != nil)
+            throw ReflectorSerializationError.expectedDictionaryRootButGotArrayRoot(type: type)
         }
         return try convert(fromDictionary: object, to: type)
     }
@@ -114,13 +127,19 @@ open class Reflector {
         var properties = [Property]()
         let subjectType = type(of: instance)
         
-        let ignored = Set(subjectType.ignoredProperties)
+        var ignored = Set(subjectType.ignoredProperties)
         let ignoreErrorsFor = Set(subjectType.ignoreErrorsForProperties)
         let mapped = subjectType.mappedProperties
         let transformed = subjectType.transformedProperties
         
         let children = try getMirrorChildren(Mirror(reflecting: instance), parentMirror: nil)
         let propertyNameSet: Set<String> = Set(children.map({ $0.label }))
+        
+        // Automatically treat read-only properties as ignored.
+        let readOnly = propertyNameSet.filter {
+            isReadOnly(property: $0, instance: instance)
+        }
+        ignored.formUnion(readOnly)
         
         // We *could* silently ignore the users request to ignore a non-existant property, but it's possible that
         // they simply misspelled it. Raise an error just to be safe.
@@ -164,7 +183,11 @@ open class Reflector {
         }
         
         // We cannot possibly map one property to multiple values.
-        let excessivelyMapped = mapped.filter { k1, v1 in mapped.contains { v1 == $1 && k1 != $0 } }
+        let excessivelyMapped = mapped.filter { k1, v1 in
+            mapped.contains {
+                v1 == $1 && k1 != $0
+            }
+        }
         if !excessivelyMapped.isEmpty {
             let pickOne = excessivelyMapped.first!.1
             let propertiesForIt = excessivelyMapped.filter { $1 == pickOne }.map { $0.0 }
@@ -208,7 +231,7 @@ open class Reflector {
                 // The user should probably add this to their list of ignored properties if it reaches this point.
                 
                 throw ReflectionError.propertyNotSupported(
-                    property: label,
+                    propertyName: label,
                     valueType: valueType,
                     forClass: subjectType
                 )
@@ -227,11 +250,18 @@ open class Reflector {
                 
                 switch type {
                 case .optional(let wrapped):
+                    // Optional numeric primitives (i.e., Int?) cannot be bridged to Objective-C as of Swift 3.1.0.
                     switch wrapped {
-                    case .number, .bool:
-                        // Optional numeric primitives (i.e., Int?) cannot be bridged to Objective-C as of Swift 3.1.0.
+                    case .number(let wrappedType):
                         throw ReflectionError.optionalNumericTypesAreNotSupported(
-                            property: label,
+                            propertyName: label,
+                            unwrappedType: wrappedType,
+                            forClass: subjectType
+                        )
+                    case .bool:
+                        throw ReflectionError.optionalNumericTypesAreNotSupported(
+                            propertyName: label,
+                            unwrappedType: Bool.self,
                             forClass: subjectType
                         )
                     default:
@@ -243,21 +273,12 @@ open class Reflector {
                 
                 // We have no clue what this property type is.
                 throw ReflectionError.propertyNotSupported(
-                    property: label,
+                    propertyName: label,
                     valueType: valueType,
                     forClass: subjectType
                 )
             }
             
-            guard !isReadOnly(property: label, instance: instance) else {
-                // This property is read-only, which means it is not settable.
-                // It's *possible* the user doesn't care if we ignore it, but that'd be a bad thing to assume. Better
-                // safe than sorry.
-                throw ReflectionError.readOnlyProperty(
-                    property: label,
-                    forClass: subjectType
-                )
-            }
             let required = !ignoreErrorsFor.contains(label)
             let finalMappedKey = mapped[label] ?? label
             let property = Property(type: type, name: label, required: required, mappedTo: finalMappedKey, transformer: transformer)
@@ -270,8 +291,12 @@ open class Reflector {
     }
     
     fileprivate func isReadOnly(property: String, instance: Reflectable) -> Bool {
-        let objc_property = class_getProperty(type(of: instance), property)
-        let c_attributes = property_getAttributes(objc_property)!
+        guard let objc_property = class_getProperty(type(of: instance), property) else {
+            return false
+        }
+        guard let c_attributes = property_getAttributes(objc_property) else {
+            return false
+        }
         let attributes = String(cString: c_attributes, encoding: String.Encoding.utf8)!
         return attributes.components(separatedBy: ",").contains("R")
     }

@@ -341,8 +341,8 @@ class ReflectionErrorTests: XCTestCase {
         do {
             _ = try Reflector().reflect(object)
             XCTFail("Operation should not have succeeded.")
-        } catch ReflectionError.propertyNotSupported(property: let property, valueType: let valueType, forClass: let classType) {
-            XCTAssert(property == "test")
+        } catch ReflectionError.propertyNotSupported(propertyName: let propertyName, valueType: let valueType, forClass: let classType) {
+            XCTAssert(propertyName == "test")
             XCTAssert(valueType is Data.Type)
             XCTAssert(classType == Object1.self)
         } catch let error {
@@ -362,8 +362,9 @@ class ReflectionErrorTests: XCTestCase {
         do {
             _ = try Reflector().reflect(object)
             XCTFail("Operation should not have succeeded.")
-        } catch ReflectionError.optionalNumericTypesAreNotSupported(property: let property, forClass: let classType) {
-            XCTAssert(property == "test")
+        } catch ReflectionError.optionalNumericTypesAreNotSupported(propertyName: let propertyName, unwrappedType: let unwrappedType, forClass: let classType) {
+            XCTAssert(propertyName == "test")
+            XCTAssert(unwrappedType == Int.self)
             XCTAssert(classType == Object1.self)
         } catch let error {
             XCTFail("\(error)")
@@ -383,10 +384,28 @@ class ReflectionErrorTests: XCTestCase {
         do {
             _ = try Reflector().reflect(object)
             XCTFail("Operation should not have succeeded.")
-        } catch ReflectionError.propertyNotSupported(property: let property, valueType: let valueType, forClass: let classType) {
-            XCTAssert(property == "test")
+        } catch ReflectionError.propertyNotSupported(propertyName: let propertyName, valueType: let valueType, forClass: let classType) {
+            XCTAssert(propertyName == "test")
             XCTAssert(valueType == Bool.self)
             XCTAssert(classType == Object1.self)
+        } catch let error {
+            XCTFail("\(error)")
+        }
+    }
+    
+    func testRLObjectReflection_ReadOnlyProperty() {
+        class Object1: NSObject, Reflectable {
+            let test = false
+            
+            required override init() {
+                super.init()
+            }
+        }
+        
+        let object = Object1()
+        do {
+            let properties = try Reflector().reflect(object)
+            XCTAssert(properties.isEmpty)
         } catch let error {
             XCTFail("\(error)")
         }
@@ -399,15 +418,20 @@ class ReflectionErrorTests: XCTestCase {
             required override init() {
                 super.init()
             }
+            
+            static let mappedProperties: [String: String] = [
+                "test": "test"
+            ]
         }
         
         let object = Object1()
         do {
-            _ = try Reflector().reflect(object)
+            let properties = try Reflector().reflect(object)
+            XCTAssert(properties.isEmpty)
             XCTFail("Operation should not have succeeded.")
-        } catch ReflectionError.readOnlyProperty(property: let property, forClass: let classType) {
-            XCTAssert(property == "test")
-            XCTAssert(classType == Object1.self)
+        } catch ReflectionError.cannotMapAndIgnoreProperty(propertyName: let propertyName, forClass: let `class`) {
+            XCTAssert(propertyName == "test")
+            XCTAssert(`class` == Object1.self)
         } catch let error {
             XCTFail("\(error)")
         }
@@ -442,8 +466,8 @@ class ReflectionErrorTests: XCTestCase {
             XCTAssert(properties.first?.type == .string)
             try object.set(value: NSNull(), for: properties.first!)
             XCTFail("Operation should not have succeeded.")
-        } catch SerializationError.propertyDoesNotSupportNullValues(property: let property, forClass: let `class`) {
-            XCTAssert(property.name == "name")
+        } catch ReflectorSerializationError.propertyDoesNotSupportNullValues(propertyName: let propertyName, forClass: let `class`) {
+            XCTAssert(propertyName == "name")
             XCTAssert(`class` == Person.self)
         } catch {
             XCTFail("\(error)")
@@ -455,8 +479,8 @@ class ReflectionErrorTests: XCTestCase {
             let reflector = Reflector()
             _ = try reflector.convert(fromJSONDictionaryData: data, to: Person.self)
             XCTFail("Operation should not have succeeded.")
-        } catch SerializationError.propertyDoesNotSupportNullValues(property: let property, forClass: let `class`) {
-            XCTAssert(property.name == "name")
+        } catch ReflectorSerializationError.propertyDoesNotSupportNullValues(propertyName: let propertyName, forClass: let `class`) {
+            XCTAssert(propertyName == "name")
             XCTAssert(`class` == Person.self)
         } catch {
             XCTFail("\(error)")
@@ -466,6 +490,12 @@ class ReflectionErrorTests: XCTestCase {
     func testKeyNotFound() {
         class Person: Reflection {
             var name = ""
+            
+            override class var mappedProperties: [String: String] {
+                return [
+                    "name": "not_name"
+                ]
+            }
         }
         
         let object = Person()
@@ -476,9 +506,9 @@ class ReflectionErrorTests: XCTestCase {
             XCTAssert(properties.first?.type == .string)
             try object.set(value: nil, for: properties.first!)
             XCTFail("Operation should not have succeeded.")
-        } catch SerializationError.keyNotFound(property: let property, forClass: let `class`) {
-            XCTAssert(property.mappedTo == "name")
-            XCTAssert(property.name == "name")
+        } catch ReflectorSerializationError.keyNotFound(propertyName: let propertyName, key: let key, forClass: let `class`) {
+            XCTAssert(propertyName == "name")
+            XCTAssert(key == "not_name")
             XCTAssert(`class` == Person.self)
         } catch {
             XCTFail("\(error)")
@@ -490,9 +520,9 @@ class ReflectionErrorTests: XCTestCase {
             let reflector = Reflector()
             _ = try reflector.convert(fromJSONDictionaryData: data, to: Person.self)
             XCTFail("Operation should not have succeeded.")
-        } catch SerializationError.keyNotFound(property: let property, forClass: let `class`) {
-            XCTAssert(property.mappedTo == "name")
-            XCTAssert(property.name == "name")
+        } catch ReflectorSerializationError.keyNotFound(propertyName: let propertyName, key: let key, forClass: let `class`) {
+            XCTAssert(propertyName == "name")
+            XCTAssert(key == "not_name")
             XCTAssert(`class` == Person.self)
         } catch {
             XCTFail("\(error)")
@@ -505,8 +535,8 @@ class ReflectionErrorTests: XCTestCase {
         do {
             _ = try Reflector().convert(fromJSONDictionaryData: "[{}]".data(using: .utf8)!, to: Person.self)
             XCTFail("Should not have succeeded.")
-        } catch SerializationError.expectedDictionaryRootButGotArrayRoot {
-            /* Success! */
+        } catch ReflectorSerializationError.expectedDictionaryRootButGotArrayRoot(type: let type) {
+            XCTAssert(type == Person.self)
         } catch {
             XCTFail("\(error)")
         }
@@ -514,8 +544,8 @@ class ReflectionErrorTests: XCTestCase {
         do {
             _ = try Reflector().convert(fromJSONArrayData: "{}".data(using: .utf8)!, to: Person.self)
             XCTFail("Should not have succeeded.")
-        } catch SerializationError.expectedArrayRootButGotDictionaryRoot {
-            /* Success! */
+        } catch ReflectorSerializationError.expectedArrayRootButGotDictionaryRoot(type: let type) {
+            XCTAssert(type == Person.self)
         } catch {
             XCTFail("\(error)")
         }
@@ -523,8 +553,8 @@ class ReflectionErrorTests: XCTestCase {
         do {
             _ = try Reflector().convert(fromJSONArrayData: "null".data(using: .utf8)!, to: Person.self)
             XCTFail("Should not have succeeded.")
-        } catch let error as NSError {
-            XCTAssert(error.code == 3840)
+        } catch ReflectorSerializationError.invalidJSONData(_) {
+            // SUCCESS!
         } catch {
             XCTFail("\(error)")
         }

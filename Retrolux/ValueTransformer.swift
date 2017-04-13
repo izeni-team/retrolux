@@ -29,12 +29,19 @@ public protocol ValueTransformer {
     func transform(_ value: Any, targetType: Any.Type, direction: ValueTransformerDirection) throws -> Any
 }
 
-internal func reflectable_transform(_ value: Any, type: PropertyType, transformer: ValueTransformer, direction: ValueTransformerDirection) throws -> Any {
+internal func reflectable_transform(value: Any, propertyName: String, classType: Any.Type, type: PropertyType, transformer: ValueTransformer, direction: ValueTransformerDirection) throws -> Any {
     switch type {
     case .anyObject:
         return value
     case .optional(let wrapped):
-        return try reflectable_transform(value, type: wrapped, transformer: transformer, direction: direction)
+        return try reflectable_transform(
+            value: value,
+            propertyName: propertyName,
+            classType: classType,
+            type: wrapped,
+            transformer: transformer,
+            direction: direction
+        )
     case .bool:
         return value
     case .number:
@@ -48,15 +55,30 @@ internal func reflectable_transform(_ value: Any, type: PropertyType, transforme
             throw ValueTransformationError.typeMismatch(got: type(of: value))
         }
         return try array.map {
-            try reflectable_transform($0, type: element, transformer: transformer, direction: direction)
+            try reflectable_transform(
+                value: $0,
+                propertyName: propertyName,
+                classType: classType,
+                type: element,
+                transformer: transformer,
+                direction: direction
+            )
         }
     case .dictionary(let valueType):
         guard let dictionary = value as? [String: Any] else {
-            throw SerializationError.typeMismatch(expected: type, got: type(of: value), property: "", forClass: Int.self)
+            // TODO: Add a test for this.
+            throw ReflectorSerializationError.typeMismatch(expected: type, got: type(of: value), propertyName: propertyName, forClass: classType)
         }
         var result: [String: Any] = [:]
         for (key, value) in dictionary {
-            result[key] = try reflectable_transform(value, type: valueType, transformer: transformer, direction: direction)
+            result[key] = try reflectable_transform(
+                value: value,
+                propertyName: propertyName,
+                classType: classType,
+                type: valueType,
+                transformer: transformer,
+                direction: direction
+            )
         }
         return result
     }

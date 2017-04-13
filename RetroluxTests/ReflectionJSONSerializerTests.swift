@@ -122,9 +122,10 @@ class ReflectionJSONSerializerTests: XCTestCase {
             let response = makeResponse(from: inputDictionary)
             _ = try serializer.makeValue(from: response, type: Valid.self)
             XCTFail("Should not have succeeded.")
-        } catch SerializationError.typeMismatch(expected: let expected, got: _, property: let property, forClass: let forClass) {
-            XCTAssert(expected == .number)
-            XCTAssert(property == "age")
+        } catch ReflectorSerializationError.typeMismatch(expected: let expected, got: _, propertyName: let propertyName, forClass: let forClass) {
+            // TODO: Add unit test for got.
+            XCTAssert(expected == .number(exactType: Int.self))
+            XCTAssert(propertyName == "age")
             XCTAssert(forClass == Valid.self)
         } catch {
             XCTFail("Unexpected error \(error)")
@@ -134,9 +135,10 @@ class ReflectionJSONSerializerTests: XCTestCase {
             let response = makeResponse(from: [inputDictionary])
             _ = try serializer.makeValue(from: response, type: [Valid].self)
             XCTFail("Should not have succeeded.")
-        } catch SerializationError.typeMismatch(expected: let expected, got: _, property: let property, forClass: let forClass) {
-            XCTAssert(expected == .number)
-            XCTAssert(property == "age")
+        } catch ReflectorSerializationError.typeMismatch(expected: let expected, got: _, propertyName: let propertyName, forClass: let forClass) {
+            // TODO: Add unit test for got.
+            XCTAssert(expected == .number(exactType: Int.self))
+            XCTAssert(propertyName == "age")
             XCTAssert(forClass == Valid.self)
         } catch {
             XCTFail("Unexpected error \(error)")
@@ -168,8 +170,8 @@ class ReflectionJSONSerializerTests: XCTestCase {
         do {
             _ = try serializer.makeValue(from: clientData, type: Whatever.self)
             XCTFail("Should not have succeeded.")
-        } catch ReflectionJSONSerializerError.invalidJSON {
-            // Works!
+        } catch ReflectorSerializationError.invalidJSONData(_) {
+            // WORKS!
         } catch {
             XCTFail("Failed with error \(error)")
         }
@@ -177,8 +179,8 @@ class ReflectionJSONSerializerTests: XCTestCase {
         do {
             _ = try serializer.makeValue(from: clientData, type: [Whatever].self)
             XCTFail("Should not have succeeded.")
-        } catch ReflectionJSONSerializerError.invalidJSON {
-            // Works!
+        } catch ReflectorSerializationError.invalidJSONData(_) {
+            // WORKS!
         } catch {
             XCTFail("Failed with error \(error)")
         }

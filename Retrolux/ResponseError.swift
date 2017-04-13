@@ -8,6 +8,16 @@
 
 import Foundation
 
-public enum ResponseError: Error {
+public enum ResponseError: RetroluxError {
     case invalidHttpStatusCode(code: Int?)
+    
+    public var rl_error: RetroluxErrorDescription {
+        switch self {
+        case .invalidHttpStatusCode(code: let code):
+            return RetroluxErrorDescription(
+                description: code != nil ? "Unexpected HTTP status code, \(code!)." : "Expected an HTTP status code, but got no response.",
+                suggestion: nil
+            )
+        }
+    }
 }

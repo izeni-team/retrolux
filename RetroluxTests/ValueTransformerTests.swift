@@ -103,9 +103,9 @@ class ValueTransformerTests: XCTestCase {
         do {
             _ = try transformer.transform(dictionary, targetType: Test.self, direction: .forwards) as? Test
             XCTFail("Should not have passed.")
-        } catch SerializationError.keyNotFound(property: let property, forClass: let `class`) {
-            XCTAssert(property.mappedTo == "name")
-            XCTAssert(property.name == "name")
+        } catch ReflectorSerializationError.keyNotFound(propertyName: let propertyName, key: let key, forClass: let `class`) {
+            XCTAssert(propertyName == "name")
+            XCTAssert(key == "name")
             XCTAssert(`class` == Test.self)
         } catch {
             XCTFail("Failed with error: \(error)")

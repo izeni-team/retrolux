@@ -162,8 +162,8 @@ class RetroluxReflectorTests: XCTestCase {
         do {
             _ = try reflector.convert(fromJSONDictionaryData: responseData, to: Car.self)
             XCTFail("Should not have passed.")
-        } catch SerializationError.propertyDoesNotSupportNullValues(property: let property, forClass: let `class`) {
-            XCTAssert(property.name == "model")
+        } catch ReflectorSerializationError.propertyDoesNotSupportNullValues(propertyName: let propertyName, forClass: let `class`) {
+            XCTAssert(propertyName == "model")
             XCTAssert(`class` == Car.self)
         } catch {
             XCTFail("\(error)")
@@ -225,8 +225,8 @@ class RetroluxReflectorTests: XCTestCase {
         do {
             _ = try reflector.convert(fromJSONDictionaryData: responseData, to: Dummy.self)
             XCTFail("Should not pass.")
-        } catch let error as NSError {
-            XCTAssert(error.domain == NSCocoaErrorDomain && error.code == 3840)
+        } catch ReflectorSerializationError.invalidJSONData(_) {
+            // SUCCESS!
         } catch {
             XCTFail("Failed with exception: \(error)")
         }
@@ -384,12 +384,12 @@ class RetroluxReflectorTests: XCTestCase {
         do {
             _ = try reflector.convert(fromJSONDictionaryData: responseData, to: Car.self)
             XCTFail("Should not have passed.")
-        } catch SerializationError.typeMismatch(expected: let expected, got: let got, property: let property, forClass: let `class`) {
-            XCTAssert(expected == .number)
+        } catch ReflectorSerializationError.typeMismatch(expected: let expected, got: let got, propertyName: let propertyName, forClass: let `class`) {
+            XCTAssert(expected == .number(exactType: Int.self))
             
             // TODO: Cannot check got type. It's always Optional<Optional<Any>> it seems... :-(
             
-            XCTAssert(property == "year")
+            XCTAssert(propertyName == "year")
             XCTAssert(`class` == Car.self)
         } catch {
             print("Error serializing data into a basic Car: \(error)")
