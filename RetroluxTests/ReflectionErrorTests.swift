@@ -162,171 +162,48 @@ class ReflectionErrorTests: XCTestCase {
                 super.init()
             }
             
-            static let ignoredProperties = ["does_not_exist"]
+            static func config(_ c: PropertyConfig) {
+                do {
+                    try c.validator(c, "does_not_exist", [])
+                } catch PropertyConfigValidationError.cannotSetOptionsForNonExistantProperty(propertyName: let propertyName, forClass: let `class`) {
+                    XCTAssert(propertyName == "does_not_exist")
+                    XCTAssert(`class` == Object1.self)
+                } catch {
+                    XCTFail("Unexpected error: \(error)")
+                }
+            }
         }
         
         let object = Object1()
-        do {
-            _ = try Reflector().reflect(object)
-            XCTFail("Operation should not have succeeded.")
-        } catch ReflectionError.cannotIgnoreNonExistantProperty(propertyName: let propertyName, forClass: let classType) {
-            XCTAssert(propertyName == "does_not_exist")
-            XCTAssert(classType == Object1.self)
-        } catch let error {
-            XCTFail("\(error)")
-        }
-    }
-    
-    func testRLObjectReflectorError_CannotIgnoreErrorsForNonExistantProperty() {
-        class Object1: NSObject, Reflectable {
-            required override init() {
-                super.init()
-            }
-            
-            static let ignoreErrorsForProperties = ["does_not_exist"]
-        }
-        
-        let object = Object1()
-        do {
-            _ = try Reflector().reflect(object)
-            XCTFail("Operation should not have succeeded.")
-        } catch ReflectionError.cannotIgnoreErrorsForNonExistantProperty(propertyName: let propertyName, forClass: let classType) {
-            XCTAssert(propertyName == "does_not_exist")
-            XCTAssert(classType == Object1.self)
-        } catch let error {
-            XCTFail("\(error)")
-        }
-    }
-    
-    func testRLObjectReflectorError_CannotMapAndIgnoreProperty() {
-        class Object1: NSObject, Reflectable {
-            var someProperty = false
-            
-            required override init() {
-                super.init()
-            }
-            
-            static let mappedProperties = ["someProperty": "someProperty"]
-            static let ignoredProperties = ["someProperty"]
-        }
-        
-        let object = Object1()
-        do {
-            _ = try Reflector().reflect(object)
-            XCTFail("Operation should not have succeeded.")
-        } catch ReflectionError.cannotMapAndIgnoreProperty(propertyName: let propertyName, forClass: let classType) {
-            XCTAssert(propertyName == "someProperty")
-            XCTAssert(classType == Object1.self)
-        } catch let error {
-            XCTFail("\(error)")
-        }
-    }
-    
-    func testRLObjectReflectorError_CannotTransformAndIgnoreProperty() {
-        struct DummyTransformer: Retrolux.ValueTransformer {
-            func supports(targetType: Any.Type) -> Bool {
-                return true
-            }
-            func supports(value: Any, targetType: Any.Type, direction: ValueTransformerDirection) -> Bool {
-                return true
-            }
-            
-            func transform(_ value: Any, targetType: Any.Type, direction: ValueTransformerDirection) throws -> Any {
-                return value
-            }
-        }
-        
-        class Object1: NSObject, Reflectable {
-            var someProperty = false
-            
-            required override init() {
-                super.init()
-            }
-            
-            // TODO: The type has to be explicitly set because DummyTransformer.self != ValueTransformer.Type
-            static let transformedProperties: [String: Retrolux.ValueTransformer] = ["someProperty": DummyTransformer()]
-            static let ignoredProperties = ["someProperty"]
-        }
-        
-        let object = Object1()
-        do {
-            _ = try Reflector().reflect(object)
-            XCTFail("Operation should not have succeeded.")
-        } catch ReflectionError.cannotTransformAndIgnoreProperty(propertyName: let propertyName, forClass: let classType) {
-            XCTAssert(propertyName == "someProperty")
-            XCTAssert(classType == Object1.self)
-        } catch let error {
-            XCTFail("\(error)")
-        }
-    }
-    
-    func testRLObjectReflectorError_CannotMapNonExistantProperty() {
-        class Object1: NSObject, Reflectable {
-            required override init() {
-                super.init()
-            }
-            
-            static let mappedProperties = ["does_not_exist": "something_else"]
-        }
-        
-        let object = Object1()
-        do {
-            _ = try Reflector().reflect(object)
-            XCTFail("Operation should not have succeeded.")
-        } catch ReflectionError.cannotMapNonExistantProperty(propertyName: let propertyName, forClass: let classType) {
-            XCTAssert(propertyName == "does_not_exist")
-            XCTAssert(classType == Object1.self)
-        } catch let error {
-            XCTFail("\(error)")
-        }
-    }
-    
-    func testRLObjectReflectorError_CannotTransformNonExistantProperty() {
-        class Object1: NSObject, Reflectable {
-            required override init() {
-                super.init()
-            }
-            
-            static let transformedProperties: [String: Retrolux.ValueTransformer] = ["does_not_exist": ReflectableTransformer(reflector: Reflector())]
-        }
-        
-        let object = Object1()
-        do {
-            _ = try Reflector().reflect(object)
-            XCTFail("Operation should not have succeeded.")
-        } catch ReflectionError.cannotTransformNonExistantProperty(propertyName: let propertyName, forClass: let classType) {
-            XCTAssert(propertyName == "does_not_exist")
-            XCTAssert(classType == Object1.self)
-        } catch let error {
-            XCTFail("\(error)")
-        }
+        _ = try! Reflector().reflect(object)
     }
     
     func testRLObjectReflectionError_MappedPropertyConflict() {
         class Object1: NSObject, Reflectable {
             var test1 = ""
             var test2: [Any] = []
+            
             required override init() {
                 super.init()
             }
             
-            static let mappedProperties = [
-                "test1": "conflict_test",
-                "test2": "conflict_test"
-            ]
+            static func config(_ c: PropertyConfig) {
+                c["test1"] = [.serializedName("conflict_test")]
+                do {
+                    try c.validator(c, "test2", [.serializedName("conflict_test")])
+                } catch PropertyConfigValidationError.serializedNameAlreadyTaken(propertyName: let propertyName, alreadyTakenBy: let alreadyTakenBy, serializedName: let serializedName, onClass: let `class`) {
+                    XCTAssert(propertyName == "test2")
+                    XCTAssert(alreadyTakenBy == "test1")
+                    XCTAssert(serializedName == "conflict_test")
+                    XCTAssert(`class` == Object1.self)
+                } catch {
+                    XCTFail("Unexpected error: \(error)")
+                }
+            }
         }
         
-        let object = Object1()
-        do {
-            _ = try Reflector().reflect(object)
-            XCTFail("Operation should not have succeeded.")
-        } catch ReflectionError.mappedPropertyConflict(properties: let properties, conflictKey: let conflict, forClass: let classType) {
-            XCTAssert(Set(properties) == Set(["test1", "test2"]))
-            XCTAssert(conflict == "conflict_test")
-            XCTAssert(classType == Object1.self)
-        } catch let error {
-            XCTFail("\(error)")
-        }
+        // TODO: How to test that config was called?
+        _ = try? Reflector().reflect(Object1())
     }
     
     func testRLObjectReflectionError_UnsupportedPropertyValueType() {
@@ -341,9 +218,9 @@ class ReflectionErrorTests: XCTestCase {
         do {
             _ = try Reflector().reflect(object)
             XCTFail("Operation should not have succeeded.")
-        } catch ReflectionError.propertyNotSupported(propertyName: let propertyName, valueType: let valueType, forClass: let classType) {
+        } catch ReflectionError.propertyNotSupported(propertyName: let propertyName, type: let type, forClass: let classType) {
             XCTAssert(propertyName == "test")
-            XCTAssert(valueType is Data.Type)
+            XCTAssert(type == .unknown(Data.self))
             XCTAssert(classType == Object1.self)
         } catch let error {
             XCTFail("\(error)")
@@ -384,9 +261,9 @@ class ReflectionErrorTests: XCTestCase {
         do {
             _ = try Reflector().reflect(object)
             XCTFail("Operation should not have succeeded.")
-        } catch ReflectionError.propertyNotSupported(propertyName: let propertyName, valueType: let valueType, forClass: let classType) {
+        } catch ReflectionError.propertyNotSupported(propertyName: let propertyName, type: let type, forClass: let classType) {
             XCTAssert(propertyName == "test")
-            XCTAssert(valueType == Bool.self)
+            XCTAssert(type == .bool)
             XCTAssert(classType == Object1.self)
         } catch let error {
             XCTFail("\(error)")

@@ -25,7 +25,8 @@ class RetroluxReflectorTests: XCTestCase {
             let properties = try Reflector().reflect(test)
             XCTAssert(properties.first?.name == "name")
             XCTAssert(properties.last?.name == "nested")
-            XCTAssert(properties.last?.type == PropertyType.optional(wrapped: .transformable(transformer: ReflectableTransformer(reflector: Reflector()), targetType: Test.self)))
+//            XCTAssert(properties.last?.type == PropertyType.optional(wrapped: .transformable(transformer: ReflectableTransformer(reflector: Reflector()), targetType: Test.self)))
+            XCTFail()
             try test.set(value: ["name": "success"], forProperty: properties.last!)
             XCTAssert(test.nested?.name == "success")
         } catch {
@@ -56,7 +57,8 @@ class RetroluxReflectorTests: XCTestCase {
             XCTAssert(properties.first?.name == "name")
             XCTAssert(properties.count == 2)
             XCTAssert(properties.last?.name == "nested")
-            XCTAssert(properties.last?.type == PropertyType.dictionary(type: PropertyType.transformable(transformer: ReflectableTransformer(reflector: Reflector()), targetType: Test.self)))
+//            XCTAssert(properties.last?.type == PropertyType.dictionary(type: PropertyType.transformable(transformer: ReflectableTransformer(reflector: Reflector()), targetType: Test.self)))
+            XCTFail()
             try test.set(value: nestedDictionary, for: properties.last!)
             XCTAssert(test.nested["bob"]?.name == "Bob")
             XCTAssert(test.nested["alice"]?.name == "Alice")
@@ -101,13 +103,17 @@ class RetroluxReflectorTests: XCTestCase {
             XCTAssert(properties.first?.name == "name")
             XCTAssert(properties.count == 2)
             XCTAssert(properties.last?.name == "nested")
-            XCTAssert(properties.last?.type == PropertyType.array(type: PropertyType.dictionary(type: PropertyType.transformable(transformer: ReflectableTransformer(reflector: Reflector()), targetType: Test.self))))
+//            XCTAssert(properties.last?.type == PropertyType.array(type: PropertyType.dictionary(type: PropertyType.transformable(transformer: ReflectableTransformer(reflector: Reflector()), targetType: Test.self))))
+            XCTFail()
             try test.set(value: nestedArray, for: properties.last!)
-            XCTAssert(test.nested.count == 2)
-            XCTAssert(test.nested[0]["bob"]?.name == "Bob")
-            XCTAssert(test.nested[0]["alice"]?.name == "Alice")
-            XCTAssert(test.nested[1]["robert"]?.name == "Robert")
-            XCTAssert(test.nested[1]["alicia"]?.name == "Alicia")
+            if test.nested.count == 2 {
+                XCTAssert(test.nested[0]["bob"]?.name == "Bob")
+                XCTAssert(test.nested[0]["alice"]?.name == "Alice")
+                XCTAssert(test.nested[1]["robert"]?.name == "Robert")
+                XCTAssert(test.nested[1]["alicia"]?.name == "Alicia")
+            } else {
+                XCTFail("Count is wrong.")
+            }
         } catch {
             XCTFail("Failed with error: \(error)")
         }

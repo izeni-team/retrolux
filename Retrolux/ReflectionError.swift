@@ -25,7 +25,7 @@ public enum ReflectionError: RetroluxError {
      If that still doesnt work, try adding the dynamic (or @objc) attribute.
      If that STILL doesnt work, your property type is not supported. :-(
      */
-    case propertyNotSupported(propertyName: String, valueType: Any.Type, forClass: Any.Type)
+    case propertyNotSupported(propertyName: String, type: PropertyType, forClass: Any.Type)
     
     public var rl_error: RetroluxErrorDescription {
         switch self {
@@ -79,10 +79,10 @@ public enum ReflectionError: RetroluxError {
                 description: "The property '\(propertyName)' on class \(`class`) has type \(unwrappedType)?, which isn't supported as an optional.",
                 suggestion: "Either change the type of the property '\(propertyName)' on \(`class`) to \(unwrappedType) (like `var \(propertyName) = \(unwrappedType)()`), or make it an optional NSNumber (i.e., NSNumber?), or add it to the list of ignored properties."
             )
-        case .propertyNotSupported(propertyName: let propertyName, valueType: let valueType, forClass: let `class`):
+        case .propertyNotSupported(propertyName: let propertyName, type: let type, forClass: let `class`):
             return RetroluxErrorDescription(
-                description: "The property '\(propertyName)' on class \(`class`) has an unsupported type, \(valueType).",
-                suggestion: "Change the type of the property '\(propertyName)' on \(`class`) to a supported type, or create a transformer that supports the property's type, \(valueType), or add it to the list of ignored properties. To see a more descriptive reason for why this property isn't supported, try adding the @objc attribute to your property and see if the compiler reveals any new errors."
+                description: "The property '\(propertyName)' on class \(`class`) has an unsupported type, \(type).",
+                suggestion: "Change the type of the property '\(propertyName)' on \(`class`) to a supported type, or create a transformer that supports the property's type, \(type), or add it to the list of ignored properties. To see a more descriptive reason for why this property isn't supported, try adding the @objc attribute to your property and see if the compiler reveals any new errors."
             )
         }
     }

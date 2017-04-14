@@ -99,10 +99,10 @@ class ReflectionJSONSerializerTests: XCTestCase {
         do {
             try serializer.apply(arguments: [BuilderArg(type: Invalid.self, creation: nil, starting: Invalid())], to: &request)
             XCTFail("Should not have succeeded.")
-        } catch ReflectionError.propertyNotSupported(let property, let valueType, let forClass) {
-            XCTAssert(property == "name")
-            XCTAssert(valueType == Data.self)
-            XCTAssert(forClass == Invalid.self)
+        } catch ReflectionError.propertyNotSupported(propertyName: let propertyName, type: let type, forClass: let `class`) {
+            XCTAssert(propertyName == "name")
+            XCTAssert(type == .unknown(Data.self))
+            XCTAssert(`class` == Invalid.self)
         } catch {
             XCTFail("Unexpected error \(error)")
         }

@@ -9,17 +9,19 @@
 import Foundation
 
 public func reflectable_setProperty(_ property: Property, value: Any?, instance: Reflectable) throws {
+    if property.ignored {
+        return
+    }
+    
     guard property.type.isCompatible(with: value) else {
-        if property.required {
-            if case PropertyType.optional = property.type {
-                /* Nothing */
-            } else if value == nil {
-                throw ReflectorSerializationError.keyNotFound(propertyName: property.name, key: property.mappedTo, forClass: type(of: instance))
-            } else if value is NSNull {
-                throw ReflectorSerializationError.propertyDoesNotSupportNullValues(propertyName: property.name, forClass: type(of: instance))
-            } else {
-                throw ReflectorSerializationError.typeMismatch(expected: property.type, got: type(of: value), propertyName: property.name, forClass: type(of: instance))
-            }
+        if case .optional(let wrapped) = property.type {
+            /* Nothing */ // TODO: This needs a unit test, and isn't correct behavior.
+        } else if value == nil {
+            throw ReflectorSerializationError.keyNotFound(propertyName: property.name, key: property.serializedName, forClass: type(of: instance))
+        } else if value is NSNull {
+            throw ReflectorSerializationError.propertyDoesNotSupportNullValues(propertyName: property.name, forClass: type(of: instance))
+        } else {
+            throw ReflectorSerializationError.typeMismatch(expected: property.type, got: type(of: value), propertyName: property.name, forClass: type(of: instance))
         }
         return
     }
@@ -30,34 +32,17 @@ public func reflectable_setProperty(_ property: Property, value: Any?, instance:
     }
     
     if let transformer = property.transformer {
-        let transformed = try reflectable_transform(
-            value: value,
-            propertyName: property.name,
-            classType: type(of: instance),
-            type: property.type,
-            transformer: transformer,
-            direction: .forwards
-        )
-        instance.setValue(transformed, forKey: property.name)
+        try transformer.set(value: value, for: property, instance: instance)
     } else {
         instance.setValue(value, forKey: property.name)
     }
 }
 
 public func reflectable_value(for property: Property, instance: Reflectable) throws -> Any? {
-    let rawValue = instance.value(forKey: property.name)
-    if let transformer = property.transformer, let rawValue = rawValue {
-        let transformed = try reflectable_transform(
-            value: rawValue,
-            propertyName: property.name,
-            classType: type(of: instance),
-            type: property.type,
-            transformer: transformer,
-            direction: .backwards
-        )
-        return transformed
+    if let transformer = property.transformer {
+        return try transformer.value(for: property, instance: instance) ?? NSNull()
     }
-    return rawValue ?? NSNull()
+    return instance.value(forKey: property.name) ?? NSNull()
 }
 
 public protocol Reflectable: NSObjectProtocol {
@@ -75,11 +60,8 @@ public protocol Reflectable: NSObjectProtocol {
     //func clearChanges() resetChanges() markAsHavingNoChanges() What to name this thing?
     //func revertChanges() // MAYBE?
     
-    func validate() -> String?
-    static var ignoredProperties: [String] { get }
-    static var ignoreErrorsForProperties: [String] { get }
-    static var mappedProperties: [String: String] { get }
-    static var transformedProperties: [String: ValueTransformer] { get }
+    func validate() throws
+    static func config(_ c: PropertyConfig)
     
     func set(value: Any?, for property: Property) throws
     func value(for property: Property) throws -> Any?
@@ -94,26 +76,11 @@ extension Reflectable {
         return try reflectable_value(for: property, instance: self)
     }
 
-    // TODO: This isn't internationalizable.
-    // Return value is just an error message.
-    // TODO: Return an error object instead or make it throw?
-    public func validate() -> String? {
-        return nil
+    public func validate() throws {
+        
     }
     
-    public static var ignoredProperties: [String] {
-        return []
-    }
-    
-    public static var ignoreErrorsForProperties: [String] {
-        return []
-    }
-    
-    public static var mappedProperties: [String: String] {
-        return [:]
-    }
-    
-    public static var transformedProperties: [String: ValueTransformer] {
-        return [:]
+    public static func config(_ c: PropertyConfig) {
+        
     }
 }

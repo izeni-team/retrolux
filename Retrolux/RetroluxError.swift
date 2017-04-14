@@ -26,6 +26,10 @@ extension RetroluxError {
         return rl_error.description
     }
     
+    public var localizedDescription: String {
+        return description
+    }
+    
     public var debugDescription: String {
         return description
     }

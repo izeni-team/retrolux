@@ -19,7 +19,13 @@ open class Reflector {
         return Static.instance
     }
     
-    public init() {}
+    open var globalTransformers: [TransformerType] = []
+    
+    public init() {
+        self.globalTransformers = [
+            ReflectableTransformer(reflector: self)
+        ]
+    }
     
     open func convert(fromJSONArrayData arrayData: Data, to type: Reflectable.Type) throws -> [Reflectable] {
         let objects_any: Any
@@ -71,7 +77,7 @@ open class Reflector {
         let instance = type.init()
         let properties = try reflect(instance)
         for property in properties {
-            let rawValue = dictionary[property.mappedTo]
+            let rawValue = dictionary[property.serializedName]
             try instance.set(value: rawValue, for: property)
         }
         return instance
@@ -89,7 +95,7 @@ open class Reflector {
         var dictionary: [String: Any] = [:]
         let properties = try reflect(instance)
         for property in properties {
-            dictionary[property.mappedTo] = try instance.value(for: property)
+            dictionary[property.serializedName] = try instance.value(for: property)
         }
         return dictionary
     }
@@ -126,124 +132,83 @@ open class Reflector {
         
         var properties = [Property]()
         let subjectType = type(of: instance)
-        
-        var ignored = Set(subjectType.ignoredProperties)
-        let ignoreErrorsFor = Set(subjectType.ignoreErrorsForProperties)
-        let mapped = subjectType.mappedProperties
-        let transformed = subjectType.transformedProperties
-        
         let children = try getMirrorChildren(Mirror(reflecting: instance), parentMirror: nil)
         let propertyNameSet: Set<String> = Set(children.map({ $0.label }))
         
-        // Automatically treat read-only properties as ignored.
-        let readOnly = propertyNameSet.filter {
-            isReadOnly(property: $0, instance: instance)
-        }
-        ignored.formUnion(readOnly)
-        
-        // We *could* silently ignore the users request to ignore a non-existant property, but it's possible that
-        // they simply misspelled it. Raise an error just to be safe.
-        if let ignoredButNotImplemented = ignored.subtracting(propertyNameSet).first {
-            throw ReflectionError.cannotIgnoreNonExistantProperty(
-                propertyName: ignoredButNotImplemented,
-                forClass: subjectType
-            )
-        }
-        
-        // A non-existant property is not considered an error that can be ignored. It probably indicates a mistake
-        // on the user's part.
-        if let optionalButNotImplemented = ignoreErrorsFor.subtracting(propertyNameSet).first {
-            throw ReflectionError.cannotIgnoreErrorsForNonExistantProperty(
-                propertyName: optionalButNotImplemented,
-                forClass: subjectType
-            )
-        }
-        
-        // Check if the user has requested to completely ignore a property AS WELL as ignore only the errors.
-        if let ignoredAndOptional = ignored.intersection(ignoreErrorsFor).first {
-            throw ReflectionError.cannotIgnoreErrorsAndIgnoreProperty(
-                propertyName: ignoredAndOptional,
-                forClass: subjectType
-            )
-        }
-        
-        // Check if the user has requested to remap a property that doesn't exist.
-        if let mappedButNotImplemented = Set(mapped.keys).subtracting(propertyNameSet).first {
-            throw ReflectionError.cannotMapNonExistantProperty(
-                propertyName: mappedButNotImplemented,
-                forClass: subjectType
-            )
-        }
-        
-        if let transformedButNotImplemented = Set(transformed.keys).subtracting(propertyNameSet).first {
-            throw ReflectionError.cannotTransformNonExistantProperty(
-                propertyName: transformedButNotImplemented,
-                forClass: subjectType
-            )
-        }
-        
-        // We cannot possibly map one property to multiple values.
-        let excessivelyMapped = mapped.filter { k1, v1 in
-            mapped.contains {
-                v1 == $1 && k1 != $0
-            }
-        }
-        if !excessivelyMapped.isEmpty {
-            let pickOne = excessivelyMapped.first!.1
-            let propertiesForIt = excessivelyMapped.filter { $1 == pickOne }.map { $0.0 }
-            throw ReflectionError.mappedPropertyConflict(
-                properties: propertiesForIt,
-                conflictKey: pickOne,
-                forClass: subjectType
-            )
-        }
-        
-        // Ignoring and mapping a property doesn't make sense and might indicate a user error.
-        if let ignoredAndMapped = ignored.intersection(mapped.keys).first {
-            throw ReflectionError.cannotMapAndIgnoreProperty(
-                propertyName: ignoredAndMapped,
-                forClass: subjectType
-            )
-        }
-        
-        if let transformedAndIgnored = ignored.intersection(transformed.keys).first {
-            throw ReflectionError.cannotTransformAndIgnoreProperty(
-                propertyName: transformedAndIgnored,
-                forClass: subjectType
-            )
-        }
-        
-        for (label, valueType) in children {
-            if ignored.contains(label) {
-                continue
+        let config = PropertyConfig(validator: { (config, name, options) in
+            guard propertyNameSet.contains(name) else {
+                throw PropertyConfigValidationError.cannotSetOptionsForNonExistantProperty(propertyName: name, forClass: subjectType)
             }
             
-            var transformer: ValueTransformer?
-            if let custom = transformed[label] {
-                transformer = custom
+            // Ensure that each property is mapped to a unique key.
+            var mappedTo = name
+            for option in options {
+                if case PropertyConfig.Option.serializedName(let customized) = option {
+                    mappedTo = customized
+                    // Purposefully no break, because there could be another serialized name later on.
+                }
+            }
+            
+            for (otherName, otherOptions) in config.storage {
+                for option in otherOptions {
+                    if case PropertyConfig.Option.serializedName(let otherMappedTo) = option, mappedTo == otherMappedTo {
+                        throw PropertyConfigValidationError.serializedNameAlreadyTaken(propertyName: name, alreadyTakenBy: otherName, serializedName: mappedTo, onClass: subjectType)
+                    }
+                }
+            }
+        })
+        subjectType.config(config)
+        
+        outer_loop: for (label, valueType) in children {
+            var options = config[label]
+            
+            if isReadOnly(property: label, instance: instance) {
+                options.append(.ignored)
+            }
+            
+            for option in options {
+                if case .ignored = option {
+                    continue outer_loop
+                }
+            }
+            
+            var transformer: TransformerType?
+            for option in options {
+                if case .transformed(let t) = option {
+                    transformer = t
+                }
+            }
+            
+            let type = PropertyType.from(valueType)
+            let isSupportedType: Bool
+            if let transformer = transformer {
+                isSupportedType = transformer.supports(propertyType: type)
+            } else if case .unknown = type.bottom {
+                for t in globalTransformers {
+                    if t.supports(propertyType: type) {
+                        transformer = t
+                        options.append(.transformed(t))
+                        break
+                    }
+                }
+                isSupportedType = transformer != nil
             } else {
-                transformer = ReflectableTransformer(reflector: self)
+                isSupportedType = true
             }
             
-            var transformerMatched = false
-            guard let type = PropertyType.from(valueType, transformer: transformer, transformerMatched: &transformerMatched) else {
+            if !isSupportedType {
+                throw ReflectionError.propertyNotSupported(propertyName: label, type: type, forClass: subjectType)
+            }
+            
                 // We don't know what type this property is, so it's unsupported.
                 // The user should probably add this to their list of ignored properties if it reaches this point.
                 
-                throw ReflectionError.propertyNotSupported(
-                    propertyName: label,
-                    valueType: valueType,
-                    forClass: subjectType
-                )
-            }
-            
-            if !transformerMatched {
-                // Don't save to the property.
-                transformer = nil
-            }
-            
-            // TODO: At this point, we should validate that the transformer, if it exists, is being used properly
-            // in the property type.
+//                throw ReflectionError.propertyNotSupported(
+//                    propertyName: label,
+//                    valueType: valueType,
+//                    forClass: subjectType
+//                )
+//            }
             
             guard instance.responds(to: Selector(label)) else {
                 // This property cannot be seen by the Objective-C runtime.
@@ -274,14 +239,12 @@ open class Reflector {
                 // We have no clue what this property type is.
                 throw ReflectionError.propertyNotSupported(
                     propertyName: label,
-                    valueType: valueType,
+                    type: type,
                     forClass: subjectType
                 )
             }
             
-            let required = !ignoreErrorsFor.contains(label)
-            let finalMappedKey = mapped[label] ?? label
-            let property = Property(type: type, name: label, required: required, mappedTo: finalMappedKey, transformer: transformer)
+            let property = Property(type: type, name: label, options: options)
             properties.append(property)
         }
         

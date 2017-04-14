@@ -8,49 +8,60 @@
 
 import Foundation
 
-public class ReflectableTransformer: ValueTransformer {
+public class ReflectableTransformer: TransformerType {
     let reflector: Reflector
+    
+    public func supports(propertyType: PropertyType) -> Bool {
+        if case .unknown(let type) = propertyType.bottom {
+            return type is Reflectable.Type
+        }
+        return false
+    }
+    
+    public func supports(value: Any) -> Bool {
+        return value is [String: Any]
+    }
     
     public init(reflector: Reflector) {
         self.reflector = reflector
     }
     
-    public func supports(targetType: Any.Type) -> Bool {
-        return targetType is Reflectable.Type
-    }
-    
-    public func supports(value: Any, targetType: Any.Type, direction: ValueTransformerDirection) -> Bool {
-        switch direction {
-        case .forwards:
-            return value is [String: Any]
-        case .backwards:
-            return value is Reflectable
+    public func set(value: Any?, for property: Property, instance targetInstance: Reflectable) throws {
+        guard let value = value else {
+            try targetInstance.set(value: nil, for: property)
+            return
         }
+        
+        let protoType: Reflectable.Type
+        if case .unknown(let type) = property.type.bottom {
+            protoType = type as! Reflectable.Type
+        } else {
+            fatalError()
+        }
+//        let dictionary = value as! [String: Any]
+//        
+//        let instance = protoType.init()
+//        let properties = try reflector.reflect(instance)
+//        for property in properties {
+//            try instance.set(value: dictionary[property.serializedName], for: property)
+//        }
+//        try targetInstance.set(value: instance, for: property)
     }
     
-    public func transform(_ value: Any, targetType: Any.Type, direction: ValueTransformerDirection) throws -> Any {
-        switch direction {
-        case .forwards:
-            // TODO: Need target type to be able to code.
-            let protoType = targetType as! Reflectable.Type
-            let dictionary = value as! [String: Any]
-            
-            let instance = protoType.init()
-            let properties = try reflector.reflect(instance)
-            for property in properties {
-                try instance.set(value: dictionary[property.mappedTo], for: property)
-            }
-            return instance
-        case .backwards:
-            guard let object = value as? Reflectable else {
+    public func value(for property: Property, instance: Reflectable) throws -> Any? {
+        let value = instance.value(forKey: property.name)
+        guard let object = value as? Reflectable else {
+            if value != nil {
                 throw ValueTransformationError.typeMismatch(got: type(of: value))
+            } else {
+                return nil
             }
-            var output: [String: Any] = [:]
-            let properties = try reflector.reflect(object)
-            for property in properties {
-                output[property.mappedTo] = try object.value(for: property) ?? NSNull()
-            }
-            return output
         }
+        var output: [String: Any] = [:]
+        let properties = try reflector.reflect(object)
+        for property in properties {
+            output[property.serializedName] = try object.value(for: property) ?? NSNull()
+        }
+        return output
     }
 }
