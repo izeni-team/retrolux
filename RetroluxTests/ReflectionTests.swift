@@ -62,26 +62,27 @@ class ReflectionTests: XCTestCase {
             var name = ""
             var age = 0
             
-            override class var ignoredProperties: [String] {
-                return ["name"]
+            override class func config(_ c: PropertyConfig) {
+                c["name"] = [.ignored]
             }
         }
         
         do {
             let properties = try Reflector().reflect(Object())
+            
             XCTAssert(Set(properties.map({ $0.name })) == Set(["age"]))
         } catch let error {
             XCTFail("\(error)")
         }
     }
     
-    func testRLObjectIgnoredErrorsForProperties() {
+    func testRLObjectNullablePropertyConfig() {
         class Object: Reflection {
             var name = "default_value"
             var age = 0
             
-            override class var ignoreErrorsForProperties: [String] {
-                return ["name"]
+            override class func config(_ c: PropertyConfig) {
+                c["name"] = [.nullable]
             }
         }
         
@@ -103,8 +104,8 @@ class ReflectionTests: XCTestCase {
         class Object: Reflection {
             var description_ = ""
             
-            override class var mappedProperties: [String: String] {
-                return ["description_": "description"]
+            override class func config(_ c: PropertyConfig) {
+                c["description_"] = [.serializedName("description")]
             }
         }
         
@@ -121,81 +122,72 @@ class ReflectionTests: XCTestCase {
      Tests that inheritance is properly supported when the base class is Reflection.
      */
     func testRLObjectInheritance() {
-        XCTFail()
-//        class Plain: Reflection {
-//            var bad = ""
-//            
-//            override func set(value: Any?, forProperty property: Property) throws {
-//                try super.set(value: "bad", forProperty: property)
-//            }
-//            
-//            override func value(for property: Property) throws -> Any? {
-//                return "bad"
-//            }
-//            
-//            override func validate() -> String? {
-//                return "bad"
-//            }
-//            
-//            override class var ignoredProperties: [String] {
-//                return ["bad"]
-//            }
-//            
-//            override class var ignoreErrorsForProperties: [String] {
-//                return ["bad"]
-//            }
-//            
-//            override class var mappedProperties: [String: String] {
-//                return ["bad": "bad"]
-//            }
-//            
-//            override class var transformedProperties: [String: Retrolux.ValueTransformer] {
-//                return ["bad": ReflectableTransformer(reflector: Reflector())]
-//            }
-//        }
-//        
-//        class Problematic: Plain {
-//            override func set(value: Any?, forProperty property: Property) throws {
-//                try super.set(value: "good", forProperty: property)
-//            }
-//            
-//            override func value(for property: Property) throws -> Any? {
-//                return "good"
-//            }
-//            
-//            override func validate() -> String? {
-//                return "good"
-//            }
-//            
-//            override class var ignoredProperties: [String] {
-//                return ["good"]
-//            }
-//            
-//            override class var ignoreErrorsForProperties: [String] {
-//                return ["good"]
-//            }
-//            
-//            override class var mappedProperties: [String: String] {
-//                return ["good": "good"]
-//            }
-//            
-//            override class var transformedProperties: [String: Retrolux.ValueTransformer] {
-//                return ["good": ReflectableTransformer(reflector: Reflector())]
-//            }
-//        }
-//        
-//        let proto: Reflectable.Type = Problematic.self
-//        XCTAssert(proto.ignoredProperties == ["good"])
-//        XCTAssert(proto.ignoreErrorsForProperties == ["good"])
-//        XCTAssert(proto.mappedProperties == ["good": "good"])
-//        let instance = proto.init()
-////        let property = Property(type: .string, name: "bad", required: true, mappedTo: "bad", transformer: nil)
-//        XCTFail()
-////        try! instance.set(value: "bad", for: property)
-//        XCTFail()
-////        XCTAssert(try! instance.value(for: property) as? String == "good")
-//        XCTFail()
-//        XCTAssert(proto.init().validate() == "good")
+        class Plain: Reflection {
+            var bad = ""
+            
+            required init() {
+                super.init()
+            }
+            
+            override func set(value: Any?, forProperty property: Property) throws {
+                try super.set(value: "bad", forProperty: property)
+            }
+            
+            override func value(for property: Property) throws -> Any? {
+                return "bad"
+            }
+            
+            override func validate() throws {
+                throw NSError(domain: "bad", code: 0, userInfo: [:])
+            }
+            
+            override class func config(_ c: PropertyConfig) {
+                c["bad"] = [.serializedName("bad")]
+            }
+        }
+        
+        class Problematic: Plain {
+            required init() {
+                super.init()
+                bad = "good"
+            }
+            
+            override func set(value: Any?, forProperty property: Property) throws {
+                try super.set(value: "good", forProperty: property)
+            }
+            
+            override func value(for property: Property) throws -> Any? {
+                return "good"
+            }
+            
+            override func validate() throws {
+                throw NSError(domain: "good", code: 0, userInfo: [:])
+            }
+            
+            override class func config(_ c: PropertyConfig) {
+                c["bad"] = [.serializedName("good")]
+            }
+        }
+        
+        let proto: Reflectable.Type = Problematic.self
+        let config = PropertyConfig()
+        proto.config(config)
+        if let option = config["bad"].first, case .serializedName(let serializedName) = option {
+            XCTAssert(serializedName == "good")
+        } else {
+            XCTFail("Failed to find config option.")
+        }
+        let instance = proto.init()
+        let property = Property(type: .string, name: "bad", options: [.serializedName("bad")])
+        XCTAssert(try! instance.value(for: property) as? String == "good")
+        try! instance.set(value: "bad", for: property)
+        XCTAssert(try! instance.value(for: property) as? String == "good")
+        do {
+            try proto.init().validate()
+            XCTFail("Did not expect to succeed.")
+        } catch let error as NSError {
+            XCTAssert(error.domain == "good")
+        }
     }
     
     func testNoProperties() {

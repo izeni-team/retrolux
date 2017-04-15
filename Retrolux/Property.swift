@@ -47,6 +47,15 @@ open class Property {
         return nil
     }
     
+    open var nullable: Bool {
+        for option in options {
+            if case .nullable = option {
+                return true
+            }
+        }
+        return false
+    }
+    
     public init(type: PropertyType, name: String, options: [PropertyConfig.Option]) {
         self.type = type
         self.name = name

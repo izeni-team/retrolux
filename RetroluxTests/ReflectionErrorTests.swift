@@ -288,32 +288,6 @@ class ReflectionErrorTests: XCTestCase {
         }
     }
     
-    func testRLObjectReflectionError_ReadOnlyProperty() {
-        class Object1: NSObject, Reflectable {
-            let test = false
-            
-            required override init() {
-                super.init()
-            }
-            
-            static let mappedProperties: [String: String] = [
-                "test": "test"
-            ]
-        }
-        
-        let object = Object1()
-        do {
-            let properties = try Reflector().reflect(object)
-            XCTAssert(properties.isEmpty)
-            XCTFail("Operation should not have succeeded.")
-        } catch ReflectionError.cannotMapAndIgnoreProperty(propertyName: let propertyName, forClass: let `class`) {
-            XCTAssert(propertyName == "test")
-            XCTAssert(`class` == Object1.self)
-        } catch let error {
-            XCTFail("\(error)")
-        }
-    }
-    
     func testNoProperties() {
         class Object1: NSObject, Reflectable {
             required override init() {
@@ -368,10 +342,8 @@ class ReflectionErrorTests: XCTestCase {
         class Person: Reflection {
             var name = ""
             
-            override class var mappedProperties: [String: String] {
-                return [
-                    "name": "not_name"
-                ]
+            override class func config(_ c: PropertyConfig) {
+                c["name"] = [.serializedName("not_name")]
             }
         }
         

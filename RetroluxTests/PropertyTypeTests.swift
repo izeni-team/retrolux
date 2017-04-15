@@ -12,24 +12,24 @@ import Retrolux
 class PropertyTypeTests: XCTestCase {
     func testPropertyTypeInference() {
         XCTAssert(PropertyType.from(AnyObject.self) == .anyObject)
-        XCTAssert(PropertyType.from(Optional<Int>.self) == .optional(wrapped: .number(exactType: Int.self)))
+        XCTAssert(PropertyType.from(Optional<Int>.self) == .optional(.number(Int.self)))
         XCTAssert(PropertyType.from(Bool.self) == .bool)
-        XCTAssert(PropertyType.from(Int.self) == .number(exactType: Int.self))
-        XCTAssert(PropertyType.from(Double.self) == .number(exactType: Double.self))
+        XCTAssert(PropertyType.from(Int.self) == .number(Int.self))
+        XCTAssert(PropertyType.from(Double.self) == .number(Double.self))
         XCTAssert(PropertyType.from(Reflection.self) == .unknown(Reflection.self))
         
-        XCTAssert(PropertyType.from([Int?].self) == .array(type: .optional(wrapped: .number(exactType: Int.self))))
-        XCTAssert(PropertyType.from([String: Int?].self) == .dictionary(type: .optional(wrapped: .number(exactType: Int.self))))
-        XCTAssert(PropertyType.from(NSDictionary.self) == .dictionary(type: .anyObject))
-        XCTAssert(PropertyType.from(NSMutableDictionary.self) == .dictionary(type: .anyObject))
+        XCTAssert(PropertyType.from([Int?].self) == .array(.optional(.number(Int.self))))
+        XCTAssert(PropertyType.from([String: Int?].self) == .dictionary(.optional(.number(Int.self))))
+        XCTAssert(PropertyType.from(NSDictionary.self) == .dictionary(.anyObject))
+        XCTAssert(PropertyType.from(NSMutableDictionary.self) == .dictionary(.anyObject))
         let jsonDictionaryData = "{\"test\": true}".data(using: String.Encoding.utf8)!
         let jsonDictionaryType: Any.Type = try! type(of: (JSONSerialization.jsonObject(with: jsonDictionaryData, options: [])))
-        XCTAssert(PropertyType.from(jsonDictionaryType) == .dictionary(type: .anyObject))
-        XCTAssert(PropertyType.from(NSArray.self) == .array(type: .anyObject))
-        XCTAssert(PropertyType.from(NSMutableArray.self) == .array(type: .anyObject))
+        XCTAssert(PropertyType.from(jsonDictionaryType) == .dictionary(.anyObject))
+        XCTAssert(PropertyType.from(NSArray.self) == .array(.anyObject))
+        XCTAssert(PropertyType.from(NSMutableArray.self) == .array(.anyObject))
         let jsonArrayData = "[1, 2, 3]".data(using: String.Encoding.utf8)!
         let jsonArrayType: Any.Type = try! type(of: (JSONSerialization.jsonObject(with: jsonArrayData, options: [])))
-        XCTAssert(PropertyType.from(jsonArrayType) == .array(type: .anyObject))
+        XCTAssert(PropertyType.from(jsonArrayType) == .array(.anyObject))
         
         class Object2: Reflection {}
         
@@ -50,8 +50,8 @@ class PropertyTypeTests: XCTestCase {
             let propertyTypes = properties.map({ $0.type })
             XCTAssert(propertyTypes == [
                 PropertyType.string,
-                PropertyType.dictionary(type: .array(type: .number(exactType: Int.self))),
-                PropertyType.array(type: .unknown(Object2.self))
+                PropertyType.dictionary(.array(.number(Int.self))),
+                PropertyType.array(.unknown(Object2.self))
                 ])
         } catch let error {
             XCTFail("\(error)")

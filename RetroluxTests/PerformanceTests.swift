@@ -24,17 +24,16 @@ class PerformanceTests: XCTestCase {
     }
     
     func testReflectPerformance() {
-        XCTFail()
-//        measure {
-//            for _ in 1...20 {
-//                let reflector = Reflector()
-//                let instance = LargeClass()
-//                do {
-//                    _ = try reflector.reflect(instance)
-//                } catch {
-//                    XCTFail("Reflection failed with error: \(error)")
-//                }
-//            }
-//        }
+        measure {
+            for _ in 1...20 {
+                let reflector = Reflector()
+                let instance = LargeClass()
+                do {
+                    _ = try reflector.reflect(instance)
+                } catch {
+                    XCTFail("Reflection failed with error: \(error)")
+                }
+            }
+        }
     }
 }

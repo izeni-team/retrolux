@@ -73,12 +73,12 @@ extension NSNumber: RLNumberType {}
 public indirect enum PropertyType: CustomStringConvertible, Equatable {
     case any
     case anyObject
-    case optional(wrapped: PropertyType)
+    case optional(PropertyType)
     case bool
-    case number(exactType: Any.Type)
+    case number(Any.Type)
     case string
-    case array(type: PropertyType)
-    case dictionary(type: PropertyType)
+    case array(PropertyType)
+    case dictionary(PropertyType)
     case unknown(Any.Type)
     
     public static func from(_ type: Any.Type) -> PropertyType {
@@ -91,13 +91,13 @@ public indirect enum PropertyType: CustomStringConvertible, Equatable {
         } else if type is RLStringType.Type {
             return .string
         } else if type is RLNumberType.Type {
-            return .number(exactType: type)
+            return .number(type)
         } else if let arr = type as? RLArrayType.Type {
-            return .array(type: from(arr.rl_type()))
+            return .array(from(arr.rl_type()))
         } else if let opt = type as? RLOptionalType.Type {
-            return .optional(wrapped: from(opt.rl_type()))
+            return .optional(from(opt.rl_type()))
         } else if let dict = type as? RLDictionaryType.Type {
-            return .dictionary(type: from(dict.rl_type()))
+            return .dictionary(from(dict.rl_type()))
         } else {
             return .unknown(type)
         }
@@ -107,11 +107,11 @@ public indirect enum PropertyType: CustomStringConvertible, Equatable {
         switch self {
         case .any, .anyObject, .bool, .string, .unknown, .number:
             return self
-        case .array(type: let inner):
+        case .array(let inner):
             return inner.bottom
-        case .dictionary(type: let inner):
+        case .dictionary(let inner):
             return inner.bottom
-        case .optional(wrapped: let wrapped):
+        case .optional(let wrapped):
             return wrapped.bottom
         }
     }

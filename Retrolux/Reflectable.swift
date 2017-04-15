@@ -19,7 +19,9 @@ public func reflectable_setProperty(_ property: Property, value: Any?, instance:
         } else if value == nil {
             throw ReflectorSerializationError.keyNotFound(propertyName: property.name, key: property.serializedName, forClass: type(of: instance))
         } else if value is NSNull {
-            throw ReflectorSerializationError.propertyDoesNotSupportNullValues(propertyName: property.name, forClass: type(of: instance))
+            if !property.nullable {
+                throw ReflectorSerializationError.propertyDoesNotSupportNullValues(propertyName: property.name, forClass: type(of: instance))
+            }
         } else {
             throw ReflectorSerializationError.typeMismatch(expected: property.type, got: type(of: value), propertyName: property.name, forClass: type(of: instance))
         }

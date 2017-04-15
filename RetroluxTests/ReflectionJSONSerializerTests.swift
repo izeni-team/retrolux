@@ -124,7 +124,7 @@ class ReflectionJSONSerializerTests: XCTestCase {
             XCTFail("Should not have succeeded.")
         } catch ReflectorSerializationError.typeMismatch(expected: let expected, got: _, propertyName: let propertyName, forClass: let forClass) {
             // TODO: Add unit test for got.
-            XCTAssert(expected == .number(exactType: Int.self))
+            XCTAssert(expected == .number(Int.self))
             XCTAssert(propertyName == "age")
             XCTAssert(forClass == Valid.self)
         } catch {
@@ -137,7 +137,7 @@ class ReflectionJSONSerializerTests: XCTestCase {
             XCTFail("Should not have succeeded.")
         } catch ReflectorSerializationError.typeMismatch(expected: let expected, got: _, propertyName: let propertyName, forClass: let forClass) {
             // TODO: Add unit test for got.
-            XCTAssert(expected == .number(exactType: Int.self))
+            XCTAssert(expected == .number(Int.self))
             XCTAssert(propertyName == "age")
             XCTAssert(forClass == Valid.self)
         } catch {

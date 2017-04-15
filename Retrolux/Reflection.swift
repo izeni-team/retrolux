@@ -68,23 +68,11 @@ open class Reflection: NSObject, Reflectable, ReflectableSubclassingIsAllowed {
         return try reflectable_value(for: property, instance: self)
     }
     
-    open func validate() -> String? {
-        return nil
+    open func validate() throws {
+        
     }
     
-    open class var ignoredProperties: [String] {
-        return []
-    }
-    
-    open class var ignoreErrorsForProperties: [String] {
-        return []
-    }
-    
-    open class var mappedProperties: [String: String] {
-        return [:]
-    }
-    
-    open class var transformedProperties: [String: ValueTransformer] {
-        return [:]
+    open class func config(_ c: PropertyConfig) {
+        
     }
 }

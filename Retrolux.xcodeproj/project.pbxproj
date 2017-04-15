@@ -16,6 +16,7 @@
 		346411CF1EA114D60028A844 /* Transformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 346411CE1EA114D60028A844 /* Transformer.swift */; };
 		346411D11EA116A20028A844 /* TransformerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 346411D01EA116A20028A844 /* TransformerTests.swift */; };
 		346411D31EA123500028A844 /* TransformerDirection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 346411D21EA123500028A844 /* TransformerDirection.swift */; };
+		348384391EA1912200EA13A1 /* NestedTypeTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 348384381EA1912200EA13A1 /* NestedTypeTransformer.swift */; };
 		34B8ED621E664A7C00030FAA /* Retrolux.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34B8ED591E664A7C00030FAA /* Retrolux.framework */; };
 		34B8ED701E664B1C00030FAA /* testmultipleparts.data in Resources */ = {isa = PBXBuildFile; fileRef = 34F027931E3BF4B8007AA8C9 /* testmultipleparts.data */; };
 		34B8ED711E664B1D00030FAA /* request.data in Resources */ = {isa = PBXBuildFile; fileRef = 3424A6EE1E3A962700D2240F /* request.data */; };
@@ -137,6 +138,7 @@
 		3475A6ED1E5CFE600050019D /* OutboundSerializerType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OutboundSerializerType.swift; sourceTree = "<group>"; };
 		347814EB1E36AFD6004E47E0 /* DigestAuthTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DigestAuthTests.swift; sourceTree = "<group>"; };
 		347AEE801E575B1B00D7AFFA /* fieldsandpartscombined.data */ = {isa = PBXFileReference; lastKnownFileType = file; path = fieldsandpartscombined.data; sourceTree = "<group>"; };
+		348384381EA1912200EA13A1 /* NestedTypeTransformer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NestedTypeTransformer.swift; sourceTree = "<group>"; };
 		3484545B1DB2C37700032ACC /* ReflectionJSONSerializerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReflectionJSONSerializerTests.swift; sourceTree = "<group>"; };
 		34926EE61E301255009E4E42 /* RetroluxTests-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "RetroluxTests-Bridging-Header.h"; sourceTree = "<group>"; };
 		34926EE71E3020CE009E4E42 /* Sensitive.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Sensitive.plist; sourceTree = "<group>"; };
@@ -353,6 +355,7 @@
 				34F6F04A1E8F0829002BA263 /* ValueTransformer.swift */,
 				34CA58771E942343001F5E54 /* ReflectionError.swift */,
 				346411D21EA123500028A844 /* TransformerDirection.swift */,
+				348384381EA1912200EA13A1 /* NestedTypeTransformer.swift */,
 			);
 			name = Reflector;
 			sourceTree = "<group>";
@@ -562,6 +565,7 @@
 				346411CF1EA114D60028A844 /* Transformer.swift in Sources */,
 				346411D31EA123500028A844 /* TransformerDirection.swift in Sources */,
 				34B8ED8F1E664B7F00030FAA /* Query.swift in Sources */,
+				348384391EA1912200EA13A1 /* NestedTypeTransformer.swift in Sources */,
 				346411C51EA017A30028A844 /* RetroluxError.swift in Sources */,
 				34CA58721E94224B001F5E54 /* BuilderError.swift in Sources */,
 				34B8ED861E664B7700030FAA /* WrappedSerializerArg.swift in Sources */,
