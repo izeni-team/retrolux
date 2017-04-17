@@ -8,6 +8,7 @@ v0.6.0
   - `static var mappedProperties: [String: String]`, refer to "New Config API" instead
   - `static var transformedProperties: [String: Retrolux.ValueTransformer]`, refer to "New Config API" instead
 - New Config API: override/implement `static func config(_ c: PropertyConfig)` and then do something like `c["nameOfProperty"] = [.serializedName("name_of_property", .nullable]`
+- Reflector now has a `globalTransformers` property, to allow adding support globally for things like `Date` conversion
 
 v0.5.3
 - Error messages are more human readable and have recovery suggestions
