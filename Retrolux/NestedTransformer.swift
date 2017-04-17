@@ -54,7 +54,7 @@ public protocol NestedTransformer: TransformerType {
 extension NestedTransformer {
     public func supports(propertyType: PropertyType) -> Bool {
         if case .unknown(let type) = propertyType.bottom {
-            return type is TypeOfProperty || type is TypeOfProperty.Type
+            return type is TypeOfProperty.Type
         }
         return false
     }
