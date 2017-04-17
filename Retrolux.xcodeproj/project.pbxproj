@@ -13,7 +13,6 @@
 		346411C51EA017A30028A844 /* RetroluxError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 346411C41EA017A30028A844 /* RetroluxError.swift */; };
 		346411CB1EA113560028A844 /* TransformerType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 346411CA1EA113560028A844 /* TransformerType.swift */; };
 		346411CD1EA1135B0028A844 /* PropertyConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 346411CC1EA1135B0028A844 /* PropertyConfig.swift */; };
-		346411CF1EA114D60028A844 /* Transformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 346411CE1EA114D60028A844 /* Transformer.swift */; };
 		346411D11EA116A20028A844 /* TransformerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 346411D01EA116A20028A844 /* TransformerTests.swift */; };
 		346411D31EA123500028A844 /* TransformerDirection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 346411D21EA123500028A844 /* TransformerDirection.swift */; };
 		348384391EA1912200EA13A1 /* NestedTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 348384381EA1912200EA13A1 /* NestedTransformer.swift */; };
@@ -129,7 +128,6 @@
 		346411C41EA017A30028A844 /* RetroluxError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RetroluxError.swift; sourceTree = "<group>"; };
 		346411CA1EA113560028A844 /* TransformerType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransformerType.swift; sourceTree = "<group>"; };
 		346411CC1EA1135B0028A844 /* PropertyConfig.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PropertyConfig.swift; sourceTree = "<group>"; };
-		346411CE1EA114D60028A844 /* Transformer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Transformer.swift; sourceTree = "<group>"; };
 		346411D01EA116A20028A844 /* TransformerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransformerTests.swift; sourceTree = "<group>"; };
 		346411D21EA123500028A844 /* TransformerDirection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransformerDirection.swift; sourceTree = "<group>"; };
 		3472D1C71E0C70E600AE8621 /* URLEncodedSerializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = URLEncodedSerializer.swift; sourceTree = "<group>"; };
@@ -344,7 +342,6 @@
 			children = (
 				346411CC1EA1135B0028A844 /* PropertyConfig.swift */,
 				346411CA1EA113560028A844 /* TransformerType.swift */,
-				346411CE1EA114D60028A844 /* Transformer.swift */,
 				34F6F04C1E8F0829002BA263 /* Property.swift */,
 				34F6F04D1E8F0829002BA263 /* PropertyType.swift */,
 				34F6F0471E8F0829002BA263 /* Reflectable.swift */,
@@ -562,7 +559,6 @@
 				34B8ED811E664B7700030FAA /* ClientResponse.swift in Sources */,
 				34B8ED8A1E664B7B00030FAA /* OptionalHelper.swift in Sources */,
 				34CA58781E942343001F5E54 /* ReflectionError.swift in Sources */,
-				346411CF1EA114D60028A844 /* Transformer.swift in Sources */,
 				346411D31EA123500028A844 /* TransformerDirection.swift in Sources */,
 				34B8ED8F1E664B7F00030FAA /* Query.swift in Sources */,
 				348384391EA1912200EA13A1 /* NestedTransformer.swift in Sources */,

@@ -12,10 +12,11 @@ import Retrolux
 class ReflectionTests: XCTestCase {
     func setPropertiesHelper(_ properties: [Property], dictionary: [String: Any], instance: Reflectable) {
         XCTAssert(Set(properties.map({ $0.name })) == Set(dictionary.keys))
+        let reflector = Reflector()
         
         for property in properties {
             do {
-                try instance.set(value: dictionary[property.name], for: property)
+                try reflector.set(value: dictionary[property.name], for: property, on: instance)
             } catch let error {
                 XCTFail("\(error)")
             }
@@ -23,7 +24,12 @@ class ReflectionTests: XCTestCase {
         
         for property in properties {
             let value = dictionary[property.serializedName] as? NSObject
-            XCTAssert(try! instance.value(for: property) as? NSObject == value || property.ignored)
+            do {
+                let instanceValue = try reflector.value(for: property, on: instance)
+                XCTAssert(instanceValue as? NSObject == value || property.ignored)
+            } catch let error {
+                XCTFail("\(error)")
+            }
         }
     }
     
@@ -88,12 +94,13 @@ class ReflectionTests: XCTestCase {
         
         do {
             let object = Object()
-            let properties = try Reflector().reflect(object)
+            let reflector = Reflector()
+            let properties = try reflector.reflect(object)
             guard let nameProp = properties.filter({ $0.name == "name" }).first else {
                 XCTFail("Name property was missing")
                 return
             }
-            try object.set(value: NSNull(), forProperty: nameProp)
+            try reflector.set(value: NSNull(), for: nameProp, on: object)
             XCTAssert(object.name == "default_value")
         } catch let error {
             XCTFail("\(error)")
@@ -129,11 +136,11 @@ class ReflectionTests: XCTestCase {
                 super.init()
             }
             
-            override func set(value: Any?, forProperty property: Property) throws {
-                try super.set(value: "bad", forProperty: property)
+            override func setValue(_ value: Any?, forKey key: String) {
+                super.setValue("bad", forKey: "bad")
             }
             
-            override func value(for property: Property) throws -> Any? {
+            override func value(forKey key: String) -> Any? {
                 return "bad"
             }
             
@@ -152,11 +159,11 @@ class ReflectionTests: XCTestCase {
                 bad = "good"
             }
             
-            override func set(value: Any?, forProperty property: Property) throws {
-                try super.set(value: "good", forProperty: property)
+            override func setValue(_ value: Any?, forKey key: String) {
+                super.setValue("good", forKey: key)
             }
             
-            override func value(for property: Property) throws -> Any? {
+            override func value(forKey key: String) -> Any? {
                 return "good"
             }
             
@@ -179,9 +186,10 @@ class ReflectionTests: XCTestCase {
         }
         let instance = proto.init()
         let property = Property(type: .string, name: "bad", options: [.serializedName("bad")])
-        XCTAssert(try! instance.value(for: property) as? String == "good")
-        try! instance.set(value: "bad", for: property)
-        XCTAssert(try! instance.value(for: property) as? String == "good")
+        let reflector = Reflector()
+        XCTAssert(try! reflector.value(for: property, on: instance) as? String == "good")
+        try! reflector.set(value: "bad", for: property, on: instance)
+        XCTAssert(try! reflector.value(for: property, on: instance) as? String == "good")
         do {
             try proto.init().validate()
             XCTFail("Did not expect to succeed.")

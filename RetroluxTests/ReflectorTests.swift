@@ -14,6 +14,16 @@ func toJSONData(_ object: Any) -> Data {
 }
 
 class RetroluxReflectorTests: XCTestCase {
+    func testScope() {
+        var transformer: ReflectableTransformer!
+        if (true) {
+            let reflector = Reflector()
+            transformer = reflector.reflectableTransformer as! ReflectableTransformer
+            XCTAssert(transformer.reflector === reflector)
+        }
+        XCTAssert(transformer.reflector == nil)
+    }
+    
     func testSetProperty() {
         class Test: Reflection {
             var name = ""
@@ -22,11 +32,12 @@ class RetroluxReflectorTests: XCTestCase {
         
         do {
             let test = Test()
-            let properties = try Reflector().reflect(test)
+            let reflector = Reflector()
+            let properties = try reflector.reflect(test)
             XCTAssert(properties.first?.name == "name")
             XCTAssert(properties.last?.name == "nested")
             XCTAssert(properties.last?.type == .optional(.unknown(Test.self)))
-            try test.set(value: ["name": "success"], forProperty: properties.last!)
+            try reflector.set(value: ["name": "success"], for: properties.last!, on: test)
             XCTAssert(test.nested?.name == "success")
         } catch {
             XCTFail("Failed with error: \(error)")
@@ -52,12 +63,13 @@ class RetroluxReflectorTests: XCTestCase {
         
         do {
             let test = Test()
-            let properties = try Reflector().reflect(test)
+            let reflector = Reflector()
+            let properties = try reflector.reflect(test)
             XCTAssert(properties.first?.name == "name")
             XCTAssert(properties.count == 2)
             XCTAssert(properties.last?.name == "nested")
             XCTAssert(properties.last?.type == .dictionary(.unknown(Test.self)))
-            try test.set(value: nestedDictionary, for: properties.last!)
+            try reflector.set(value: nestedDictionary, for: properties.last!, on: test)
             XCTAssert(test.nested["bob"]?.name == "Bob")
             XCTAssert(test.nested["alice"]?.name == "Alice")
             XCTAssert(test.nested.count == 2)
@@ -97,12 +109,13 @@ class RetroluxReflectorTests: XCTestCase {
         
         do {
             let test = Test()
-            let properties = try Reflector().reflect(test)
+            let reflector = Reflector()
+            let properties = try reflector.reflect(test)
             XCTAssert(properties.first?.name == "name")
             XCTAssert(properties.count == 2)
             XCTAssert(properties.last?.name == "nested")
             XCTAssert(properties.last?.type == .array(.dictionary(.unknown(Test.self))))
-            try test.set(value: nestedArray, for: properties.last!)
+            try reflector.set(value: nestedArray, for: properties.last!, on: test)
             if test.nested.count == 2 {
                 XCTAssert(test.nested[0]["bob"]?.name == "Bob")
                 XCTAssert(test.nested[0]["alice"]?.name == "Alice")
@@ -426,7 +439,6 @@ class RetroluxReflectorTests: XCTestCase {
     }
     
     func testSendAndReceiveComplexObject() {
-//        XCTFail()
         class Pet: Reflection {
             var name = ""
             
@@ -449,7 +461,7 @@ class RetroluxReflectorTests: XCTestCase {
                 c["born"] = [.transformed(DateTransformer())]
                 c["visitDates"] = [.transformed(DateTransformer()), .serializedName("visit_dates")]
                 c["upgradedAt"] = [.transformed(DateTransformer()), .serializedName("upgraded_at")]
-                c["bestFriend"] = [.serializedName("best_friends")]
+                c["bestFriend"] = [.serializedName("best_friend")]
             }
             
 //            override class var transformedProperties: [String: Retrolux.ValueTransformer] {

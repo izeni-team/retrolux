@@ -10,7 +10,6 @@ import Foundation
 
 public protocol TransformerType: class {
     func supports(propertyType: PropertyType) -> Bool
-    func supports(value: Any) -> Bool
     
     func set(value: Any?, for property: Property, instance: Reflectable) throws
     func value(for property: Property, instance: Reflectable) throws -> Any?

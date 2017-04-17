@@ -60,14 +60,6 @@ open class Reflection: NSObject, Reflectable, ReflectableSubclassingIsAllowed {
         super.init()
     }
     
-    open func set(value: Any?, forProperty property: Property) throws {
-        try reflectable_setProperty(property, value: value, instance: self)
-    }
-    
-    open func value(for property: Property) throws -> Any? {
-        return try reflectable_value(for: property, instance: self)
-    }
-    
     open func validate() throws {
         
     }

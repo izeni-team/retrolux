@@ -24,11 +24,7 @@ open class Reflector {
     open var reflectableTransformer: TransformerType!
     
     public init() {
-        self.reflectableTransformer = NestedTransformer<Reflectable, [String: Any]>(setter: { (dictionary, t) -> Reflectable in
-            return try self.convert(fromDictionary: dictionary, to: t as! Reflectable.Type)
-            }, getter: { (instance) -> [String : Any] in
-                return try self.convertToDictionary(from: instance)
-        })
+        self.reflectableTransformer = ReflectableTransformer(weakReflector: self)
         
         self.globalTransformers = [
             reflectableTransformer
@@ -87,7 +83,7 @@ open class Reflector {
         let properties = try reflect(instance)
         for property in properties {
             let rawValue = dictionary[property.serializedName]
-            try instance.set(value: rawValue, for: property)
+            try set(value: rawValue, for: property, on: instance)
         }
         return instance
     }
@@ -104,9 +100,8 @@ open class Reflector {
         var dictionary: [String: Any] = [:]
         let properties = try reflect(instance)
         for property in properties {
-            let output = try instance.value(for: property)
-            print("output:", output)
-            dictionary[property.serializedName] = output ?? NSNull()
+            let value = try self.value(for: property, on: instance)
+            dictionary[property.serializedName] = value ?? NSNull()
         }
         return dictionary
     }
@@ -273,5 +268,13 @@ open class Reflector {
         }
         let attributes = String(cString: c_attributes, encoding: String.Encoding.utf8)!
         return attributes.components(separatedBy: ",").contains("R")
+    }
+    
+    open func set(value: Any?, for property: Property, on instance: Reflectable) throws {
+        try reflectable_setProperty(property, value: value, instance: instance)
+    }
+    
+    open func value(for property: Property, on instance: Reflectable) throws -> Any {
+        return try reflectable_value(for: property, instance: instance) ?? NSNull()
     }
 }

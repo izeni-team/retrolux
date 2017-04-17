@@ -18,150 +18,172 @@ class ValueTransformerTests: XCTestCase {
             var test: Test?
             
             override class func config(_ c: PropertyConfig) {
-//                c["test"] = [.]
+                c["test"] = [.nullable]
             }
         }
         
+        let dictionary: [String: Any] = [
+            "name": "Bob"
+        ]
         
-        XCTFail()
-//        class Test: Reflection {
-//            var name = ""
-//            var test: Test?
-//            
-//            override class func config(_ c: PropertyConfig) {
-//                c["test"] = [.allow(.keyNotFoundError)]
-//            }
-//        }
-//        
-//        let dictionary: [String: Any] = [
-//            "name": "Bob"
-//        ]
-//        
-//        let transformer = ReflectableTransformer(reflector: Reflector())
-//        XCTAssert(transformer.propertyType == Reflectable.self)
-//        XCTAssert(transformer.dataType == [String: Any].self)
-//        
-//        do {
-//            let test = Test()
-//            let config = PropertyConfig()
-//            Test.config(config)
-//            let property = Property(type: .transformable(Test.self), name: "test", options: config["test"])
-//            try transformer.set(value: dictionary, for: property, instance: test)
-//        } catch {
-//            XCTFail("Failed with error: \(error)")
-//        }
+        let reflector = Reflector()
+        let transformer = ReflectableTransformer(weakReflector: reflector)
+        
+        do {
+            let test = Test()
+            let config = PropertyConfig()
+            Test.config(config)
+            let property = Property(type: .unknown(Test.self), name: "test", options: config["test"])
+            try transformer.set(value: dictionary, for: property, instance: test)
+        } catch {
+            XCTFail("Failed with error: \(error)")
+        }
     }
     
-    func testBackwards() {
-        XCTFail()
-//        class Test: Reflection {
-//            var name = ""
-//        }
-//        
-//        let dictionary: [String: Any] = [
-//            "name": "bob"
-//        ]
-//        
-//        let transformer = ReflectableTransformer(reflector: Reflector())
-//        XCTAssert(transformer.supports(targetType: Test.self))
-//        XCTAssert(transformer.supports(value: dictionary, targetType: Test.self, direction: .forwards))
-//        
-//        do {
-//            let test = Test()
-//            test.name = "success"
-//            let dictionary = try transformer.transform(test, targetType: Test.self, direction: .backwards) as? [String: Any]
-//            XCTAssert(dictionary?["name"] as? String == "success")
-//        } catch {
-//            XCTFail("Failed with error: \(error)")
-//        }
+    func testNested() {
+        class Test: Reflection {
+            var name = ""
+            var friends: [String: Test]? = nil
+            
+            convenience init(name: String) {
+                self.init()
+                self.name = name
+            }
+        }
+        
+        let reflector = Reflector()
+        let transformer = ReflectableTransformer(weakReflector: reflector)
+        XCTAssert(transformer.supports(propertyType: .unknown(Test.self)))
+        
+        do {
+            let test = Test()
+            test.name = "bob"
+            let dictionary = try reflector.convertToDictionary(from: test)
+            XCTAssert(dictionary["name"] as? String == "bob")
+            XCTAssert(dictionary["friends"] is NSNull)
+            
+            test.friends = [
+                "sally": Test(name: "Sally"),
+                "robert": Test(name: "Robert")
+            ]
+            let d2 = try reflector.convertToDictionary(from: test)
+            XCTAssert(d2["name"] as? String == "bob")
+            
+            let friends = d2["friends"] as? [String: Any]
+            
+            let sally = friends?["sally"] as? [String: Any]
+            XCTAssert(sally?["name"] as? String == "Sally")
+            
+            let robert = friends?["robert"] as? [String: Any]
+            XCTAssert(robert?["name"] as? String == "Robert")
+            
+            let back = try reflector.convert(fromDictionary: d2, to: Test.self) as! Test
+            XCTAssert(back.name == "bob")
+            XCTAssert(back.friends?.count == 2)
+            XCTAssert(back.friends?["sally"]?.name == "Sally")
+            XCTAssert(back.friends?["robert"]?.name == "Robert")
+        } catch {
+            XCTFail("Failed with error: \(error)")
+        }
     }
     
     func testNestedBackwards() {
-        XCTFail()
-//        class Test: Reflection {
-//            var name = ""
-//            var age = 0
-//            var another: Test?
-//        }
-//        
-//        let test = Test()
-//        test.name = "Bob"
-//        test.age = 30
-//        test.another = Test()
-//        test.another?.name = "Another"
-//        test.another?.age = 25
-//        test.another?.another = Test()
-//        test.another?.another?.name = "Another 2"
-//        test.another?.another?.age = 20
-//        
-//        do {
-//            let transformer = ReflectableTransformer(reflector: Reflector())
-//            guard let output = try transformer.transform(test, targetType: Test.self, direction: .backwards) as? [String: Any] else {
-//                XCTFail("Invalid type returned--expected a dictionary")
-//                return
-//            }
-//            XCTAssert(output["name"] as? String == "Bob")
-//            XCTAssert(output["age"] as? Int == 30)
-//            let another = output["another"] as? [String: Any]
-//            XCTAssert(another?["name"] as? String == "Another")
-//            XCTAssert(another?["age"] as? Int == 25)
-//            let another2 = another?["another"] as? [String: Any]
-//            XCTAssert(another2?["name"] as? String == "Another 2")
-//            XCTAssert(another2?["age"] as? Int == 20)
-//            XCTAssert(another2?["another"] is NSNull)
-//        } catch {
-//            XCTFail("Failed with error: \(error)")
-//        }
+        class Test: Reflection {
+            var name = ""
+            var age = 0
+            var another: Test?
+        }
+        
+        let test = Test()
+        test.name = "Bob"
+        test.age = 30
+        test.another = Test()
+        test.another?.name = "Another"
+        test.another?.age = 25
+        test.another?.another = Test()
+        test.another?.another?.name = "Another 2"
+        test.another?.another?.age = 20
+        
+        do {
+            let reflector = Reflector()
+            let transformer = ReflectableTransformer(weakReflector: reflector)
+            let output = try transformer.getter(test)
+            XCTAssert(output["name"] as? String == "Bob")
+            XCTAssert(output["age"] as? Int == 30)
+            let another = output["another"] as? [String: Any]
+            XCTAssert(another?["name"] as? String == "Another")
+            XCTAssert(another?["age"] as? Int == 25)
+            let another2 = another?["another"] as? [String: Any]
+            XCTAssert(another2?["name"] as? String == "Another 2")
+            XCTAssert(another2?["age"] as? Int == 20)
+            XCTAssert(another2?["another"] is NSNull)
+        } catch {
+            XCTFail("Failed with error: \(error)")
+        }
     }
     
     func testErrorHandling() {
-        XCTFail()
-//        class Test: Reflection {
-//            var name = ""
-//        }
-//        
-//        let dictionary: [String: Any] = [:] // Should trigger a key not found error.
-//        
-//        let transformer = ReflectableTransformer(reflector: Reflector())
-//        
-//        do {
-//            _ = try transformer.transform(dictionary, targetType: Test.self, direction: .forwards) as? Test
-//            XCTFail("Should not have passed.")
-//        } catch ReflectorSerializationError.keyNotFound(propertyName: let propertyName, key: let key, forClass: let `class`) {
-//            XCTAssert(propertyName == "name")
-//            XCTAssert(key == "name")
-//            XCTAssert(`class` == Test.self)
-//        } catch {
-//            XCTFail("Failed with error: \(error)")
-//        }
+        class Test: Reflection {
+            var name = ""
+        }
+        
+        let dictionary: [String: Any] = [:] // Should trigger a key not found error.
+        
+        let reflector = Reflector()
+        let transformer = ReflectableTransformer(weakReflector: reflector)
+        
+        do {
+            _ = try transformer.setter(dictionary, type: Test.self)
+            XCTFail("Should not have passed.")
+        } catch ReflectorSerializationError.keyNotFound(propertyName: let propertyName, key: let key, forClass: let `class`) {
+            XCTAssert(propertyName == "name")
+            XCTAssert(key == "name")
+            XCTAssert(`class` == Test.self)
+        } catch {
+            XCTFail("Failed with error: \(error)")
+        }
     }
     
     func testNullable() {
-        XCTFail()
-//        class Test: NSObject, Reflectable {
-//            var date: Date?
-//            
-//            required override init() {
-//                super.init()
-//            }
-//            
-//            static let transformedProperties: [String: Retrolux.ValueTransformer] = [
-//                "date": DateTransformer.shared
-//            ]
-//        }
-//        
-//        let test = Test()
-//        
-//        let reflection = Reflector()
-//        
-//        do {
-//            let properties = try reflection.reflect(test)
-//            XCTAssert(properties.count == 1)
-//            XCTAssert(properties.first?.name == "date")
-//            let value = try test.value(for: properties.first!)
-//            XCTAssert(value is NSNull)
-//        } catch {
-//            XCTFail("Error getting value: \(error)")
-//        }
+        class CustomTransformer: NestedTransformer {
+            typealias TypeOfData = String
+            typealias TypeOfProperty = Data
+            
+            func setter(_ dataValue: String, type: Any.Type) throws -> Data {
+                XCTFail("Shouldn't be called.")
+                return Data()
+            }
+            
+            func getter(_ propertyValue: Data) throws -> String {
+                XCTFail("Shouldn't be called.")
+                return ""
+            }
+        }
+        
+        class Test: NSObject, Reflectable {
+            var data: Data?
+            
+            required override init() {
+                super.init()
+            }
+            
+            static func config(_ c: PropertyConfig) {
+                c["data"] = [.transformed(CustomTransformer())]
+            }
+        }
+        
+        let test = Test()
+        
+        let reflector = Reflector()
+        
+        do {
+            let properties = try reflector.reflect(test)
+            XCTAssert(properties.count == 1)
+            XCTAssert(properties.first?.name == "data")
+            let value = try reflector.value(for: properties.first!, on: test)
+            XCTAssert(value is NSNull)
+        } catch {
+            XCTFail("Error getting value: \(error)")
+        }
     }
 }

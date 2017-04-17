@@ -311,11 +311,12 @@ class ReflectionErrorTests: XCTestCase {
         
         let object = Person()
         do {
-            let properties = try Reflector().reflect(object)
+            let reflector = Reflector()
+            let properties = try reflector.reflect(object)
             XCTAssert(properties.count == 1)
             XCTAssert(properties.first?.name == "name")
             XCTAssert(properties.first?.type == .string)
-            try object.set(value: NSNull(), for: properties.first!)
+            try reflector.set(value: NSNull(), for: properties.last!, on: object)
             XCTFail("Operation should not have succeeded.")
         } catch ReflectorSerializationError.propertyDoesNotSupportNullValues(propertyName: let propertyName, forClass: let `class`) {
             XCTAssert(propertyName == "name")
@@ -349,11 +350,12 @@ class ReflectionErrorTests: XCTestCase {
         
         let object = Person()
         do {
-            let properties = try Reflector().reflect(object)
+            let reflector = Reflector()
+            let properties = try reflector.reflect(object)
             XCTAssert(properties.count == 1)
             XCTAssert(properties.first?.name == "name")
             XCTAssert(properties.first?.type == .string)
-            try object.set(value: nil, for: properties.first!)
+            try reflector.set(value: nil, for: properties.first!, on: object)
             XCTFail("Operation should not have succeeded.")
         } catch ReflectorSerializationError.keyNotFound(propertyName: let propertyName, key: let key, forClass: let `class`) {
             XCTAssert(propertyName == "name")

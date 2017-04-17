@@ -9,7 +9,10 @@
 import Foundation
 import Retrolux
 
-class DateTransformer: NestedTransformer<Date, String> {
+class DateTransformer: NestedTransformer {
+    typealias TypeOfProperty = Date
+    typealias TypeOfData = String
+    
     enum Error: Swift.Error {
         case invalidDateFormat
     }
@@ -21,14 +24,14 @@ class DateTransformer: NestedTransformer<Date, String> {
         return f
     }()
     
-    convenience init() {
-        self.init(setter: { (string, _) -> Date in
-            guard let date = DateTransformer.formatter.date(from: string) else {
-                throw Error.invalidDateFormat
-            }
-            return date
-        }, getter: { (date) -> String in
-            return DateTransformer.formatter.string(from: date)
-        })
+    func setter(_ dataValue: String, type: Any.Type) throws -> Date {
+        guard let date = DateTransformer.formatter.date(from: dataValue) else {
+            throw Error.invalidDateFormat
+        }
+        return date
+    }
+    
+    func getter(_ propertyValue: Date) throws -> String {
+        return DateTransformer.formatter.string(from: propertyValue)
     }
 }

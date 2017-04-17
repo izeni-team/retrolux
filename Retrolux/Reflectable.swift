@@ -65,20 +65,9 @@ public protocol Reflectable: NSObjectProtocol {
     
     func validate() throws
     static func config(_ c: PropertyConfig)
-    
-    func set(value: Any?, for property: Property) throws
-    func value(for property: Property) throws -> Any?
 }
 
 extension Reflectable {
-    public func set(value: Any?, for property: Property) throws {
-        try reflectable_setProperty(property, value: value, instance: self)
-    }
-    
-    public func value(for property: Property) throws -> Any? {
-        return try reflectable_value(for: property, instance: self)
-    }
-
     public func validate() throws {
         
     }

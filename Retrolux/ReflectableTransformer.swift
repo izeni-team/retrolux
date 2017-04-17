@@ -8,60 +8,21 @@
 
 import Foundation
 
-public class ReflectableTransformer: TransformerType {
-    let reflector: Reflector
+open class ReflectableTransformer: NestedTransformer {
+    public typealias TypeOfProperty = Reflectable
+    public typealias TypeOfData = [String: Any]
     
-    public func supports(propertyType: PropertyType) -> Bool {
-        if case .unknown(let type) = propertyType.bottom {
-            return type is Reflectable.Type
-        }
-        return false
+    open weak var reflector: Reflector?
+    
+    public init(weakReflector: Reflector) {
+        self.reflector = weakReflector
     }
     
-    public func supports(value: Any) -> Bool {
-        return value is [String: Any]
+    public func setter(_ dataValue: TypeOfData, type: Any.Type) throws -> TypeOfProperty {
+        return try reflector!.convert(fromDictionary: dataValue, to: type as! TypeOfProperty.Type)
     }
     
-    public init(reflector: Reflector) {
-        self.reflector = reflector
-    }
-    
-    public func set(value: Any?, for property: Property, instance targetInstance: Reflectable) throws {
-        guard let value = value else {
-            try targetInstance.set(value: nil, for: property)
-            return
-        }
-        
-        let protoType: Reflectable.Type
-        if case .unknown(let type) = property.type.bottom {
-            protoType = type as! Reflectable.Type
-        } else {
-            fatalError()
-        }
-//        let dictionary = value as! [String: Any]
-//        
-//        let instance = protoType.init()
-//        let properties = try reflector.reflect(instance)
-//        for property in properties {
-//            try instance.set(value: dictionary[property.serializedName], for: property)
-//        }
-//        try targetInstance.set(value: instance, for: property)
-    }
-    
-    public func value(for property: Property, instance: Reflectable) throws -> Any? {
-        let value = instance.value(forKey: property.name)
-        guard let object = value as? Reflectable else {
-            if value != nil {
-                throw ValueTransformationError.typeMismatch(got: type(of: value))
-            } else {
-                return nil
-            }
-        }
-        var output: [String: Any] = [:]
-        let properties = try reflector.reflect(object)
-        for property in properties {
-            output[property.serializedName] = try object.value(for: property) ?? NSNull()
-        }
-        return output
+    public func getter(_ propertyValue: TypeOfProperty) throws -> [String : Any] {
+        return try reflector!.convertToDictionary(from: propertyValue)
     }
 }
