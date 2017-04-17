@@ -450,7 +450,7 @@ class MyDateTransformer: NestedTransformer {
     
     func setter(_ dataValue: String, type: Any.Type) -> Date {
         guard let date = formatter.date(from: value) else {
-            throw DateTransformationError(
+            throw DateTransformationError.invalidDateFormat(
                 got: value,
                 expected: formatter.dateFormat
             )
