@@ -426,27 +426,32 @@ class RetroluxReflectorTests: XCTestCase {
     }
     
     func testSendAndReceiveComplexObject() {
-        XCTFail()
-//        class Pet: Reflection {
-//            var name = ""
-//            
-//            convenience init(name: String) {
-//                self.init()
-//                self.name = name
-//            }
-//        }
-//        
-//        class Person: Reflection {
-//            var name = ""
-//            var age = 0
-//            var born = Date()
-//            var visitDates: [Date] = []
-//            var pets: [Pet] = []
-//            var bestFriend: Person?
-//            var upgradedAt: Date?
-//            
-//            
-//            
+//        XCTFail()
+        class Pet: Reflection {
+            var name = ""
+            
+            convenience init(name: String) {
+                self.init()
+                self.name = name
+            }
+        }
+        
+        class Person: Reflection {
+            var name = ""
+            var age = 0
+            var born = Date()
+            var visitDates: [Date] = []
+            var pets: [Pet] = []
+            var bestFriend: Person?
+            var upgradedAt: Date?
+            
+            override class func config(_ c: PropertyConfig) {
+                c["born"] = [.transformed(DateTransformer())]
+                c["visitDates"] = [.transformed(DateTransformer()), .serializedName("visit_dates")]
+                c["upgradedAt"] = [.transformed(DateTransformer()), .serializedName("upgraded_at")]
+                c["bestFriend"] = [.serializedName("best_friends")]
+            }
+            
 //            override class var transformedProperties: [String: Retrolux.ValueTransformer] {
 //                return [
 //                    "born": DateTransformer.shared,
@@ -462,82 +467,81 @@ class RetroluxReflectorTests: XCTestCase {
 //                    "upgradedAt": "upgraded_at"
 //                ]
 //            }
-//        }
-//        
-//        let object = Person()
-//        object.name = "Bryan"
-//        object.age = 24
-//        object.born = Date(timeIntervalSince1970: -86400 * 365 * 24) // Roughly 24 years ago.
-//        
-//        let now = Date()
-//        let date2 = Date(timeIntervalSince1970: 276246)
-//        let date3 = Date(timeIntervalSinceReferenceDate: 123873)
-//        object.visitDates = [
-//            now,
-//            date2,
-//            date3
-//        ]
-//        
-//        object.pets = [
-//            Pet(name: "Fifi"),
-//            Pet(name: "Tiger")
-//        ]
-//        
-//        let bestFriend = Person()
-//        bestFriend.name = "Bob"
-//        bestFriend.age = 2
-//        bestFriend.born = Date(timeIntervalSinceNow: -86400 * 365 * 2)
-//        bestFriend.upgradedAt = now
-//        object.bestFriend = bestFriend
-//        
-//        let reflector = Reflector()
-//        
-//        do {
-//            let data = try reflector.convertToJSONDictionaryData(from: object)
-//            guard let dictionary = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
-//                XCTFail("Serializer set incorrect root type. Expected dictionary.")
-//                return
-//            }
-//            XCTAssert(dictionary["name"] as? String == "Bryan")
-//            XCTAssert(dictionary["age"] as? Int == 24)
-//            
-//            let dates = dictionary["visit_dates"] as? [String]
-//            XCTAssert(dates?.count == 3)
-//            let transformer = DateTransformer()
-//            XCTAssert(dates?[0] == transformer.formatter.string(from: now))
-//            XCTAssert(dates?[1] == transformer.formatter.string(from: date2))
-//            XCTAssert(dates?[2] == transformer.formatter.string(from: date3))
-//            
-//            let pets = dictionary["pets"] as? [[String: Any]]
-//            XCTAssert(pets?.count == 2)
-//            XCTAssert(pets?[0]["name"] as? String == "Fifi")
-//            XCTAssert(pets?[1]["name"] as? String == "Tiger")
-//            
-//            let bf = dictionary["best_friend"] as? [String: Any]
-//            XCTAssert(bf?["name"] as? String == "Bob")
-//            XCTAssert(bf?["age"] as? Int == 2)
-//            XCTAssert(bf?["born"] as? String == transformer.formatter.string(from: bestFriend.born))
-//            XCTAssert(bf?["upgraded_at"] as? String == transformer.formatter.string(from: bestFriend.upgradedAt!))
-//            
-//            XCTAssert(dictionary["upgraded_at"] is NSNull)
-//
-//            let serialized = try reflector.convert(fromJSONDictionaryData: data, to: Person.self) as! Person
-//            XCTAssert(serialized.name == object.name)
-//            XCTAssert(serialized.age == object.age)
-//            XCTAssert(serialized.born.toString() == object.born.toString())
-//            XCTAssert(serialized.visitDates.map { $0.toString() } == object.visitDates.map { $0.toString() })
-//            XCTAssert(serialized.pets.map { $0.name } == object.pets.map { $0.name })
-//            XCTAssert(serialized.bestFriend?.name == object.bestFriend?.name)
-//            XCTAssert(serialized.bestFriend?.age == object.bestFriend?.age)
-//            XCTAssert(serialized.bestFriend?.upgradedAt?.toString() == object.bestFriend?.upgradedAt?.toString())
-//            XCTAssert(serialized.upgradedAt == nil && object.upgradedAt == nil)
-//            XCTAssert(serialized.bestFriend?.bestFriend == nil)
-//            XCTAssert(serialized.bestFriend?.visitDates.isEmpty == true)
-//            XCTAssert(serialized.bestFriend?.born.toString() == object.bestFriend?.born.toString())
-//            XCTAssert(serialized.bestFriend?.pets.isEmpty == true)
-//        } catch {
-//            XCTFail("Failed with error: \(error)")
-//        }
+        }
+        
+        let object = Person()
+        object.name = "Bryan"
+        object.age = 24
+        object.born = Date(timeIntervalSince1970: -86400 * 365 * 24) // Roughly 24 years ago.
+        
+        let now = Date()
+        let date2 = Date(timeIntervalSince1970: 276246)
+        let date3 = Date(timeIntervalSinceReferenceDate: 123873)
+        object.visitDates = [
+            now,
+            date2,
+            date3
+        ]
+        
+        object.pets = [
+            Pet(name: "Fifi"),
+            Pet(name: "Tiger")
+        ]
+        
+        let bestFriend = Person()
+        bestFriend.name = "Bob"
+        bestFriend.age = 2
+        bestFriend.born = Date(timeIntervalSinceNow: -86400 * 365 * 2)
+        bestFriend.upgradedAt = now
+        object.bestFriend = bestFriend
+        
+        let reflector = Reflector()
+        
+        do {
+            let data = try reflector.convertToJSONDictionaryData(from: object)
+            guard let dictionary = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
+                XCTFail("Serializer set incorrect root type. Expected dictionary.")
+                return
+            }
+            XCTAssert(dictionary["name"] as? String == "Bryan")
+            XCTAssert(dictionary["age"] as? Int == 24)
+            
+            let dates = dictionary["visit_dates"] as? [String]
+            XCTAssert(dates?.count == 3)
+            XCTAssert(dates?[0] == DateTransformer.formatter.string(from: now))
+            XCTAssert(dates?[1] == DateTransformer.formatter.string(from: date2))
+            XCTAssert(dates?[2] == DateTransformer.formatter.string(from: date3))
+            
+            let pets = dictionary["pets"] as? [[String: Any]]
+            XCTAssert(pets?.count == 2)
+            XCTAssert(pets?[0]["name"] as? String == "Fifi")
+            XCTAssert(pets?[1]["name"] as? String == "Tiger")
+            
+            let bf = dictionary["best_friend"] as? [String: Any]
+            XCTAssert(bf?["name"] as? String == "Bob")
+            XCTAssert(bf?["age"] as? Int == 2)
+            XCTAssert(bf?["born"] as? String == DateTransformer.formatter.string(from: bestFriend.born))
+            XCTAssert(bf?["upgraded_at"] as? String == DateTransformer.formatter.string(from: bestFriend.upgradedAt!))
+            
+            XCTAssert(dictionary["upgraded_at"] is NSNull)
+
+            let serialized = try reflector.convert(fromJSONDictionaryData: data, to: Person.self) as! Person
+            XCTAssert(serialized.name == object.name)
+            XCTAssert(serialized.age == object.age)
+            XCTAssert(serialized.born.toString() == object.born.toString())
+            XCTAssert(serialized.visitDates.map { $0.toString() } == object.visitDates.map { $0.toString() })
+            XCTAssert(serialized.pets.map { $0.name } == object.pets.map { $0.name })
+            XCTAssert(serialized.bestFriend?.name == object.bestFriend?.name)
+            XCTAssert(serialized.bestFriend?.age == object.bestFriend?.age)
+            XCTAssert(serialized.bestFriend?.upgradedAt?.toString() == object.bestFriend?.upgradedAt?.toString())
+            XCTAssert(serialized.upgradedAt == nil && object.upgradedAt == nil)
+            XCTAssert(serialized.bestFriend?.bestFriend == nil)
+            XCTAssert(serialized.bestFriend?.visitDates.isEmpty == true)
+            XCTAssert(serialized.bestFriend?.born.toString() == object.bestFriend?.born.toString())
+            XCTAssert(serialized.bestFriend?.pets.isEmpty == true)
+        } catch {
+            XCTFail("Failed with error: \(error)")
+        }
     }
     
     func testAlternativeInheritance() {
@@ -566,6 +570,6 @@ extension CustomObject: Reflectable {}
 
 extension Date {
     fileprivate func toString() -> String {
-        return DateTransformer.shared.formatter.string(from: self)
+        return DateTransformer.formatter.string(from: self)
     }
 }

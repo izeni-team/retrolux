@@ -21,9 +21,17 @@ open class Reflector {
     
     open var globalTransformers: [TransformerType] = []
     
+    open var reflectableTransformer: TransformerType!
+    
     public init() {
+        self.reflectableTransformer = NestedTransformer<Reflectable, [String: Any]>(setter: { (dictionary, t) -> Reflectable in
+            return try self.convert(fromDictionary: dictionary, to: t as! Reflectable.Type)
+            }, getter: { (instance) -> [String : Any] in
+                return try self.convertToDictionary(from: instance)
+        })
+        
         self.globalTransformers = [
-            ReflectableTransformer(reflector: self)
+            reflectableTransformer
         ]
     }
     
@@ -57,6 +65,7 @@ open class Reflector {
     
     open func convertToJSONDictionaryData(from instance: Reflectable) throws -> Data {
         let dictionary = try convertToDictionary(from: instance)
+        print(dictionary)
         return try JSONSerialization.data(withJSONObject: dictionary, options: [])
     }
     
@@ -95,7 +104,9 @@ open class Reflector {
         var dictionary: [String: Any] = [:]
         let properties = try reflect(instance)
         for property in properties {
-            dictionary[property.serializedName] = try instance.value(for: property)
+            let output = try instance.value(for: property)
+            print("output:", output)
+            dictionary[property.serializedName] = output ?? NSNull()
         }
         return dictionary
     }

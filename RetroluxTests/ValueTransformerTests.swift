@@ -11,6 +11,18 @@ import Retrolux
 
 class ValueTransformerTests: XCTestCase {
     func testForwards() {
+//        class CustomTransformer: 
+        
+        class Test: Reflection {
+            var name = ""
+            var test: Test?
+            
+            override class func config(_ c: PropertyConfig) {
+//                c["test"] = [.]
+            }
+        }
+        
+        
         XCTFail()
 //        class Test: Reflection {
 //            var name = ""

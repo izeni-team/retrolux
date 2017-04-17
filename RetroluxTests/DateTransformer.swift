@@ -9,37 +9,26 @@
 import Foundation
 import Retrolux
 
-enum DateTransformerError: Error {
-    case invalidType
-    case invalidDateFormat
-}
-
-class DateTransformer: Retrolux.ValueTransformer {
-    static let shared = DateTransformer()
+class DateTransformer: NestedTransformer<Date, String> {
+    enum Error: Swift.Error {
+        case invalidDateFormat
+    }
     
-    let formatter = { () -> DateFormatter in
+    static let formatter = { () -> Foundation.DateFormatter in
         let f = DateFormatter()
         f.dateFormat = "yyyy-MM-dd'T'hh:mm:ss.SSSZZZZ"
         f.locale = Locale(identifier: "en_US")
         return f
     }()
     
-    func supports(targetType: Any.Type) -> Bool {
-        return targetType is Date.Type
-    }
-    
-    func transform(_ value: Any, targetType: Any.Type, direction: ValueTransformerDirection) throws -> Any {
-        switch direction {
-        case .forwards:
-            guard let string = value as? String else {
-                throw DateTransformerError.invalidType
-            }
-            guard let date = formatter.date(from: string) else {
-                throw DateTransformerError.invalidDateFormat
+    convenience init() {
+        self.init(setter: { (string, _) -> Date in
+            guard let date = DateTransformer.formatter.date(from: string) else {
+                throw Error.invalidDateFormat
             }
             return date
-        case .backwards:
-            return formatter.string(from: value as! Date)
-        }
+        }, getter: { (date) -> String in
+            return DateTransformer.formatter.string(from: date)
+        })
     }
 }

@@ -16,6 +16,7 @@ public func reflectable_setProperty(_ property: Property, value: Any?, instance:
     guard property.type.isCompatible(with: value) else {
         if case .optional(let wrapped) = property.type {
             /* Nothing */ // TODO: This needs a unit test, and isn't correct behavior.
+            
         } else if value == nil {
             throw ReflectorSerializationError.keyNotFound(propertyName: property.name, key: property.serializedName, forClass: type(of: instance))
         } else if value is NSNull {
@@ -42,9 +43,9 @@ public func reflectable_setProperty(_ property: Property, value: Any?, instance:
 
 public func reflectable_value(for property: Property, instance: Reflectable) throws -> Any? {
     if let transformer = property.transformer {
-        return try transformer.value(for: property, instance: instance) ?? NSNull()
+        return try transformer.value(for: property, instance: instance)
     }
-    return instance.value(forKey: property.name) ?? NSNull()
+    return instance.value(forKey: property.name)
 }
 
 public protocol Reflectable: NSObjectProtocol {
