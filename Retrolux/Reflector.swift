@@ -101,7 +101,7 @@ open class Reflector {
         let properties = try reflect(instance)
         for property in properties {
             let value = try self.value(for: property, on: instance)
-            dictionary[property.serializedName] = value ?? NSNull()
+            dictionary[property.serializedName] = value
         }
         return dictionary
     }
