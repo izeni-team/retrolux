@@ -40,6 +40,7 @@ Then follow the instructions mentioned in [Carthage's documentation](https://git
 * [Testing](#testing)
 * [Changing Base URL](#changing-base-url)
 * [Logging](#logging)
+* [Reflection Customizations](#reflection-customizations)
 
 # JSON
 
@@ -425,4 +426,68 @@ class MyBuilder: Builder {
         // To silence logging, do nothing here.
     }
 }
+```
+
+# Reflection Customizations
+
+The reflection API supports customizing behavior by implementing the `static func config(_:PropertyConfig)` function, like so:
+
+```swift
+class MyDateTransformer: NestedTransformer {
+    enum DateTransformationError: Error {
+        case invalidDateFormat(got: String, expected: String)
+    }
+    
+    typealias TypeOfData = String
+    typealias TypeOfProperty = Date
+    
+    let formatter = { () -> DateFormatter in
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
+        f.locale = Locale(identifier: "en_US_POSIX")
+        return f
+    }()
+    
+    func setter(_ dataValue: String, type: Any.Type) -> Date {
+        guard let date = formatter.date(from: value) else {
+            throw DateTransformationError.invalidDateFormat(
+                got: value,
+                expected: formatter.dateFormat
+            )
+        }
+        return date
+    }
+    
+    func getter(_ propertyValue: TypeOfProperty) -> String {
+        return formatter.string(from: value)
+    }
+}
+
+class Person: Reflection {
+    var desc = "DEFAULT_VALUE"
+    var notSupported: Int?
+    var date = Date()
+    
+    override class func config(_ c: PropertyConfig) {
+        c["desc"] = [
+            .serializedName("description"), // Will look for the "description" key in JSON
+            .nullable // If the value is null, don't raise a "null values not supported" error
+        ]
+        
+        // 'Int?' is not a supported type, so this will tell Retrolux to ignore it instead of raising an error
+        c["notSupported"] = [.ignored]
+        
+        // Alternatively, you can do Reflector.shared.globalTransformers.append(MyDateTransformer())
+        c["date"] = [.transformed(MyDateTransformer())]
+    }
+}
+
+let reflector = Reflector()
+let person = try reflector.convert(
+    fromDictionary: [
+        "description": NSNull(),
+        "date": "2017-04-17T12:02:04.142Z"
+    ],
+    to: Person.self
+) as! Person
 ```

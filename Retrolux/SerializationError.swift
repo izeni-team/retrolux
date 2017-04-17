@@ -21,7 +21,7 @@ public enum ReflectorSerializationError: RetroluxError {
         case .keyNotFound(propertyName: let propertyName, key: let key, forClass: let `class`):
             return RetroluxErrorDescription(
                 description: "Could not find the key '\(key)' for the property '\(propertyName)' on \(`class`).",
-                suggestion: "TODO" // TODO
+                suggestion: nil // TODO
             )
         case .propertyDoesNotSupportNullValues(propertyName: let propertyName, forClass: let `class`):
             return RetroluxErrorDescription(
@@ -30,8 +30,8 @@ public enum ReflectorSerializationError: RetroluxError {
             )
         case .typeMismatch(expected: let expected, got: let got, propertyName: let propertyName, forClass: let `class`):
             return RetroluxErrorDescription(
-                description: "TODO", // TODO
-                suggestion: "TODO" // TODO
+                description: "The property '\(propertyName)' on \(`class`) was given an incompatible value type, \(got). Expected type \(expected).", // TODO: Fix 'got'.
+                suggestion: nil // TODO
             )
         case .expectedDictionaryRootButGotArrayRoot(type: let type):
             return RetroluxErrorDescription(
