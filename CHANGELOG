@@ -1,3 +1,14 @@
+v0.6.0
+- Overhauled transformers API for Reflectables
+- Removed the following properties/functions from Reflectable:
+  - `func set(value:, for property:) throws`, use `Reflector.set(value:for:on:)` instead
+  - `func value(for:) throws -> Any?`, use `Reflector.value(for:on:)` instead
+  - `static var ignoredProperties: [String]`, refer to "New Config API" instead
+  - `static var ignoreErrorsForProperties: [String]`, refer to "New Config API" instead
+  - `static var mappedProperties: [String: String]`, refer to "New Config API" instead
+  - `static var transformedProperties: [String: Retrolux.ValueTransformer]`, refer to "New Config API" instead
+- New Config API: override/implement `static func config(_ c: PropertyConfig)` and then do something like `c["nameOfProperty"] = [.serializedName("name_of_property", .nullable]`
+
 v0.5.3
 - Error messages are more human readable and have recovery suggestions
 
