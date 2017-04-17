@@ -568,6 +568,45 @@ class RetroluxReflectorTests: XCTestCase {
             XCTFail("Failed with error: \(error)")
         }
     }
+    
+    func testOptionalNested() {
+        class LoginResponse: Reflection {
+            
+            class LoginSuccessResponse: Reflection {
+                var user_id = ""
+                var role = ""
+            }
+            
+            var success: LoginSuccessResponse?
+            var error: String?
+        }
+        
+        let builder = Builder.dry()
+        let function = builder.makeRequest(
+            method: .post,
+            endpoint: "endpoint/",
+            args: (),
+            response: LoginResponse.self,
+            testProvider: { (creation, starting, request) in
+                return ClientResponse(
+                    url: request.url!,
+                data: ("{\n" +
+                "  \"success\": {\n" +
+                "    \"user_id\": \"123\"," +
+                "    \"role\": \"freelancer\"\n" +
+                "  }\n" +
+                    "}").data(using: .utf8)!,
+                    headers: [:],
+                    status: 200,
+                    error: nil
+                )
+            }
+        )
+        let response = function().perform()
+        XCTAssert(response.body?.success?.user_id == "123")
+        XCTAssert(response.body?.success?.role == "freelancer")
+        XCTAssert(response.isSuccessful)
+    }
 }
 
 class Object: NSObject {
