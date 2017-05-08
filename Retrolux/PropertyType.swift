@@ -116,12 +116,16 @@ public indirect enum PropertyType: CustomStringConvertible, Equatable {
         }
     }
     
-    public func isCompatible(with value: Any?) -> Bool {
+    public func isCompatible(with value: Any?, transformer: TransformerType?) -> Bool {
+        if transformer?.supports(propertyType: self) == true {
+            return true
+        }
+        
         switch self {
         case .any, .anyObject:
             return true
         case .optional(let wrapped):
-            return value is NSNull || value == nil || wrapped.isCompatible(with: value)
+            return value is NSNull || value == nil || wrapped.isCompatible(with: value, transformer: transformer)
         case .bool:
             return value is NSNumber
         case .number:
@@ -137,14 +141,14 @@ public indirect enum PropertyType: CustomStringConvertible, Equatable {
                 return false
             }
             return !array.contains {
-                !element.isCompatible(with: $0)
+                !element.isCompatible(with: $0, transformer: transformer)
             }
         case .dictionary(let valueType):
             guard let dictionary = value as? [String : AnyObject] else {
                 return false
             }
             return !dictionary.values.contains {
-                !valueType.isCompatible(with: $0)
+                !valueType.isCompatible(with: $0, transformer: transformer)
             }
         }
     }

@@ -53,10 +53,26 @@ public protocol NestedTransformer: TransformerType {
 
 extension NestedTransformer {
     public func supports(propertyType: PropertyType) -> Bool {
-        if case .unknown(let type) = propertyType.bottom {
+        switch propertyType.bottom {
+        case .any:
+            return false
+        case .anyObject:
+            return false
+        case .array(_):
+            return false
+        case .dictionary(_):
+            return false
+        case .optional(_):
+            return false
+        case .unknown(let type):
             return type is TypeOfProperty.Type
+        case .bool:
+            return Bool.self is TypeOfProperty.Type
+        case .number(let innerType):
+            return innerType is TypeOfProperty.Type
+        case .string:
+            return String.self is TypeOfProperty.Type
         }
-        return false
     }
     
     public func set(value: Any?, for property: Property, instance: Reflectable) throws {
@@ -74,10 +90,30 @@ extension NestedTransformer {
         guard let value = value else {
             return nil
         }
+                
+        guard value is NSNull == false else {
+            return nil
+        }
         
         switch type {
-        case .anyObject, .any:
-            return value
+        case .anyObject, .any, .bool, .number, .string:
+            switch direction {
+            case .deserialize:
+                if let cast = value as? TypeOfData {
+                    return try setter(cast, type: type(of: value))
+                }
+            case .serialize:
+                if let cast = value as? TypeOfProperty {
+                    return try getter(cast)
+                }
+            }
+            throw NestedTransformerError.typeMismatch(
+                got: type(of: value),
+                expected: TypeOfProperty.self,
+                propertyName: property.name,
+                class: type(of: instance),
+                direction: direction
+            )
         case .optional(let wrapped):
             return try transform(
                 value: value,
@@ -86,12 +122,6 @@ extension NestedTransformer {
                 instance: instance,
                 direction: direction
             )
-        case .bool:
-            return value
-        case .number:
-            return value
-        case .string:
-            return value
         case .unknown(let unknownType):
             switch direction {
             case .serialize:

@@ -61,7 +61,6 @@ open class Reflector {
     
     open func convertToJSONDictionaryData(from instance: Reflectable) throws -> Data {
         let dictionary = try convertToDictionary(from: instance)
-        print(dictionary)
         return try JSONSerialization.data(withJSONObject: dictionary, options: [])
     }
     

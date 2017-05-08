@@ -167,7 +167,6 @@ class BuilderTests: XCTestCase {
         let function = builder.makeRequest(method: .post, endpoint: "whateverz", args: String(), response: Void.self)
         let response = function("a").perform()
         if let error = response.error, case BuilderError.unsupportedArgument(let arg) = error {
-            print(arg)
             XCTAssert(arg.type == String.self)
             XCTAssert(arg.creation as? String == "")
             XCTAssert(arg.starting as? String == "a")
@@ -188,7 +187,6 @@ class BuilderTests: XCTestCase {
         let function = builder.makeRequest(method: .post, endpoint: "whateverz", args: Container(), response: Void.self)
         let response = function(Container()).perform()
         if let error = response.error, case BuilderError.unsupportedArgument(let arg) = error {
-            print(arg)
             XCTAssert(arg.type == NSObject.self)
             XCTAssert(arg.creation is NSObject)
             XCTAssert(arg.starting is NSObject)

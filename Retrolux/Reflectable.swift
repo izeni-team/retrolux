@@ -13,7 +13,7 @@ public func reflectable_setProperty(_ property: Property, value: Any?, instance:
         return
     }
     
-    guard property.type.isCompatible(with: value) else {
+    guard property.type.isCompatible(with: value, transformer: property.transformer) else {
         if case .optional(let wrapped) = property.type {
             /* Nothing */ // TODO: This needs a unit test, and isn't correct behavior.
             
