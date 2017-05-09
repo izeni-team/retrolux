@@ -201,7 +201,7 @@ class ReflectionTests: XCTestCase {
     func testNoProperties() {
         class Object1: Reflection {
         }
-        
+
         let object = Object1()
         do {
             let properties = try Reflector().reflect(object)

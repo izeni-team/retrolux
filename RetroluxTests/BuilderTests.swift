@@ -147,8 +147,8 @@ class BuilderTests: XCTestCase {
             var name = ""
         }
         
-        let call = Builder.dry().makeRequest(method: .post, endpoint: "login", args: (Person()), response: Void.self)
-        let response = call((Person())).perform()
+        let call = Builder.dry().makeRequest(method: .post, endpoint: "login", args: Person(), response: Void.self)
+        let response = call(Person()).perform()
         XCTAssert(response.request.httpBody! == "{\"name\":\"\"}".data(using: .utf8)!)
     }
     
@@ -174,6 +174,29 @@ class BuilderTests: XCTestCase {
         } else {
             XCTFail("Expected to fail.")
         }
+    }
+    
+    func testNestedArgs() {
+        struct MyArgs {
+            struct MoreArgs {
+                struct EvenMoreArgs {
+                    let path: Path
+                }
+                
+                let evenMore: EvenMoreArgs
+            }
+            
+            let args: MoreArgs
+        }
+        
+        let creationArgs = MyArgs(args: MyArgs.MoreArgs(evenMore: MyArgs.MoreArgs.EvenMoreArgs(path: Path("id"))))
+        let builder = Builder.dry()
+        let function = builder.makeRequest(method: .delete, endpoint: "users/{id}/", args: creationArgs, response: Void.self)
+        
+        let startingArgs = MyArgs(args: MyArgs.MoreArgs(evenMore: MyArgs.MoreArgs.EvenMoreArgs(path: Path("asdf"))))
+        let response = function(startingArgs).perform()
+        XCTAssert(response.request.url!.absoluteString.hasSuffix("users/asdf/"))
+        print(response.request.url!)
     }
     
     func testNestedUnsupportedArgument() {
@@ -213,5 +236,24 @@ class BuilderTests: XCTestCase {
         } else {
             XCTFail("Expected to fail.")
         }
+    }
+    
+    // This tests a bug where launching 100 or more network requests at the same time
+    // would cause the Builder to deadlock at semaphore.wait().
+    func testLotsOfSimultaneousNetworkRequests() {
+        let builder = Builder(base: URL(string: "http://127.0.0.1/")!)
+        let request = builder.makeRequest(method: .get, endpoint: "", args: (), response: Void.self)
+        
+        var expectations = [XCTestExpectation]()
+        
+        for i in 0..<100 {
+            let expectation = self.expectation(description: "request \(i)")
+            expectations.append(expectation)
+            request().enqueue { response in
+                expectation.fulfill()
+            }
+        }
+        
+        self.wait(for: expectations, timeout: 60)
     }
 }

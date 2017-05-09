@@ -28,7 +28,11 @@ open class Call<T> {
     
     open func enqueue(queue: DispatchQueue = .main, callback: @escaping (Response<T>) -> Void) {
         let state = delegatedCapture()
-        DispatchQueue.global().async {
+        
+        // Creating a new queue each time fixes a bug where launching 100 or more network requests at the same time
+        // would cause the Builder to deadlock at semaphore.wait(). This probably indicates some sort of limit in
+        // the background global queue.
+        DispatchQueue(label: "retrolux." + UUID().uuidString).async {
             let response = self.delegatedPerform(state)
             queue.async {
                 callback(response)
