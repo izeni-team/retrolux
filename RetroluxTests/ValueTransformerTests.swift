@@ -11,8 +11,6 @@ import Retrolux
 
 class ValueTransformerTests: XCTestCase {
     func testForwards() {
-//        class CustomTransformer: 
-        
         class Test: Reflection {
             var name = ""
             var test: Test?
@@ -184,6 +182,68 @@ class ValueTransformerTests: XCTestCase {
             XCTAssert(value is NSNull)
         } catch {
             XCTFail("Error getting value: \(error)")
+        }
+    }
+    
+    func testBoolStringConversion() {
+        class BoolTransformer: NestedTransformer {
+            static var setterWasCalled = 0
+            static var getterWasCalled = 0
+            
+            typealias TypeOfData = String
+            typealias TypeOfProperty = Bool
+            
+            func setter(_ dataValue: String, type: Any.Type) throws -> Bool {
+                BoolTransformer.setterWasCalled += 1
+                return dataValue == "t"
+            }
+            
+            func getter(_ propertyValue: Bool) throws -> String {
+                BoolTransformer.getterWasCalled += 1
+                return propertyValue ? "t" : "f"
+            }
+        }
+        
+        class Test: Reflection {
+            var randomize: Bool = false
+            
+            override class func config(_ c: PropertyConfig) {
+                c["randomize"] = [.transformed(BoolTransformer())]
+            }
+        }
+        
+        let reflector = Reflector()
+        do {
+            XCTAssert(BoolTransformer.setterWasCalled == 0)
+            XCTAssert(BoolTransformer.getterWasCalled == 0)
+            
+            let data = "{\"randomize\":\"t\"}".data(using: .utf8)!
+            let test = try reflector.convert(fromJSONDictionaryData: data, to: Test.self) as! Test
+            XCTAssert(test.randomize == true)
+            
+            XCTAssert(BoolTransformer.setterWasCalled == 1)
+            XCTAssert(BoolTransformer.getterWasCalled == 0)
+            
+            let data2 = "{\"randomize\":\"f\"}".data(using: .utf8)!
+            let test2 = try reflector.convert(fromJSONDictionaryData: data2, to: Test.self) as! Test
+            XCTAssert(test2.randomize == false)
+            
+            XCTAssert(BoolTransformer.setterWasCalled == 2)
+            XCTAssert(BoolTransformer.getterWasCalled == 0)
+            
+            let output = try reflector.convertToJSONDictionaryData(from: test)
+            XCTAssert(output == "{\"randomize\":\"t\"}".data(using: .utf8)!)
+            
+            XCTAssert(BoolTransformer.setterWasCalled == 2)
+            XCTAssert(BoolTransformer.getterWasCalled == 1)
+
+            let output2 = try reflector.convertToJSONDictionaryData(from: test2)
+            XCTAssert(output2 == "{\"randomize\":\"f\"}".data(using: .utf8)!)
+            
+            XCTAssert(BoolTransformer.setterWasCalled == 2)
+            XCTAssert(BoolTransformer.getterWasCalled == 2)
+        } catch {
+            XCTFail("Failed with error: \(error)")
         }
     }
 }
