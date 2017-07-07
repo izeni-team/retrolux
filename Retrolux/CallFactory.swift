@@ -9,5 +9,5 @@
 import Foundation
 
 public protocol CallFactory {
-    func makeCall<T>(capture: @escaping () -> RequestCapturedState, perform: @escaping CallPerformFunction<T>, cancel: @escaping () -> Void) -> Call<T>
+    func makeCall<T>(capture: @escaping () -> RequestCapturedState, enqueue: @escaping CallEnqueueFunction<T>, cancel: @escaping () -> Void) -> Call<T>
 }

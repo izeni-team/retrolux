@@ -12,6 +12,7 @@ import Foundation
 // It is assumed that this behavior is more intuitive.
 public struct RequestCapturedState {
     public var base: URL
+    public var workerQueue: DispatchQueue
 }
 
 open class Builder {
@@ -27,16 +28,24 @@ open class Builder {
     open var serializers: [Serializer]
     open var requestInterceptor: ((inout URLRequest) -> Void)?
     open var responseInterceptor: ((inout ClientResponse) -> Void)?
+    open var workerQueue = DispatchQueue(
+        label: "Retrolux.worker",
+        qos: .background,
+        attributes: .concurrent,
+        autoreleaseFrequency: .inherit,
+        target: nil
+    )
     open var stateToCapture: RequestCapturedState {
         return RequestCapturedState(
-            base: base
+            base: base,
+            workerQueue: workerQueue
         )
     }
-    open var outboundSerializers: [OutboundSerializer] {
+    open func outboundSerializers() -> [OutboundSerializer] {
         return serializers.flatMap { $0 as? OutboundSerializer }
     }
     
-    open var inboundSerializers: [InboundSerializer] {
+    open func inboundSerializers() -> [InboundSerializer] {
         return serializers.flatMap { $0 as? InboundSerializer }
     }
     
@@ -142,27 +151,42 @@ open class Builder {
         return { startingArgs in
             var task: Task?
             
-            let perform: CallPerformFunction<ResponseType> = { (state) in
-                let base = state.base
-                let client = self.client
-                let inboundSerializers = self.inboundSerializers
-                let outboundSerializers = self.outboundSerializers
-                let isDryModeEnabled = self.isDryModeEnabled
-                let url = base.appendingPathComponent(endpoint)
-                var request = URLRequest(url: url)
+            let enqueue: CallEnqueueFunction<ResponseType> = { (state, callback) in
+                var request = URLRequest(url: state.base.appendingPathComponent(endpoint))
                 request.httpMethod = method.rawValue
                 
-                let normalizedCreationArgs = self.normalize(arg: creationArgs, serializerType: type, serializers: outboundSerializers) // Args used to create this request
-                let normalizedStartingArgs = self.normalize(arg: startingArgs, serializerType: type, serializers: outboundSerializers) // Args passed in when executing this request
-                
-                assert(normalizedCreationArgs.count == normalizedStartingArgs.count)
-                
-                var selfApplying: [BuilderArg] = []
-                
-                var serializer: OutboundSerializer?
-                var serializerArgs: [BuilderArg] = []
-                
-                let createAndLogErrorResponse: (BuilderError) -> Response<ResponseType> = { error in
+                do {
+                    try self.applyArguments(
+                        type: type,
+                        state: state,
+                        endpoint: endpoint,
+                        method: method,
+                        creation: creationArgs,
+                        starting: startingArgs,
+                        modifying: &request,
+                        responseType: response
+                    )
+                    
+                    self.requestInterceptor?(&request)
+                    self.log(request: request)
+                    
+                    if self.isDryModeEnabled {
+                        let provider = testProvider ?? { _ in ClientResponse(data: nil, response: nil, error: nil) }
+                        let clientResponse = provider(creationArgs, startingArgs, request)
+                        let response = self.process(immutableClientResponse: clientResponse, request: request, responseType: ResponseType.self)
+                        self.log(response: response)
+                        callback(response)
+                    } else {
+                        task = self.client.makeAsynchronousRequest(request: &request) { (clientResponse) in
+                            state.workerQueue.async {
+                                let response = self.process(immutableClientResponse: clientResponse, request: request, responseType: ResponseType.self)
+                                self.log(response: response)
+                                callback(response)
+                            }
+                        }
+                        task!.resume()
+                    }
+                } catch {
                     let response = Response<ResponseType>(
                         request: request,
                         data: nil,
@@ -172,99 +196,8 @@ open class Builder {
                         interpreter: self.interpret
                     )
                     self.log(response: response)
-                    return response
+                    callback(response)
                 }
-                
-                for (creation, starting) in zip(normalizedCreationArgs, normalizedStartingArgs) {
-                    assert((creation.serializer != nil) == (starting.serializer != nil), "Somehow normalize failed to produce the same results on both sides.")
-                    assert(creation.serializer == nil || creation.serializer === starting.serializer, "Normalize didn't produce the same serializer on both sides.")
-                    assert(creation.type == starting.type, "Normalize determined a different type between creation and starting, which should be impossible.")
-                    
-                    let arg = BuilderArg(type: creation.type, creation: creation.value, starting: starting.value)
-                    
-                    if creation.type is SelfApplyingArg.Type {
-                        selfApplying.append(arg)
-                    } else if let thisSerializer = creation.serializer {
-                        if serializer == nil {
-                            serializer = thisSerializer
-                        } else {
-                            // Serializer already set
-                        }
-                        
-                        serializerArgs.append(arg)
-                    } else {
-                        return createAndLogErrorResponse(.unsupportedArgument(arg))
-                    }
-                }
-                
-                if let serializer = serializer {
-                    do {
-                        try serializer.apply(arguments: serializerArgs, to: &request)
-                    } catch {
-                        return createAndLogErrorResponse(.serializerError(serializer: serializer, error: error, arguments: serializerArgs))
-                    }
-                }
-                
-                for arg in selfApplying {
-                    let type = arg.type as! SelfApplyingArg.Type
-                    type.apply(arg: arg, to: &request)
-                }
-                
-                self.requestInterceptor?(&request)
-                self.log(request: request)
-                
-                let immutableClientResponse: ClientResponse
-                if isDryModeEnabled {
-                    let provider = testProvider ?? { _ in ClientResponse(data: nil, response: nil, error: nil) }
-                    immutableClientResponse = provider(creationArgs, startingArgs, request)
-                } else {
-                    let semaphore = DispatchSemaphore(value: 0)
-                    var clientResponse: ClientResponse!
-                    task = client.makeAsynchronousRequest(request: &request) { (r) in
-                        clientResponse = r
-                        semaphore.signal()
-                    }
-                    task!.resume()
-                    semaphore.wait()
-                    immutableClientResponse = clientResponse
-                }
-                
-                var clientResponse = immutableClientResponse
-                self.responseInterceptor?(&clientResponse)
-                
-                let body: ResponseType?
-                let error: Error?
-                
-                if ResponseType.self == Void.self {
-                    body = (() as! ResponseType)
-                    error = nil
-                } else {
-                    if let serializer = inboundSerializers.first(where: { $0.supports(inboundType: ResponseType.self) }) {
-                        do {
-                            body = try serializer.makeValue(from: clientResponse, type: ResponseType.self)
-                            error = nil
-                        } catch let serializerError {
-                            body = nil
-                            error = serializerError
-                        }
-                    } else {
-                        // This is incorrect usage of Retrolux, hence it is a fatal error.
-                        fatalError("Unsupported argument type when processing request: \(ResponseType.self)")
-                    }
-                }
-                
-                let response: Response<ResponseType> = Response(
-                    request: request,
-                    data: clientResponse.data,
-                    error: error ?? clientResponse.error,
-                    urlResponse: clientResponse.response,
-                    body: body,
-                    interpreter: self.interpret
-                )
-                
-                self.log(response: response)
-                
-                return response
             }
             
             let cancel = { () -> Void in
@@ -273,7 +206,102 @@ open class Builder {
             
             let capture = { self.stateToCapture }
             
-            return self.callFactory.makeCall(capture: capture, perform: perform, cancel: cancel)
+            return self.callFactory.makeCall(capture: capture, enqueue: enqueue, cancel: cancel)
         }
+    }
+    
+    func applyArguments<Args, ResponseType>(
+        type: OutboundSerializerType,
+        state: RequestCapturedState,
+        endpoint: String,
+        method: HTTPMethod,
+        creation: Args,
+        starting: Args,
+        modifying request: inout URLRequest,
+        responseType: ResponseType.Type
+        ) throws
+    {
+        let outboundSerializers = self.outboundSerializers()
+        let normalizedCreationArgs = self.normalize(arg: creation, serializerType: type, serializers: outboundSerializers) // Args used to create this request
+        let normalizedStartingArgs = self.normalize(arg: starting, serializerType: type, serializers: outboundSerializers) // Args passed in when executing this request
+        
+        assert(normalizedCreationArgs.count == normalizedStartingArgs.count)
+        
+        var selfApplying: [BuilderArg] = []
+        
+        var serializer: OutboundSerializer?
+        var serializerArgs: [BuilderArg] = []
+        
+        for (creation, starting) in zip(normalizedCreationArgs, normalizedStartingArgs) {
+            assert((creation.serializer != nil) == (starting.serializer != nil), "Somehow normalize failed to produce the same results on both sides.")
+            assert(creation.serializer == nil || creation.serializer === starting.serializer, "Normalize didn't produce the same serializer on both sides.")
+            assert(creation.type == starting.type, "Normalize determined a different type between creation and starting, which should be impossible.")
+            
+            let arg = BuilderArg(type: creation.type, creation: creation.value, starting: starting.value)
+            
+            if creation.type is SelfApplyingArg.Type {
+                selfApplying.append(arg)
+            } else if let thisSerializer = creation.serializer {
+                if serializer == nil {
+                    serializer = thisSerializer
+                } else {
+                    // Serializer already set
+                }
+                
+                serializerArgs.append(arg)
+            } else {
+                throw BuilderError.unsupportedArgument(arg)
+            }
+        }
+        
+        if let serializer = serializer {
+            do {
+                try serializer.apply(arguments: serializerArgs, to: &request)
+            } catch {
+                throw BuilderError.serializerError(serializer: serializer, error: error, arguments: serializerArgs)
+            }
+        }
+        
+        for arg in selfApplying {
+            let type = arg.type as! SelfApplyingArg.Type
+            type.apply(arg: arg, to: &request)
+        }
+    }
+    
+    func process<ResponseType>(immutableClientResponse: ClientResponse, request: URLRequest, responseType: ResponseType.Type) -> Response<ResponseType> {
+        var clientResponse = immutableClientResponse
+        self.responseInterceptor?(&clientResponse)
+        
+        let body: ResponseType?
+        let error: Error?
+        
+        if ResponseType.self == Void.self {
+            body = (() as! ResponseType)
+            error = nil
+        } else {
+            if let serializer = inboundSerializers().first(where: { $0.supports(inboundType: ResponseType.self) }) {
+                do {
+                    body = try serializer.makeValue(from: clientResponse, type: ResponseType.self)
+                    error = nil
+                } catch let serializerError {
+                    body = nil
+                    error = serializerError
+                }
+            } else {
+                // This is incorrect usage of Retrolux, hence it is a fatal error.
+                fatalError("Unsupported argument type when processing request: \(ResponseType.self)")
+            }
+        }
+        
+        let response: Response<ResponseType> = Response(
+            request: request,
+            data: clientResponse.data,
+            error: error ?? clientResponse.error,
+            urlResponse: clientResponse.response,
+            body: body,
+            interpreter: self.interpret
+        )
+        
+        return response
     }
 }

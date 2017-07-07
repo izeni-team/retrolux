@@ -252,6 +252,30 @@ class BuilderTests: XCTestCase {
             }
         }
         
-        self.wait(for: expectations, timeout: 60)
+        self.wait(for: expectations, timeout: 10)
+    }
+    
+    func testSerializationBlocking() {
+        class Serializer: OutboundSerializer {
+            func supports(outboundType: Any.Type) -> Bool {
+                return true
+            }
+            
+            func apply(arguments: [BuilderArg], to request: inout URLRequest) throws {
+                sleep(1)
+            }
+        }
+        
+        let builder = Builder.dry()
+        builder.serializers.append(Serializer())
+        
+        let start = Date()
+        let request = builder.makeRequest(method: .get, endpoint: "whatever", args: NSNull(), response: Void.self)
+        request(NSNull()).enqueue(callback: { _ in })
+        XCTAssert(Date() < start + 0.5)
+        
+        let start2 = Date()
+        _ = request(NSNull()).perform()
+        XCTAssert(Date() > start2 + 0.5)
     }
 }

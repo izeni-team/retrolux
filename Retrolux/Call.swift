@@ -8,34 +8,39 @@
 
 import Foundation
 
-public typealias CallPerformFunction<ResponseType> = (RequestCapturedState) -> Response<ResponseType>
+public typealias CallEnqueueFunction<ResponseType> = (RequestCapturedState, @escaping (Response<ResponseType>) -> Void) -> Void
 
 open class Call<T> {
     fileprivate var delegatedCapture: () -> RequestCapturedState
-    fileprivate var delegatedPerform: CallPerformFunction<T>
+    fileprivate var delegatedEnqueue: CallEnqueueFunction<T>
     fileprivate var delegatedCancel: () -> Void
     
-    public init(capture: @escaping () -> RequestCapturedState, perform: @escaping CallPerformFunction<T>, cancel: @escaping () -> Void) {
+    public init(capture: @escaping () -> RequestCapturedState, enqueue: @escaping CallEnqueueFunction<T>, cancel: @escaping () -> Void) {
         self.delegatedCapture = capture
-        self.delegatedPerform = perform
+        self.delegatedEnqueue = enqueue
         self.delegatedCancel = cancel
     }
     
     open func perform() -> Response<T> {
         let state = delegatedCapture()
-        return delegatedPerform(state)
+        let semaphore = DispatchSemaphore(value: 0)
+        var capturedResponse: Response<T>!
+        delegatedEnqueue(state) { (response: Response<T>) in
+            capturedResponse = response
+            semaphore.signal()
+        }
+        semaphore.wait()
+        return capturedResponse
     }
     
     open func enqueue(queue: DispatchQueue = .main, callback: @escaping (Response<T>) -> Void) {
         let state = delegatedCapture()
         
-        // Creating a new queue each time fixes a bug where launching 100 or more network requests at the same time
-        // would cause the Builder to deadlock at semaphore.wait(). This probably indicates some sort of limit in
-        // the background global queue.
-        DispatchQueue(label: "retrolux." + UUID().uuidString).async {
-            let response = self.delegatedPerform(state)
-            queue.async {
-                callback(response)
+        state.workerQueue.async {
+            self.delegatedEnqueue(state) { response in
+                queue.async {
+                    callback(response)
+                }
             }
         }
     }

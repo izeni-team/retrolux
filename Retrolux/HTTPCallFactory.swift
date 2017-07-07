@@ -13,7 +13,7 @@ public struct HTTPCallFactory: CallFactory {
     
     }
     
-    public func makeCall<T>(capture: @escaping () -> RequestCapturedState, perform: @escaping CallPerformFunction<T>, cancel: @escaping () -> Void) -> Call<T> {
-        return Call(capture: capture, perform: perform, cancel: cancel)
+    public func makeCall<T>(capture: @escaping () -> RequestCapturedState, enqueue: @escaping CallEnqueueFunction<T>, cancel: @escaping () -> Void) -> Call<T> {
+        return Call(capture: capture, enqueue: enqueue, cancel: cancel)
     }
 }
