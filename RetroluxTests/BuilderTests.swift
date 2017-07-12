@@ -244,7 +244,7 @@ class BuilderTests: XCTestCase {
         
         var expectations = [XCTestExpectation]()
         
-        for i in 0..<100 {
+        for i in 0..<1000 {
             let expectation = self.expectation(description: "request \(i)")
             expectations.append(expectation)
             request().enqueue { response in
@@ -252,7 +252,7 @@ class BuilderTests: XCTestCase {
             }
         }
         
-        self.wait(for: expectations, timeout: 10)
+        self.wait(for: expectations, timeout: 60)
     }
     
     func testSerializationBlocking() {

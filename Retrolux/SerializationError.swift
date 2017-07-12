@@ -20,7 +20,7 @@ public enum ReflectorSerializationError: RetroluxError {
         switch self {
         case .keyNotFound(propertyName: let propertyName, key: let key, forClass: let `class`):
             return RetroluxErrorDescription(
-                description: "Could not find the key '\(key)' for the property '\(propertyName)' on \(`class`).",
+                description: "Could not find the key '\(key)' in data for the property '\(propertyName)' on \(`class`).",
                 suggestion: nil // TODO
             )
         case .propertyDoesNotSupportNullValues(propertyName: let propertyName, forClass: let `class`):
