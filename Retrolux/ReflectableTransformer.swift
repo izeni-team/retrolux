@@ -20,18 +20,18 @@ open class ReflectableTransformer: NestedTransformer {
     
     // We have to override this because of a Swift bug that prevents the default implementation
     // in NestedTransformer from working properly. As of Swift 3.1.0.
-    public func supports(propertyType: PropertyType) -> Bool {
+    open func supports(propertyType: PropertyType) -> Bool {
         if case .unknown(let type) = propertyType.bottom {
             return type is Reflectable.Type
         }
         return false
     }
     
-    public func setter(_ dataValue: TypeOfData, type: Any.Type) throws -> TypeOfProperty {
+    open func setter(_ dataValue: TypeOfData, type: Any.Type) throws -> TypeOfProperty {
         return try reflector!.convert(fromDictionary: dataValue, to: type as! TypeOfProperty.Type)
     }
     
-    public func getter(_ propertyValue: TypeOfProperty) throws -> [String : Any] {
+    open func getter(_ propertyValue: TypeOfProperty) throws -> [String : Any] {
         return try reflector!.convertToDictionary(from: propertyValue)
     }
 }

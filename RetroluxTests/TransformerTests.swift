@@ -66,4 +66,55 @@ class TransformerTests: XCTestCase {
             XCTFail("Failed with error: \(error)")
         }
     }
+    
+    // This test cannot be run multiple times without recycling state.
+    func testLocalTransformerOverridesGlobalTransformer() {
+        class Transformer: ReflectableTransformer {
+            var wasCalled = false
+            
+            static let reflector = Reflector()
+            static let global = Transformer(weakReflector: reflector)
+            static let local = Transformer(weakReflector: reflector)
+            
+            override func setter(_ dataValue: ReflectableTransformer.TypeOfData, type: Any.Type) throws -> ReflectableTransformer.TypeOfProperty {
+                wasCalled = true
+                return try super.setter(dataValue, type: type)
+            }
+        }
+        
+        class Person: Reflection {
+            var custom: Person?
+            
+            static var useLocalTransformer = true
+            
+            override class func config(_ c: PropertyConfig) {
+                if useLocalTransformer {
+                    c["custom"] = [.transformed(Transformer.local)]
+                }
+            }
+        }
+        
+        Transformer.reflector.globalTransformers = [Transformer.global]
+        
+        let data = "{\"custom\": {}}".data(using: .utf8)!
+        do {
+            _ = try Transformer.reflector.convert(fromJSONDictionaryData: data, to: Person.self) as! Person
+            XCTAssert(Transformer.global.wasCalled == false)
+            XCTAssert(Transformer.local.wasCalled == true)
+            
+            // Clear state
+            Transformer.local.wasCalled = false
+            Transformer.global.wasCalled = false
+            Transformer.reflector.cache.removeAll()
+            
+            // Disable local transformer
+            Person.useLocalTransformer = false
+            
+            _ = try Transformer.reflector.convert(fromJSONDictionaryData: data, to: Person.self) as! Person
+            XCTAssert(Transformer.global.wasCalled == true)
+            XCTAssert(Transformer.local.wasCalled == false)
+        } catch {
+            XCTFail("Should have succeeded, but got error: \(error)")
+        }
+    }
 }

@@ -95,4 +95,24 @@ class InterpretedResponseTests: XCTestCase {
             XCTFail("Response interpreted as failure: \(error)")
         }
     }
+    
+    func testHTTP400ErrorWithInvalidJSONResponse() {
+        class Person: Reflection {
+            var name = ""
+        }
+        
+        let function = Builder.dry().makeRequest(method: .post, endpoint: "whatevers", args: (), response: Person.self) {
+            ClientResponse(url: $0.2.url!, data: "ERROR".data(using: .utf8)!, status: 400)
+        }
+        switch function().perform().interpreted {
+        case .success:
+            XCTFail("Should not have succeeded")
+        case .failure(let error):
+            if case ResponseError.invalidHttpStatusCode = error {
+                
+            } else {
+                XCTFail("Expected an invalid HTTP error, but got the following instead: \(error)")
+            }
+        }
+    }
 }
