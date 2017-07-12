@@ -1,3 +1,6 @@
+v0.6.7
+- Added DateTransformer.swift to git repo
+
 v0.6.6
 - Fixed DateTransformer visibility
 
