@@ -1,3 +1,18 @@
+v0.6.4
+- Builder cleanup, plus a test for enqueue blocking
+- Slight wording change for missing JSON key error message
+- Added unit test for HTTP 400s, and global vs local transformers
+- Added a DateTransformer
+
+v0.6.3
+- Fixed a bug where sending off 100+ requests at once would cause a deadlock.
+
+v0.6.2
+- Fixed a bug that prevented simple transformations, like from String to Bool.
+
+v0.6.1
+- Fixes a bug that only manifests itself when being used in a 3rd-party project where ReflectableTransformer would claim it didn't support Reflectables. Caused by Swift bug where type is TypeOfProperty.Type would fail in the protocol extension but work fine in the actual class--again, only in 3rd-party projects. UGH!
+
 v0.6.0
 - Overhauled transformers API for Reflectables
 - Removed the following properties/functions from Reflectable:
