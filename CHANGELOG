@@ -1,3 +1,6 @@
+v0.6.5
+- Made Path and Query values public
+
 v0.6.4
 - Builder cleanup, plus a test for enqueue blocking
 - Slight wording change for missing JSON key error message

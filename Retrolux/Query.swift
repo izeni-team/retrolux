@@ -9,7 +9,7 @@
 import Foundation
 
 public struct Query: SelfApplyingArg {
-    private let value: String
+    public let value: String
     
     public init(_ nameOrValue: String) {
         self.value = nameOrValue

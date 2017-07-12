@@ -9,7 +9,7 @@
 import Foundation
 
 public struct Path: SelfApplyingArg, ExpressibleByStringLiteral {
-    private let value: String
+    public let value: String
     
     public init(stringLiteral value: String) {
         self.value = value
