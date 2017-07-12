@@ -1,3 +1,6 @@
+v0.6.6
+- Fixed DateTransformer visibility
+
 v0.6.5
 - Made Path and Query values public
 

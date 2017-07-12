@@ -15,6 +15,7 @@
 		346411CD1EA1135B0028A844 /* PropertyConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 346411CC1EA1135B0028A844 /* PropertyConfig.swift */; };
 		346411D11EA116A20028A844 /* TransformerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 346411D01EA116A20028A844 /* TransformerTests.swift */; };
 		346411D31EA123500028A844 /* TransformerDirection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 346411D21EA123500028A844 /* TransformerDirection.swift */; };
+		3472DCF91F16AFFA002FBB53 /* DateTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F6F05C1E8F0856002BA263 /* DateTransformer.swift */; };
 		348384391EA1912200EA13A1 /* NestedTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 348384381EA1912200EA13A1 /* NestedTransformer.swift */; };
 		34B8ED621E664A7C00030FAA /* Retrolux.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34B8ED591E664A7C00030FAA /* Retrolux.framework */; };
 		34B8ED701E664B1C00030FAA /* testmultipleparts.data in Resources */ = {isa = PBXBuildFile; fileRef = 34F027931E3BF4B8007AA8C9 /* testmultipleparts.data */; };
@@ -83,7 +84,6 @@
 		34F6F0601E8F0856002BA263 /* ReflectorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F6F0591E8F0856002BA263 /* ReflectorTests.swift */; };
 		34F6F0611E8F0856002BA263 /* ValueTransformerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F6F05A1E8F0856002BA263 /* ValueTransformerTests.swift */; };
 		34F6F0621E8F0856002BA263 /* PropertyTypeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F6F05B1E8F0856002BA263 /* PropertyTypeTests.swift */; };
-		34F6F0631E8F0856002BA263 /* DateTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F6F05C1E8F0856002BA263 /* DateTransformer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -542,6 +542,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				34B8ED9A1E664B8A00030FAA /* ReflectionJSONSerializer.swift in Sources */,
+				3472DCF91F16AFFA002FBB53 /* DateTransformer.swift in Sources */,
 				34B8ED8E1E664B7F00030FAA /* Path.swift in Sources */,
 				34F6F0531E8F0829002BA263 /* Property.swift in Sources */,
 				34B8ED851E664B7700030FAA /* Task.swift in Sources */,
@@ -597,7 +598,6 @@
 			files = (
 				34CA587E1E943F40001F5E54 /* SwiftyJSONSerializer.swift in Sources */,
 				34F6F0621E8F0856002BA263 /* PropertyTypeTests.swift in Sources */,
-				34F6F0631E8F0856002BA263 /* DateTransformer.swift in Sources */,
 				34B8ED7C1E664B3800030FAA /* HeaderTests.swift in Sources */,
 				34CA587C1E943EE5001F5E54 /* SwiftyJSON.swift in Sources */,
 				34F6F05D1E8F0856002BA263 /* ReflectionErrorTests.swift in Sources */,
