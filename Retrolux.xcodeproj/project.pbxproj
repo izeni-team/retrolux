@@ -16,6 +16,7 @@
 		346411D11EA116A20028A844 /* TransformerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 346411D01EA116A20028A844 /* TransformerTests.swift */; };
 		346411D31EA123500028A844 /* TransformerDirection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 346411D21EA123500028A844 /* TransformerDirection.swift */; };
 		3472DCF91F16AFFA002FBB53 /* DateTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F6F05C1E8F0856002BA263 /* DateTransformer.swift */; };
+		3472DCFB1F16BA88002FBB53 /* URLTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3472DCFA1F16BA88002FBB53 /* URLTransformer.swift */; };
 		348384391EA1912200EA13A1 /* NestedTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 348384381EA1912200EA13A1 /* NestedTransformer.swift */; };
 		34B8ED621E664A7C00030FAA /* Retrolux.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34B8ED591E664A7C00030FAA /* Retrolux.framework */; };
 		34B8ED701E664B1C00030FAA /* testmultipleparts.data in Resources */ = {isa = PBXBuildFile; fileRef = 34F027931E3BF4B8007AA8C9 /* testmultipleparts.data */; };
@@ -131,6 +132,7 @@
 		346411D01EA116A20028A844 /* TransformerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransformerTests.swift; sourceTree = "<group>"; };
 		346411D21EA123500028A844 /* TransformerDirection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransformerDirection.swift; sourceTree = "<group>"; };
 		3472D1C71E0C70E600AE8621 /* URLEncodedSerializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = URLEncodedSerializer.swift; sourceTree = "<group>"; };
+		3472DCFA1F16BA88002FBB53 /* URLTransformer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = URLTransformer.swift; sourceTree = "<group>"; };
 		3475A6E91E5CFE330050019D /* OptionalHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OptionalHelper.swift; sourceTree = "<group>"; };
 		3475A6EB1E5CFE430050019D /* BuilderArg.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BuilderArg.swift; sourceTree = "<group>"; };
 		3475A6ED1E5CFE600050019D /* OutboundSerializerType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OutboundSerializerType.swift; sourceTree = "<group>"; };
@@ -354,6 +356,7 @@
 				346411D21EA123500028A844 /* TransformerDirection.swift */,
 				346411CA1EA113560028A844 /* TransformerType.swift */,
 				34F6F04A1E8F0829002BA263 /* ValueTransformer.swift */,
+				3472DCFA1F16BA88002FBB53 /* URLTransformer.swift */,
 			);
 			name = Reflector;
 			sourceTree = "<group>";
@@ -582,6 +585,7 @@
 				34B8ED8C1E664B7B00030FAA /* OutboundSerializerType.swift in Sources */,
 				34F6F04F1E8F0829002BA263 /* Reflector.swift in Sources */,
 				34F6F0541E8F0829002BA263 /* PropertyType.swift in Sources */,
+				3472DCFB1F16BA88002FBB53 /* URLTransformer.swift in Sources */,
 				346411CB1EA113560028A844 /* TransformerType.swift in Sources */,
 				34B8ED9B1E664B8E00030FAA /* URLEncodedSerializer.swift in Sources */,
 				34B8ED901E664B8300030FAA /* HTTPClient.swift in Sources */,

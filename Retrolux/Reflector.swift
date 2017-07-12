@@ -22,12 +22,15 @@ open class Reflector {
     open var globalTransformers: [TransformerType] = []
     
     open var reflectableTransformer: TransformerType!
+    open var urlTransformer: TransformerType!
     
     public init() {
         self.reflectableTransformer = ReflectableTransformer(weakReflector: self)
+        self.urlTransformer = URLTransformer()
         
         self.globalTransformers = [
-            reflectableTransformer
+            reflectableTransformer,
+            urlTransformer
         ]
     }
     

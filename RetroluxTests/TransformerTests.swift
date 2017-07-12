@@ -117,4 +117,75 @@ class TransformerTests: XCTestCase {
             XCTFail("Should have succeeded, but got error: \(error)")
         }
     }
+    
+    func testURLTransformer() {
+        class Person: Reflection {
+            var image_url: URL?
+        }
+        
+        // The escaped forwards slash is intentional, and is just NSJSONSerialization trying to conform to HTML
+        // standards:
+        // https://stackoverflow.com/questions/19651009/how-to-prevent-nsjsonserialization-from-adding-extra-escapes-in-url
+        let data = "{\"image_url\":\"https:\\/\\/www.google.com\\/somepath%20with%20spaces\"}".data(using: .utf8)!
+        let image_url = URL(string: "https://www.google.com/somepath%20with%20spaces")!
+        do {
+            let person = try Reflector().convert(fromJSONDictionaryData: data, to: Person.self) as! Person
+            XCTAssert(person.image_url == URL(string: "https://www.google.com/somepath%20with%20spaces")!)
+            XCTAssert(person.image_url == image_url)
+            XCTAssert(person.image_url?.scheme == "https")
+            XCTAssert(person.image_url?.host == "www.google.com")
+            XCTAssert(person.image_url?.path == "/somepath with spaces")
+        } catch {
+            XCTFail("Failed with error: \(error)")
+        }
+        
+        do {
+            let person = Person()
+            person.image_url = image_url
+            let out = try Reflector().convertToJSONDictionaryData(from: person)
+            XCTAssert(out == data)
+        } catch {
+            XCTFail("Failed with error: \(error)")
+        }
+        
+        do {
+            let nullData = "{\"image_url\":null}".data(using: .utf8)!
+            let person = try Reflector().convert(fromJSONDictionaryData: nullData, to: Person.self) as! Person
+            XCTAssert(person.image_url == nil)
+        } catch {
+            XCTFail("Failed with error: \(error)")
+        }
+        
+        do {
+            let boringStringData = "{\"image_url\":\"boring\"}".data(using: .utf8)!
+            let person = try Reflector().convert(fromJSONDictionaryData: boringStringData, to: Person.self) as! Person
+            XCTAssert(person.image_url == URL(string: "boring")!)
+        } catch {
+            XCTFail("Failed with error: \(error)")
+        }
+        
+        do {
+            let invalidUrlData = "{\"image_url\":\"a string with spaces\"}".data(using: .utf8)!
+            _ = try Reflector().convert(fromJSONDictionaryData: invalidUrlData, to: Person.self) as! Person
+            XCTFail("Should not have succeeded.")
+        } catch {
+            if case URLTransformer.Error.invalidURL = error {
+                /* SUCCESS */
+            } else {
+                XCTFail("Expected an invalidURL error, but got the following instead: \(error)")
+            }
+        }
+        
+        do {
+            let invalidUrlData = "{\"image_url\":\"|\"}".data(using: .utf8)!
+            _ = try Reflector().convert(fromJSONDictionaryData: invalidUrlData, to: Person.self) as! Person
+            XCTFail("Should not have succeeded.")
+        } catch {
+            if case URLTransformer.Error.invalidURL = error {
+                /* SUCCESS */
+            } else {
+                XCTFail("Expected an invalidURL error, but got the following instead: \(error)")
+            }
+        }
+    }
 }
