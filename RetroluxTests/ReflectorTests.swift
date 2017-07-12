@@ -463,22 +463,6 @@ class RetroluxReflectorTests: XCTestCase {
                 c["upgradedAt"] = [.transformed(DateTransformer()), .serializedName("upgraded_at")]
                 c["bestFriend"] = [.serializedName("best_friend")]
             }
-            
-//            override class var transformedProperties: [String: Retrolux.ValueTransformer] {
-//                return [
-//                    "born": DateTransformer.shared,
-//                    "visitDates": DateTransformer.shared,
-//                    "upgradedAt": DateTransformer.shared
-//                ]
-//            }
-//            
-//            override class var mappedProperties: [String: String] {
-//                return [
-//                    "visitDates": "visit_dates",
-//                    "bestFriend": "best_friend",
-//                    "upgradedAt": "upgraded_at"
-//                ]
-//            }
         }
         
         let object = Person()
@@ -520,9 +504,9 @@ class RetroluxReflectorTests: XCTestCase {
             
             let dates = dictionary["visit_dates"] as? [String]
             XCTAssert(dates?.count == 3)
-            XCTAssert(dates?[0] == DateTransformer.formatter.string(from: now))
-            XCTAssert(dates?[1] == DateTransformer.formatter.string(from: date2))
-            XCTAssert(dates?[2] == DateTransformer.formatter.string(from: date3))
+            XCTAssert(dates?[0] == DateTransformer().formatter.string(from: now))
+            XCTAssert(dates?[1] == DateTransformer().formatter.string(from: date2))
+            XCTAssert(dates?[2] == DateTransformer().formatter.string(from: date3))
             
             let pets = dictionary["pets"] as? [[String: Any]]
             XCTAssert(pets?.count == 2)
@@ -532,8 +516,8 @@ class RetroluxReflectorTests: XCTestCase {
             let bf = dictionary["best_friend"] as? [String: Any]
             XCTAssert(bf?["name"] as? String == "Bob")
             XCTAssert(bf?["age"] as? Int == 2)
-            XCTAssert(bf?["born"] as? String == DateTransformer.formatter.string(from: bestFriend.born))
-            XCTAssert(bf?["upgraded_at"] as? String == DateTransformer.formatter.string(from: bestFriend.upgradedAt!))
+            XCTAssert(bf?["born"] as? String == DateTransformer().formatter.string(from: bestFriend.born))
+            XCTAssert(bf?["upgraded_at"] as? String == DateTransformer().formatter.string(from: bestFriend.upgradedAt!))
             
             XCTAssert(dictionary["upgraded_at"] is NSNull)
 
@@ -571,7 +555,6 @@ class RetroluxReflectorTests: XCTestCase {
     
     func testOptionalNested() {
         class LoginResponse: Reflection {
-            
             class LoginSuccessResponse: Reflection {
                 var user_id = ""
                 var role = ""
@@ -621,6 +604,6 @@ extension CustomObject: Reflectable {}
 
 extension Date {
     fileprivate func toString() -> String {
-        return DateTransformer.formatter.string(from: self)
+        return DateTransformer().formatter.string(from: self)
     }
 }

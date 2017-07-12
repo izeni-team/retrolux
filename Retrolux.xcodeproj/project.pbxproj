@@ -183,7 +183,7 @@
 		34F6F0591E8F0856002BA263 /* ReflectorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReflectorTests.swift; sourceTree = "<group>"; };
 		34F6F05A1E8F0856002BA263 /* ValueTransformerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ValueTransformerTests.swift; sourceTree = "<group>"; };
 		34F6F05B1E8F0856002BA263 /* PropertyTypeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PropertyTypeTests.swift; sourceTree = "<group>"; };
-		34F6F05C1E8F0856002BA263 /* DateTransformer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DateTransformer.swift; sourceTree = "<group>"; };
+		34F6F05C1E8F0856002BA263 /* DateTransformer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DateTransformer.swift; path = Retrolux/DateTransformer.swift; sourceTree = SOURCE_ROOT; };
 		4978AA8D1D35A11900E1F1A5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		498BCF611D39F9B100345E9F /* Task.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Task.swift; sourceTree = "<group>"; };
 		498BCF651D39FC5E00345E9F /* HTTPClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HTTPClient.swift; sourceTree = "<group>"; };
@@ -340,19 +340,20 @@
 		34F6F0461E8F0801002BA263 /* Reflector */ = {
 			isa = PBXGroup;
 			children = (
-				346411CC1EA1135B0028A844 /* PropertyConfig.swift */,
-				346411CA1EA113560028A844 /* TransformerType.swift */,
+				34F6F05C1E8F0856002BA263 /* DateTransformer.swift */,
+				348384381EA1912200EA13A1 /* NestedTransformer.swift */,
 				34F6F04C1E8F0829002BA263 /* Property.swift */,
+				346411CC1EA1135B0028A844 /* PropertyConfig.swift */,
 				34F6F04D1E8F0829002BA263 /* PropertyType.swift */,
 				34F6F0471E8F0829002BA263 /* Reflectable.swift */,
 				34F6F0491E8F0829002BA263 /* ReflectableTransformer.swift */,
 				34F6F04B1E8F0829002BA263 /* Reflection.swift */,
+				34CA58771E942343001F5E54 /* ReflectionError.swift */,
 				34F6F0481E8F0829002BA263 /* Reflector.swift */,
 				34CA58751E9422E4001F5E54 /* SerializationError.swift */,
-				34F6F04A1E8F0829002BA263 /* ValueTransformer.swift */,
-				34CA58771E942343001F5E54 /* ReflectionError.swift */,
 				346411D21EA123500028A844 /* TransformerDirection.swift */,
-				348384381EA1912200EA13A1 /* NestedTransformer.swift */,
+				346411CA1EA113560028A844 /* TransformerType.swift */,
+				34F6F04A1E8F0829002BA263 /* ValueTransformer.swift */,
 			);
 			name = Reflector;
 			sourceTree = "<group>";
@@ -366,7 +367,6 @@
 				34F6F0591E8F0856002BA263 /* ReflectorTests.swift */,
 				34F6F05A1E8F0856002BA263 /* ValueTransformerTests.swift */,
 				34F6F05B1E8F0856002BA263 /* PropertyTypeTests.swift */,
-				34F6F05C1E8F0856002BA263 /* DateTransformer.swift */,
 				346411D01EA116A20028A844 /* TransformerTests.swift */,
 			);
 			name = ReflectorTests;
