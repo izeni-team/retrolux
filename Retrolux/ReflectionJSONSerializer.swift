@@ -19,13 +19,13 @@ public struct Diff<T: Reflectable>: ReflectionDiffType {
     public let value2: Reflectable
     public let granular: Bool
     
-    init() {
+    public init() {
         self.value1 = Reflection()
         self.value2 = Reflection()
         self.granular = true
     }
     
-    init(from value1: T, to value2: T, granular: Bool = true) {
+    public init(from value1: T, to value2: T, granular: Bool = true) {
         self.value1 = value1
         self.value2 = value2
         self.granular = granular
