@@ -1,3 +1,9 @@
+v0.8.0
+- Added Reflector.copy and Reflector.diff
+
+v0.7.0
+- Added a built-in and ready to go URL <--> String transformer
+
 v0.6.7
 - Added DateTransformer.swift to git repo
 
