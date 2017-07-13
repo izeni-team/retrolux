@@ -101,6 +101,9 @@ open class Builder {
         }
         
         if !response.isHttpStatusOk {
+            if response.urlResponse == nil, let error = response.error {
+                return .failure(ResponseError.connectionError(error))
+            }
             return .failure(ResponseError.invalidHttpStatusCode(code: response.status))
         }
         
@@ -274,6 +277,18 @@ open class Builder {
         
         let body: ResponseType?
         let error: Error?
+        
+        if let error = clientResponse.error {
+            let response: Response<ResponseType> = Response(
+                request: request,
+                data: clientResponse.data,
+                error: error,
+                urlResponse: clientResponse.response,
+                body: nil,
+                interpreter: self.interpret
+            )
+            return response
+        }
         
         if ResponseType.self == Void.self {
             body = (() as! ResponseType)

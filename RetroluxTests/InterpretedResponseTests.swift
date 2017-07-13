@@ -115,4 +115,31 @@ class InterpretedResponseTests: XCTestCase {
             }
         }
     }
+    
+    func testNoInternet() {
+        let builder = Builder.dry()
+        let request = builder.makeRequest(
+            method: .get,
+            endpoint: "",
+            args: (),
+            response: Void.self
+        ) { _ in
+            return ClientResponse(data: nil, response: nil, error: NSError(domain: "Whatever", code: 2, userInfo: [
+                NSLocalizedDescriptionKey: "Localized Description",
+                NSLocalizedRecoverySuggestionErrorKey: "Recovery Suggestion"
+                ]))
+        }
+        
+        switch request().perform().interpreted {
+        case .success:
+            XCTFail("Should not have succeeded.")
+        case .failure(let error):
+            if case ResponseError.connectionError = error {
+                XCTAssert(error.localizedDescription == "Localized Description")
+                XCTAssert((error as NSError).localizedRecoverySuggestion == "Recovery Suggestion")
+            } else {
+                XCTFail("Unexpected error code: \(error)")
+            }
+        }
+    }
 }

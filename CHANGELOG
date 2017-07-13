@@ -1,5 +1,8 @@
+v0.8.2
+- Polished up connection error reporting
+
 v0.8.1
-- Made Diff's initializers public.
+- Made Diff's initializers public
 
 v0.8.0
 - Added Reflector.copy and Reflector.diff
