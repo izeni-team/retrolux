@@ -590,6 +590,193 @@ class RetroluxReflectorTests: XCTestCase {
         XCTAssert(response.body?.success?.role == "freelancer")
         XCTAssert(response.isSuccessful)
     }
+    
+    func testCopyReflection() {
+        class Person: Reflection {
+            var first_name = ""
+            var last_name = ""
+            var nickname: String?
+            var image_url: URL?
+            var friends: [Person]?
+        }
+        
+        let data = "{\"first_name\":\"Bobby\",\"last_name\":\"Jones\",\"nickname\":null,\"image_url\":\"https://upload.wikimedia.org/wikipedia/commons/4/47/PNG_transparency_demonstration_1.png\",\"friends\":[{\"first_name\":\"Alice\",\"last_name\":\"Rogers\"}]}".data(using: .utf8)!
+        do {
+            let person1 = try Reflector().convert(fromJSONDictionaryData: data, to: Person.self) as! Person
+            let copy1 = try Reflector().copy(person1)
+            XCTAssert(person1 !== copy1)
+            XCTAssert(person1.first_name == "Bobby")
+            XCTAssert(copy1.first_name == person1.first_name)
+            XCTAssert(person1.last_name == "Jones")
+            XCTAssert(copy1.last_name == person1.last_name)
+            XCTAssert(person1.nickname == nil)
+            XCTAssert(copy1.nickname == person1.nickname)
+            XCTAssert(person1.image_url == URL(string: "https://upload.wikimedia.org/wikipedia/commons/4/47/PNG_transparency_demonstration_1.png")!)
+            XCTAssert(copy1.image_url == person1.image_url)
+            XCTAssert(person1.friends?.count == 1)
+            XCTAssert(copy1.friends?.count == person1.friends?.count)
+            if let friend = person1.friends?.first, let copyFriend = copy1.friends?.first {
+                XCTAssert(friend.first_name == "Alice")
+                XCTAssert(copyFriend.first_name == friend.first_name)
+                XCTAssert(friend.last_name == "Rogers")
+                XCTAssert(copyFriend.last_name == friend.last_name)
+                XCTAssert(friend.nickname == nil)
+                XCTAssert(copyFriend.nickname == friend.nickname)
+                XCTAssert(friend.image_url == nil)
+                XCTAssert(copyFriend.image_url == friend.image_url)
+                XCTAssert(friend.friends == nil)
+                XCTAssert(copyFriend.friends == nil && nil == friend.friends)
+            }
+            
+            let data1 = try Reflector().convertToJSONDictionaryData(from: person1)
+            let data2 = try Reflector().convertToJSONDictionaryData(from: copy1)
+            XCTAssert(data1 == data2)
+        } catch {
+            XCTFail("Failed with error: \(error)")
+        }
+    }
+    
+    func testDiff() {
+        class Person: Reflection {
+            var first_name = ""
+            var last_name = ""
+            var nickname: String?
+            var image_url: URL?
+            var favorite_friend: Person?
+            var friends: [Person]?
+        }
+        
+        let p1 = Person()
+        let p2 = Person()
+        p2.first_name = "Alice"
+        p2.last_name = "Jones"
+        p2.nickname = "Ali"
+        p1.favorite_friend = Person()
+        p1.favorite_friend!.first_name = "Bobby"
+        p1.favorite_friend!.last_name = "Rogers"
+        
+        do {
+            let diff_p1_p2 = try Reflector().diff(from: p1, to: p2)
+            XCTAssert(Set(diff_p1_p2.keys) == Set(["first_name", "last_name", "nickname", "favorite_friend"]))
+            XCTAssert(diff_p1_p2["first_name"] as? String == "Alice")
+            XCTAssert(diff_p1_p2["last_name"] as? String == "Jones")
+            XCTAssert(diff_p1_p2["nickname"] as? String == "Ali")
+            XCTAssert(diff_p1_p2["favorite_friend"] is NSNull)
+        } catch {
+            XCTFail("Failed with error: \(error)")
+        }
+        
+        do {
+            let diff_p2_p1 = try Reflector().diff(from: p2, to: p1)
+            XCTAssert(Set(diff_p2_p1.keys) == Set(["first_name", "last_name", "nickname", "favorite_friend"]))
+            XCTAssert(diff_p2_p1["first_name"] as? String == "")
+            XCTAssert(diff_p2_p1["last_name"] as? String == "")
+            XCTAssert(diff_p2_p1["nickname"] is NSNull)
+            XCTAssert(diff_p2_p1["favorite_friend"] as? NSDictionary == [
+                "first_name": "Bobby",
+                "last_name": "Rogers",
+                "nickname": NSNull(),
+                "image_url": NSNull(),
+                "favorite_friend": NSNull(),
+                "friends": NSNull()
+                ] as NSDictionary)
+        } catch {
+            XCTFail("Failed with error: \(error)")
+        }
+        
+        do {
+            let p1 = Person()
+            p1.favorite_friend = Person()
+            p1.favorite_friend!.first_name = "Bob"
+            let p2 = Person()
+            p2.favorite_friend = Person()
+            p2.favorite_friend!.first_name = "Bobby"
+            let diff_p1_p2 = try Reflector().diff(from: p1, to: p2)
+            XCTAssert(diff_p1_p2 as NSDictionary == [
+                "favorite_friend": [
+                    "first_name": "Bobby"
+                    ] as NSDictionary
+                ])
+            
+            let diff_p2_p1 = try Reflector().diff(from: p2, to: p1)
+            XCTAssert(diff_p2_p1 as NSDictionary == [
+                "favorite_friend": [
+                    "first_name": "Bob"
+                    ] as NSDictionary
+                ])
+        } catch {
+            XCTFail("Failed with error: \(error)")
+        }
+        
+        do {
+            let p1 = Person()
+            let p2 = Person()
+            p1.friends = [
+                Person()
+            ]
+            p2.friends = [
+                Person()
+            ]
+            
+            XCTAssert(try Reflector().diff(from: p1, to: p2).isEmpty)
+            XCTAssert(try Reflector().diff(from: p2, to: p1).isEmpty)
+            
+            p2.friends![0].first_name = "Actually has one"
+            XCTAssert(try Reflector().diff(from: p1, to: p2) as NSDictionary == ["friends": [[
+                "first_name": "Actually has one",
+                "last_name": "",
+                "nickname": NSNull(),
+                "image_url": NSNull(),
+                "favorite_friend": NSNull(),
+                "friends": NSNull()
+                ]]] as NSDictionary)
+            XCTAssert(try Reflector().diff(from: p2, to: p1) as NSDictionary == ["friends": [[
+                "first_name": "",
+                "last_name": "",
+                "nickname": NSNull(),
+                "image_url": NSNull(),
+                "favorite_friend": NSNull(),
+                "friends": NSNull()
+                ]]] as NSDictionary)
+        } catch {
+            XCTFail("Failed with error: \(error)")
+        }
+        
+        do {
+            let p1 = Person()
+            p1.favorite_friend = Person()
+            let p2 = Person()
+            p2.favorite_friend = Person()
+            p2.favorite_friend!.first_name = "Bob"
+            let diff_p1_p2 = try Reflector().diff(from: p1, to: p2)
+            XCTAssert(diff_p1_p2 as NSDictionary == [
+                "favorite_friend": [
+                    "first_name": "Bob"
+                ]
+                ] as NSDictionary)
+            
+            let diff_p2_p1 = try Reflector().diff(from: p2, to: p1)
+            XCTAssert(diff_p2_p1 as NSDictionary == [
+                "favorite_friend": [
+                    "first_name": ""
+                ]
+                ] as NSDictionary)
+            
+            let diff_p2_p1_nongranular = try Reflector().diff(from: p2, to: p1, granular: false)
+            XCTAssert(diff_p2_p1_nongranular as NSDictionary == [
+                "favorite_friend": [
+                    "first_name": "",
+                    "last_name": "",
+                    "nickname": NSNull(),
+                    "image_url": NSNull(),
+                    "favorite_friend": NSNull(),
+                    "friends": NSNull()
+                ]
+                ] as NSDictionary)
+        } catch {
+            XCTFail("Failed with error: \(error)")
+        }
+    }
 }
 
 class Object: NSObject {

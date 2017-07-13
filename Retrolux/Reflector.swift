@@ -279,4 +279,63 @@ open class Reflector {
     open func value(for property: Property, on instance: Reflectable) throws -> Any {
         return try reflectable_value(for: property, instance: instance) ?? NSNull()
     }
+    
+    open func copy<T: Reflectable>(_ reflectable: T) throws -> T {
+        let dictionary = try convertToDictionary(from: reflectable)
+        return try convert(fromDictionary: dictionary, to: T.self) as! T
+    }
+    
+    // See documentation for diff(from: [String: Any], to: [String: Any]) for what granular does.
+    open func diff(from r1: Reflectable, to r2: Reflectable, granular: Bool = true) throws -> [String: Any] {
+        let d1 = try convertToDictionary(from: r1)
+        let d2 = try convertToDictionary(from: r2)
+        return diff(from: d1, to: d2, granular: granular)
+    }
+    
+    // If granular is false, then if ANY key in _nested_ dictionaries is different,
+    // then the ENTIRE nested dictionary will be in the resulting dictionary.
+    // If granular is true, then only differences in nested dictionaries
+    // will be in the resulting dictionary.
+    //
+    // Granular only affects nested diffs. Regardless of what granular's value is, the top level is
+    // always granular. If you don't like this, you can just do == on the two dictionaries. :-)
+    open func diff(from d1: [String: Any], to d2: [String: Any], granular: Bool = true) -> [String: Any] {
+        var result = [String: Any]()
+        let d1Keys = Set(d1.keys)
+        let d2Keys = Set(d2.keys)
+        let allKeys = d1Keys.union(d2Keys)
+        for key in allKeys {
+            if d1Keys.contains(key), !d2Keys.contains(key) {
+                result[key] = NSNull()
+            } else if !d1Keys.contains(key), d2Keys.contains(key) {
+                result[key] = d2[key]
+            } else if d1[key] is NSNull, d2[key] is NSNull {
+                continue
+            } else if d1[key] is NSNull, d2[key] is NSNull == false {
+                result[key] = d2[key]
+            } else if d1[key] is NSNull == false, d2[key] is NSNull {
+                result[key] = NSNull()
+            } else {
+                // The actual values are different, and neither are null.
+                if d1[key] is [String: Any], granular {
+                    let d = diff(from: d1[key] as! [String: Any], to: d2[key] as! [String: Any])
+                    if !d.isEmpty {
+                        result[key] = d
+                    }
+                } else if d1[key] is [Any] {
+                    let d1_array = d1[key] as! [Any]
+                    let d2_array = d2[key] as! [Any]
+                    
+                    if d1_array.count != d2_array.count {
+                        result[key] = d2_array
+                    } else if NSArray(array: d1_array) != NSArray(array: d2_array) {
+                        result[key] = d2_array
+                    }
+                } else if d1[key] as! NSObject != d2[key] as! NSObject {
+                    result[key] = d2[key]
+                }
+            }
+        }
+        return result
+    }
 }
