@@ -231,4 +231,39 @@ class ReflectionJSONSerializerTests: XCTestCase {
             XCTFail("Unknown error: \(error)")
         }
     }
+    
+    func testSendDiff() {
+        let serializer = ReflectionJSONSerializer()
+        
+        do {
+            class Person: Reflection {
+                var name = ""
+                var age = 0
+            }
+            let p1 = Person()
+            let p2 = Person()
+            p1.name = "Bob"
+            p1.age = 33
+            p2.name = "Alice"
+            p2.age = 33
+            
+            var request = URLRequest(url: URL(string: "https://www.google.com/")!)
+            
+            let diff = Diff(from: p1, to: p2)
+            let arg = BuilderArg(type: type(of: diff), creation: Diff<Person>(), starting: diff)
+            _ = try serializer.apply(arguments: [arg], to: &request)
+            print(String(data: request.httpBody!, encoding: .utf8)!)
+            XCTAssert(request.httpBody == "{\"name\":\"Alice\"}".data(using: .utf8)!)
+            XCTAssert(request.allHTTPHeaderFields ?? [:] == ["Content-Type": "application/json"])
+            
+            let diff2 = Diff(from: p2, to: p1)
+            let arg2 = BuilderArg(type: type(of: diff2), creation: Diff<Person>(), starting: diff2)
+            _ = try serializer.apply(arguments: [arg2], to: &request)
+            print(String(data: request.httpBody!, encoding: .utf8)!)
+            XCTAssert(request.httpBody == "{\"name\":\"Bob\"}".data(using: .utf8)!)
+            XCTAssert(request.allHTTPHeaderFields ?? [:] == ["Content-Type": "application/json"])
+        } catch {
+            XCTFail("Unknown error: \(error)")
+        }
+    }
 }

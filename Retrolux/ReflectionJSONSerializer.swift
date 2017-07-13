@@ -8,6 +8,30 @@
 
 import Foundation
 
+public protocol ReflectionDiffType {
+    var value1: Reflectable { get }
+    var value2: Reflectable { get }
+    var granular: Bool { get }
+}
+
+public struct Diff<T: Reflectable>: ReflectionDiffType {
+    public let value1: Reflectable
+    public let value2: Reflectable
+    public let granular: Bool
+    
+    init() {
+        self.value1 = Reflection()
+        self.value2 = Reflection()
+        self.granular = true
+    }
+    
+    init(from value1: T, to value2: T, granular: Bool = true) {
+        self.value1 = value1
+        self.value2 = value2
+        self.granular = granular
+    }
+}
+
 public enum ReflectionJSONSerializerError: RetroluxError {
     case unsupportedType(type: Any.Type)
     case noData
@@ -46,11 +70,20 @@ public class ReflectionJSONSerializer: OutboundSerializer, InboundSerializer {
     }
     
     public func supports(outboundType: Any.Type) -> Bool {
-        return outboundType is Reflectable.Type || (outboundType as? GetTypeFromArray.Type)?.getReflectableType() != nil
+        if outboundType is ReflectionDiffType.Type {
+            return true
+        }
+        if outboundType is Reflectable.Type {
+            return true
+        }
+        return (outboundType as? GetTypeFromArray.Type)?.getReflectableType() != nil
     }
     
     public func supports(inboundType: Any.Type) -> Bool {
-        return supports(outboundType: inboundType)
+        if inboundType is Reflectable.Type {
+            return true
+        }
+        return (inboundType as? GetTypeFromArray.Type)?.getReflectableType() != nil
     }
     
     public func validate(outbound: [BuilderArg]) -> Bool {
@@ -77,7 +110,12 @@ public class ReflectionJSONSerializer: OutboundSerializer, InboundSerializer {
     public func apply(arguments: [BuilderArg], to request: inout URLRequest) throws {
         let arg = arguments.first!
         
-        if let reflectable = arg.starting as? Reflectable {
+        if let diff = arg.starting as? ReflectionDiffType {
+            let dictionary = try reflector.diff(from: diff.value1, to: diff.value2, granular: diff.granular)
+            let data = try JSONSerialization.data(withJSONObject: dictionary, options: [])
+            request.httpBody = data
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        } else if let reflectable = arg.starting as? Reflectable {
             let dictionary = try reflector.convertToDictionary(from: reflectable)
             let data = try JSONSerialization.data(withJSONObject: dictionary, options: [])
             request.httpBody = data
