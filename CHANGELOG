@@ -1,3 +1,7 @@
+v0.9.0
+- Added Reflector.update
+- Removed assert that prevented creation args from differing from starting args
+
 v0.8.2
 - Polished up connection error reporting
 
