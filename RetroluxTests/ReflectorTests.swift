@@ -777,6 +777,42 @@ class RetroluxReflectorTests: XCTestCase {
             XCTFail("Failed with error: \(error)")
         }
     }
+    
+    func testUpdate() {
+        class Person: Reflection {
+            var name = ""
+            var age = 0
+            
+            var friend: Person?
+        }
+        
+        class Dog: Reflection {
+            var name: String?
+            var age: NSNumber?
+            
+            var friend: Dog?
+        }
+        
+        let person = Person()
+        
+        let dog = Dog()
+        dog.name = "Scrufus"
+        dog.age = 13
+        
+        dog.friend = Dog()
+        dog.friend!.name = "Bubbles"
+        dog.friend!.age = 9
+        
+        do {
+            try Reflector().update(person, with: dog)
+            XCTAssert(person.name == "Scrufus")
+            XCTAssert(person.age == 13)
+            XCTAssert(person.friend!.name == "Bubbles")
+            XCTAssert(person.friend!.age == 9)
+        } catch {
+            XCTFail("Failed with error: \(error)")
+        }
+    }
 }
 
 class Object: NSObject {

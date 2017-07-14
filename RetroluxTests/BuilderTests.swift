@@ -278,4 +278,22 @@ class BuilderTests: XCTestCase {
         _ = request(NSNull()).perform()
         XCTAssert(Date() > start2 + 0.5)
     }
+    
+    func testCreationArgDiffTypeThanStartingArg() {
+        class Base: Reflection {
+            var base = ""
+        }
+        
+        class Person: Base {
+            var person = ""
+        }
+        
+        let builder = Builder.dry()
+        let request = builder.makeRequest(method: .get, endpoint: "", args: Base(), response: Void.self)
+        let p = Person()
+        p.base = "b"
+        p.person = "p"
+        let response = request(p).perform()
+        XCTAssert(response.request.httpBody == "{\"person\":\"p\",\"base\":\"b\"}".data(using: .utf8)!)
+    }
 }

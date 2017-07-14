@@ -238,7 +238,6 @@ open class Builder {
         for (creation, starting) in zip(normalizedCreationArgs, normalizedStartingArgs) {
             assert((creation.serializer != nil) == (starting.serializer != nil), "Somehow normalize failed to produce the same results on both sides.")
             assert(creation.serializer == nil || creation.serializer === starting.serializer, "Normalize didn't produce the same serializer on both sides.")
-            assert(creation.type == starting.type, "Normalize determined a different type between creation and starting, which should be impossible.")
             
             let arg = BuilderArg(type: creation.type, creation: creation.value, starting: starting.value)
             

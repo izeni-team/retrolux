@@ -11,6 +11,11 @@ import Foundation
 public struct RetroluxErrorDescription {
     public let description: String
     public let suggestion: String?
+    
+    public init(description: String, suggestion: String?) {
+        self.description = description
+        self.suggestion = suggestion
+    }
 }
 
 public protocol RetroluxError: LocalizedError, CustomStringConvertible, CustomDebugStringConvertible {

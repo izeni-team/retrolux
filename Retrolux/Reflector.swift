@@ -338,4 +338,15 @@ open class Reflector {
         }
         return result
     }
+    
+    open func update(_ reflectable: Reflectable, with other: Reflectable) throws {
+        let properties = try reflect(reflectable)
+        let otherProperties = try reflect(other)
+        for property in properties {
+            if let otherProperty = otherProperties.first(where: { $0.serializedName == property.serializedName }) {
+                let otherValue = try value(for: otherProperty, on: other)
+                try set(value: otherValue, for: property, on: reflectable)
+            }
+        }
+    }
 }
