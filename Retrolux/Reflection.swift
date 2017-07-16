@@ -67,4 +67,12 @@ open class Reflection: NSObject, Reflectable, ReflectableSubclassingIsAllowed {
     open class func config(_ c: PropertyConfig) {
         
     }
+    
+    open func afterDeserialization(remoteData: [String : Any]) throws {
+        
+    }
+    
+    open func afterSerialization(remoteData: inout [String : Any]) throws {
+        
+    }
 }

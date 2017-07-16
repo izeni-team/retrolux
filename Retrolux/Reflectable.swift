@@ -63,6 +63,14 @@ public protocol Reflectable: NSObjectProtocol {
     //func clearChanges() resetChanges() markAsHavingNoChanges() What to name this thing?
     //func revertChanges() // MAYBE?
     
+    /// Use this to make customizations to the object on a worker queue after
+    /// deserialization from remote data to a class is complete.
+    func afterDeserialization(remoteData: [String: Any]) throws
+    
+    /// Use this to make customizations to the remote data on a worker queue after
+    /// serialization from a class to remote data is complete.
+    func afterSerialization(remoteData: inout [String: Any]) throws
+    
     func validate() throws
     static func config(_ c: PropertyConfig)
 }
@@ -73,6 +81,14 @@ extension Reflectable {
     }
     
     public static func config(_ c: PropertyConfig) {
+        
+    }
+    
+    public func afterDeserialization(remoteData: [String: Any]) throws {
+        
+    }
+    
+    public func afterSerialization(remoteData: inout [String: Any]) throws {
         
     }
 }

@@ -87,6 +87,7 @@ open class Reflector {
             let rawValue = dictionary[property.serializedName]
             try set(value: rawValue, for: property, on: instance)
         }
+        try instance.afterDeserialization(remoteData: dictionary)
         return instance
     }
     
@@ -105,6 +106,7 @@ open class Reflector {
             let value = try self.value(for: property, on: instance)
             dictionary[property.serializedName] = value
         }
+        try instance.afterSerialization(remoteData: &dictionary)
         return dictionary
     }
     
@@ -207,16 +209,6 @@ open class Reflector {
             if !isSupportedType {
                 throw ReflectionError.propertyNotSupported(propertyName: label, type: type, forClass: subjectType)
             }
-            
-                // We don't know what type this property is, so it's unsupported.
-                // The user should probably add this to their list of ignored properties if it reaches this point.
-                
-//                throw ReflectionError.propertyNotSupported(
-//                    propertyName: label,
-//                    valueType: valueType,
-//                    forClass: subjectType
-//                )
-//            }
             
             guard instance.responds(to: Selector(label)) else {
                 // This property cannot be seen by the Objective-C runtime.
@@ -339,6 +331,7 @@ open class Reflector {
         return result
     }
     
+    /// WARNING: Does not call afterDeserialization or afterSerialization.
     open func update(_ reflectable: Reflectable, with other: Reflectable) throws {
         let properties = try reflect(reflectable)
         let otherProperties = try reflect(other)
