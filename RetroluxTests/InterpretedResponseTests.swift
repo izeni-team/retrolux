@@ -142,4 +142,15 @@ class InterpretedResponseTests: XCTestCase {
             }
         }
     }
+    
+    func testResponsePublicInitializer() {
+        _ = Response<Void>(
+            request: URLRequest(url: URL(string: "https://www.google.com/")!),
+            data: nil,
+            error: nil,
+            urlResponse: nil,
+            body: nil,
+            interpreter: { _ in return InterpretedResponse<Void>.success(()) }
+        )
+    }
 }

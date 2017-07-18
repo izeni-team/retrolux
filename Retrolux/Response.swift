@@ -40,4 +40,21 @@ public struct Response<T> {
     public var headers: [String: String] {
         return (httpUrlResponse?.allHeaderFields as? [String: String]) ?? [:]
     }
+    
+    public init(
+        request: URLRequest,
+        data: Data?,
+        error: Error?,
+        urlResponse: URLResponse?,
+        body: T?,
+        interpreter: @escaping (Response<T>) -> InterpretedResponse<T>
+    )
+    {
+        self.request = request
+        self.data = data
+        self.error = error
+        self.urlResponse = urlResponse
+        self.body = body
+        self.interpreter = interpreter
+    }
 }

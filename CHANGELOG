@@ -1,3 +1,6 @@
+v0.10.1
+- Made Response<T>'s initializer public.
+
 v0.10.0
 - Added Reflectable.afterDeserialization and Reflectable.afterSerialization
 
