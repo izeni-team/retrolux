@@ -8,18 +8,13 @@
 
 import Foundation
 
-public struct Response<T> {
+public class UninterpretedResponse<T> {
     // Do we want the NSURLRequest or NSHTTPURLResponse?
     public let request: URLRequest
     public let data: Data?
     public let error: Error?
     public let urlResponse: URLResponse?
     public let body: T?
-    internal let interpreter: (Response<T>) -> InterpretedResponse<T>
-    
-    public var interpreted: InterpretedResponse<T> {
-        return interpreter(self)
-    }
     
     public var isSuccessful: Bool {
         return body != nil && isHttpStatusOk
@@ -46,15 +41,63 @@ public struct Response<T> {
         data: Data?,
         error: Error?,
         urlResponse: URLResponse?,
-        body: T?,
-        interpreter: @escaping (Response<T>) -> InterpretedResponse<T>
-    )
+        body: T?
+        )
     {
         self.request = request
         self.data = data
         self.error = error
         self.urlResponse = urlResponse
         self.body = body
-        self.interpreter = interpreter
+    }
+}
+
+public class Response<T>: UninterpretedResponse<T> {
+    // Do we want the NSURLRequest or NSHTTPURLResponse?
+    public let interpreted: InterpretedResponse<T>
+    
+    internal convenience init(
+        request: URLRequest,
+        data: Data?,
+        error: Error?,
+        urlResponse: URLResponse?,
+        body: T?,
+        interpreter: (UninterpretedResponse<T>) -> InterpretedResponse<T>
+        )
+    {
+        let uninterpreted = UninterpretedResponse(
+            request: request,
+            data: data,
+            error: error,
+            urlResponse: urlResponse,
+            body: body
+        )
+        self.init(
+            request: request,
+            data: data,
+            error: error,
+            urlResponse: urlResponse,
+            body: body,
+            interpreted: interpreter(uninterpreted)
+        )
+    }
+    
+    public init(
+        request: URLRequest,
+        data: Data?,
+        error: Error?,
+        urlResponse: URLResponse?,
+        body: T?,
+        interpreted _interpreted: InterpretedResponse<T>
+    )
+    {
+        interpreted = _interpreted
+        super.init(
+            request: request,
+            data: data,
+            error: error,
+            urlResponse: urlResponse,
+            body: body
+        )
     }
 }

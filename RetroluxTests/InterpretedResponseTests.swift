@@ -150,7 +150,7 @@ class InterpretedResponseTests: XCTestCase {
             error: nil,
             urlResponse: nil,
             body: nil,
-            interpreter: { _ in return InterpretedResponse<Void>.success(()) }
+            interpreted: InterpretedResponse<Void>.failure(NSError(domain: "ERR_TEST", code: 3, userInfo: nil))
         )
     }
 }

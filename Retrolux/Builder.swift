@@ -93,7 +93,7 @@ open class Builder {
         }
     }
     
-    open func interpret<T>(response: Response<T>) -> InterpretedResponse<T> {
+    open func interpret<T>(response: UninterpretedResponse<T>) -> InterpretedResponse<T> {
         // BuilderErrors are highest priority over other kinds of errors,
         // because they represent errors creating the request.
         if let error = response.error as? BuilderError {
@@ -278,7 +278,7 @@ open class Builder {
         let error: Error?
         
         if let error = clientResponse.error {
-            let response: Response<ResponseType> = Response(
+            let response = Response<ResponseType>(
                 request: request,
                 data: clientResponse.data,
                 error: error,
