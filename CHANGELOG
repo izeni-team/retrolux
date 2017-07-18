@@ -1,5 +1,8 @@
+v0.10.2
+- Made Response<T>'s initializer accept interpreted response
+
 v0.10.1
-- Made Response<T>'s initializer public.
+- Made Response<T>'s initializer public
 
 v0.10.0
 - Added Reflectable.afterDeserialization and Reflectable.afterSerialization
