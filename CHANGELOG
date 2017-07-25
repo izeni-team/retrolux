@@ -1,3 +1,6 @@
+v0.10.3
+- Wrap all serializer errors in a common enum
+
 v0.10.2
 - Made Response<T>'s initializer accept interpreted response
 

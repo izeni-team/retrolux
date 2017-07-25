@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'Retrolux'
-  s.version          = '0.10.2'
+  s.version          = '0.10.3'
   s.summary          = 'An all in one networking solution, like Retrofit.'
 
 # This description is used to generate tags and improve search results.
