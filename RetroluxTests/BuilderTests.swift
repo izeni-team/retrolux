@@ -225,7 +225,7 @@ class BuilderTests: XCTestCase {
         builder.serializers = [serializer]
         let function = builder.makeRequest(method: .post, endpoint: "whateverz", args: Int(), response: Void.self)
         let response = function(3).perform()
-        if let error = response.error, case BuilderError.serializerError(serializer: let s, error: let e, arguments: let args) = error {
+        if let error = response.error, case BuilderError.serializationError(serializer: let s, error: let e, arguments: let args) = error {
             XCTAssert(s === serializer)
             XCTAssert(e is GreedyOutbound<Int>.Error)
             XCTAssert(args.count == 1)

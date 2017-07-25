@@ -260,7 +260,7 @@ open class Builder {
             do {
                 try serializer.apply(arguments: serializerArgs, to: &request)
             } catch {
-                throw BuilderError.serializerError(serializer: serializer, error: error, arguments: serializerArgs)
+                throw BuilderError.serializationError(serializer: serializer, error: error, arguments: serializerArgs)
             }
         }
         
@@ -299,7 +299,7 @@ open class Builder {
                     error = nil
                 } catch let serializerError {
                     body = nil
-                    error = serializerError
+                    error = BuilderResponseError.deserializationError(serializer: serializer, error: serializerError, clientResponse: clientResponse)
                 }
             } else {
                 // This is incorrect usage of Retrolux, hence it is a fatal error.
