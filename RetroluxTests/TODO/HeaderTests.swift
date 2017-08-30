@@ -12,14 +12,14 @@ import Retrolux
 
 class HeaderTests: XCTestCase {
     func testSingleHeader() {
-        XCFTail()
+        XCTFail()
     }
     
     func testThreeHeaders() {
-        XCFTail()
+        XCTFail()
     }
     
     func testHeaderDictionary() {
-        XCFTail()
+        XCTFail()
     }
 }

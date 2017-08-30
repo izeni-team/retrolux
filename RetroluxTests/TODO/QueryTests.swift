@@ -12,14 +12,14 @@ import Retrolux
 
 class QueryTests: XCTestCase {
     func testSingleQuery() {
-        XCFTail()
+        XCTFail()
     }
     
     func testThreeQueries() {
-        XCFTail()
+        XCTFail()
     }
     
     func testQueryDictionary() {
-        XCFTail()
+        XCTFail()
     }
 }

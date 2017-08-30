@@ -22,21 +22,23 @@ class JSONEncoderTests: XCTestCase {
         XCTAssert(response.request.value(forHTTPHeaderField: "Content-Type") == "application/json")
     }
     
-    // I.e., builder.make(..., body: (Person, Person).self, ...)
+    // I.e., builder.make(..., body: (Person, Person).self, ...).
+    // Whether or not multiple bodies are supported is up to the encoder.
     func testMultipleBodies() {
-        XCFTail()
+        XCTFail()
     }
     
+    // Decodable but not encodable objects should raise an error that there are no supported encodables.
     func testDecodableButNotEncodable() {
-        XCFTail()
+        XCTFail()
     }
     
     func testThrowExceptionDuringEncoding() {
-        XCFTail()
+        XCTFail()
     }
     
     // I.e., sending "3" as the body (String is Encodable) instead of an object.
     func testInvalidRootType() {
-        XCFTail()
+        XCTFail()
     }
 }

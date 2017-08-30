@@ -12,14 +12,14 @@ import Retrolux
 
 class BuilderTests: XCTestCase {
     func testEmptyGetRequest() {
-        XCFTail()
+        XCTFail()
     }
     
     func testUnsupportedBodyType() {
-        XCFTail()
+        XCTFail()
     }
     
     func testUnsupportedArg() {
-        XCFTail()
+        XCTFail()
     }
 }

@@ -11,6 +11,28 @@ import XCTest
 @testable import Retrolux
 
 class BuilderOptionalArgsTests: XCTestCase {
+    
+//    func testArgs() {
+//        typealias Value = (Int, String, (Int, String)?)
+//        let value1: Value = (1,"test", (2, "test2"))
+//
+//        func iterate(with value1: Any, value2: Any) -> Any {
+//
+//            switch value {
+//            case is Int: return value1 as! Int + value2 as! Int
+//            case is String:
+//
+//            }
+//
+//
+//            if let value = value as? Int {
+//
+//            }
+//        }
+//
+//        print(iterate(with: value1))
+//    }
+//
     func testArgumentParser() {
         struct Test {
             struct Nested {
