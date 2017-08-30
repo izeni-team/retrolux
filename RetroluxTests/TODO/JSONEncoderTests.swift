@@ -24,19 +24,19 @@ class JSONEncoderTests: XCTestCase {
     
     // I.e., builder.make(..., body: (Person, Person).self, ...)
     func testMultipleBodies() {
-        
+        XCFTail()
     }
     
     func testDecodableButNotEncodable() {
-        
+        XCFTail()
     }
     
     func testThrowExceptionDuringEncoding() {
-        
+        XCFTail()
     }
     
     // I.e., sending "3" as the body (String is Encodable) instead of an object.
     func testInvalidRootType() {
-        
+        XCFTail()
     }
 }
