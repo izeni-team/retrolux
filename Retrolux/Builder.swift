@@ -2,320 +2,395 @@
 //  Builder.swift
 //  Retrolux
 //
-//  Created by Bryan Henderson on 1/26/17.
-//  Copyright © 2017 Bryan. All rights reserved.
+//  Created by Christopher Bryan Henderson on 8/21/17.
+//  Copyright © 2017 Christopher Bryan Henderson. All rights reserved.
 //
 
 import Foundation
 
-// State for each request is captured as soon as possible, instead of when it is needed.
-// It is assumed that this behavior is more intuitive.
-public struct RequestCapturedState {
-    public var base: URL
-    public var workerQueue: DispatchQueue
+public enum Method {
+    case get(String)
+    case post(String)
+    case delete(String)
+    case put(String)
+    case options(String)
+    case head(String)
+    case patch(String)
+    
+    public var path: String {
+        switch self {
+        case .get(let path), .post(let path), .delete(let path):
+            return path
+        case .put(let path), .options(let path), .head(let path):
+            return path
+        case .patch(let path):
+            return path
+        }
+    }
+    
+    public var method: String {
+        switch self {
+        case .get:
+            return "GET"
+        case .post:
+            return "POST"
+        case .delete:
+            return "DELETE"
+        case .put:
+            return "PUT"
+        case .options:
+            return "OPTIONS"
+        case .head:
+            return "HEAD"
+        case .patch:
+            return "PATCH"
+        }
+    }
+}
+
+public protocol BuilderEncoder {
+    func supports<T>(type: T.Type) -> Bool
+    func encode<T>(body: T) throws -> (contentType: String, body: Data)
+}
+
+public protocol BuilderDecoder {
+    func supports<T>(type: T.Type) -> Bool
+    func decode<T>(_ data: Data) throws -> T
+}
+
+public protocol Client {
+    func start(_ request: URLRequest, _ callback: @escaping (ResponseData) -> Void) -> Call
+}
+
+// TODO: Make Path, Query, Header, etc. all conform to and implement this protocol.
+public protocol BuilderArg {
+    static func apply(creation: BuilderArg, starting: BuilderArg, to request: inout URLRequest)
+}
+
+extension URLSessionTask: Call {
+    public var isCancelled: Bool {
+        return state == .canceling
+    }
+}
+
+open class URLSessionClient: Client {
+    open func start(_ request: URLRequest, _ callback: @escaping (ResponseData) -> Void) -> Call {
+        let session = URLSession(configuration: .default)
+        let task = session.dataTask(with: request) { (data: Data?, urlResponse: URLResponse?, error: Error?) in
+            let httpResponse = urlResponse as? HTTPURLResponse
+            let headers = httpResponse?.allHeaderFields as? [String: String]
+            let responseData = ResponseData(body: data, status: httpResponse?.statusCode, headers: headers, error: error)
+            callback(responseData)
+        }
+        return task
+    }
+}
+
+public struct Path: BuilderArg {
+    public let value: String
+    
+    public init(_ value: String) {
+        self.value = value
+    }
+    
+    public init(_ value: Int) {
+        self.value = String(value)
+    }
+    
+    public static func apply(creation: BuilderArg, starting: BuilderArg, to request: inout URLRequest) {
+        let c = creation as! Path
+        let s = starting as! Path
+        if let url = request.url {
+            let toReplace = "%7B\(c.value as String)%7D"
+            let newURL = URL(string: url.absoluteString.replacingOccurrences(of: toReplace, with: s.value))
+            request.url = newURL
+        }
+    }
+}
+
+class DryClient: URLSessionClient {
+    init(_ simulated: ResponseData) {
+        self.simulated = simulated
+    }
+    
+    let simulated: ResponseData
+    override func start(_ request: URLRequest, _ callback: @escaping (ResponseData) -> Void) -> Call {
+        callback(simulated)
+        struct Dud: Call {
+            var isCancelled: Bool = false
+            mutating func cancel() {
+                self.isCancelled = true
+            }
+        }
+        return Dud()
+    }
+}
+
+enum BuilderCreationError: Error {
+    case unsupportedBuilderArg
+    case unsupportedBodyType
+}
+
+extension Encodable {
+    func encode() throws -> Data {
+        return try JSONEncoder().encode(self)
+    }
+}
+
+extension Decodable {
+    static func decode(from data: Data) throws -> Any {
+        return try JSONDecoder().decode(Self.self, from: data)
+    }
 }
 
 open class Builder {
-    private static let dryBase = URL(string: "e7c37c97-5483-4522-b400-106505fbf6ff/")!
-    open class func dry() -> Builder {
-        return Builder(base: self.dryBase)
+    class HackEncoder: Encodable {
+        var encoder: Encoder!
+        func encode(to encoder: Encoder) throws {
+            self.encoder = encoder
+        }
     }
     
-    open var base: URL
-    open let isDryModeEnabled: Bool
-    open var callFactory: CallFactory
+    struct HackDecoder: Decodable {
+        let decoder: Decoder
+        init(from decoder: Decoder) throws {
+            self.decoder = decoder
+        }
+    }
+    
+    open class JSONEncoder: Foundation.JSONEncoder, BuilderEncoder {
+        open func supports<T>(type: T.Type) -> Bool {
+            return type is Encodable.Type
+        }
+        
+        public func encode<T>(body: T) throws -> (contentType: String, body: Data) {
+            guard let encodable = body as? Encodable else {
+                throw BuilderCreationError.unsupportedBodyType
+            }
+            
+            return (
+                contentType: "application/json",
+                body: try encodable.encode()
+            )
+        }
+    }
+    
+    open class JSONDecoder: Foundation.JSONDecoder, BuilderDecoder {
+        open func supports<T>(type: T.Type) -> Bool {
+            return type is Decodable.Type
+        }
+        
+        open func decode<T>(_ data: Data) throws -> T {
+            guard let decodableType = T.self as? Decodable.Type else {
+                throw BuilderCreationError.unsupportedBodyType // TODO: Throw different error.
+            }
+            
+            return try decodableType.decode(from: data) as! T
+        }
+    }
+    
+    open let workerQueue: DispatchQueue = DispatchQueue(label: "Retrolux")
+    open let base: URL
+    open var encoders: [BuilderEncoder]
+    open var decoders: [BuilderDecoder]
     open var client: Client
-    open var serializers: [Serializer]
-    open var requestInterceptor: ((inout URLRequest) -> Void)?
-    open var responseInterceptor: ((inout ClientResponse) -> Void)?
-    open var workerQueue = DispatchQueue(
-        label: "Retrolux.worker",
-        qos: .background,
-        attributes: .concurrent,
-        autoreleaseFrequency: .inherit,
-        target: nil
-    )
-    open var stateToCapture: RequestCapturedState {
-        return RequestCapturedState(
-            base: base,
-            workerQueue: workerQueue
-        )
-    }
-    open func outboundSerializers() -> [OutboundSerializer] {
-        return serializers.flatMap { $0 as? OutboundSerializer }
-    }
-    
-    open func inboundSerializers() -> [InboundSerializer] {
-        return serializers.flatMap { $0 as? InboundSerializer }
-    }
     
     public init(base: URL) {
         self.base = base
-        self.isDryModeEnabled = base == type(of: self).dryBase
-        self.callFactory = HTTPCallFactory()
-        self.client = HTTPClient()
-        self.serializers = [
-            ReflectionJSONSerializer(),
-            MultipartFormDataSerializer(),
-            URLEncodedSerializer()
-        ]
-        self.requestInterceptor = nil
-        self.responseInterceptor = nil
+        self.encoders = [JSONEncoder()]
+        self.decoders = [JSONDecoder()]
+        self.client = URLSessionClient()
     }
     
-    open func log(request: URLRequest) {
-        print("Retrolux: \(request.httpMethod!) \(request.url!.absoluteString.removingPercentEncoding!)")
-    }
-    
-    open func log<T>(response: Response<T>) {
-        let status = response.status ?? 0
+    open func test() {
+        class User {}
         
-        if response.error is BuilderError == false {
-            let requestURL = response.request.url!.absoluteString.removingPercentEncoding!
-            print("Retrolux: \(status) \(requestURL)")
-        }
-        
-        if let error = response.error {
-            if let localized = error as? LocalizedError {
-                if let errorDescription = localized.errorDescription {
-                    print("Retrolux: Error: \(errorDescription)")
-                }
-                if let recoverySuggestion = localized.recoverySuggestion {
-                    print("Retrolux: Suggestion: \(recoverySuggestion)")
-                }
-                
-                if localized.errorDescription == nil && localized.recoverySuggestion == nil {
-                    print("Retrolux: Error: \(error)")
-                }
-            } else {
-                print("Retrolux: Error: \(error)")
-            }
-        }
-    }
-    
-    open func interpret<T>(response: UninterpretedResponse<T>) -> InterpretedResponse<T> {
-        // BuilderErrors are highest priority over other kinds of errors,
-        // because they represent errors creating the request.
-        if let error = response.error as? BuilderError {
-            return .failure(error)
-        }
-        
-        if !response.isHttpStatusOk {
-            if response.urlResponse == nil, let error = response.error {
-                return .failure(ResponseError.connectionError(error))
-            }
-            return .failure(ResponseError.invalidHttpStatusCode(code: response.status))
-        }
-        
-        if let error = response.error {
-            return .failure(error)
-        }
-        
-        if let body = response.body {
-            return .success(body)
-        } else {
-            assert(false, "This should be impossible.")
-            return .failure(NSError(domain: "Retrolux.Error", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to serialize response for an unknown reason."]))
-        }
-    }
-    
-    private func normalize(arg: Any, serializerType: OutboundSerializerType, serializers: [OutboundSerializer]) -> [(serializer: OutboundSerializer?, value: Any?, type: Any.Type)] {
-        if type(of: arg) == Void.self {
-            return []
-        } else if let wrapped = arg as? WrappedSerializerArg {
-            if let value = wrapped.value {
-                return normalize(arg: value, serializerType: serializerType, serializers: serializers)
-            } else {
-                return [(serializers.first(where: { serializerType.isDesired(serializer: $0) && $0.supports(outboundType: wrapped.type) }), nil, wrapped.type)]
-            }
-        } else if let opt = arg as? OptionalHelper {
-            if let value = opt.value {
-                return normalize(arg: value, serializerType: serializerType, serializers: serializers)
-            } else {
-                return [(serializers.first(where: { serializerType.isDesired(serializer: $0) && $0.supports(outboundType: opt.type) }), nil, opt.type)]
-            }
-        } else if arg is SelfApplyingArg {
-            return [(nil, arg, type(of: arg))]
-        } else if let serializer = serializers.first(where: { serializerType.isDesired(serializer: $0) && $0.supports(outboundType: type(of: arg)) }) {
-            return [(serializer, arg, type(of: arg))]
-        } else {
-            let beneath = Mirror(reflecting: arg).children.reduce([]) {
-                $0 + normalize(arg: $1.value, serializerType: serializerType, serializers: serializers)
-            }
-            if beneath.isEmpty {
-                return [(nil, arg, type(of: arg))]
-            } else {
-                return beneath
-            }
-        }
-    }
-    
-    open func makeRequest<Args, ResponseType>(type: OutboundSerializerType = .auto, method: HTTPMethod, endpoint: String, args creationArgs: Args, response: ResponseType.Type, testProvider: ((Args, Args, URLRequest) -> ClientResponse)? = nil) -> (Args) -> Call<ResponseType> {
-        return { startingArgs in
-            var task: Task?
-            
-            let enqueue: CallEnqueueFunction<ResponseType> = { (state, callback) in
-                var request = URLRequest(url: state.base.appendingPathComponent(endpoint))
-                request.httpMethod = method.rawValue
-                
-                do {
-                    try self.applyArguments(
-                        type: type,
-                        state: state,
-                        endpoint: endpoint,
-                        method: method,
-                        creation: creationArgs,
-                        starting: startingArgs,
-                        modifying: &request,
-                        responseType: response
-                    )
-                    
-                    self.requestInterceptor?(&request)
-                    self.log(request: request)
-                    
-                    if self.isDryModeEnabled {
-                        let provider = testProvider ?? { _ in ClientResponse(data: nil, response: nil, error: nil) }
-                        let clientResponse = provider(creationArgs, startingArgs, request)
-                        let response = self.process(immutableClientResponse: clientResponse, request: request, responseType: ResponseType.self)
-                        self.log(response: response)
-                        callback(response)
-                    } else {
-                        task = self.client.makeAsynchronousRequest(request: &request) { (clientResponse) in
-                            state.workerQueue.async {
-                                let response = self.process(immutableClientResponse: clientResponse, request: request, responseType: ResponseType.self)
-                                self.log(response: response)
-                                callback(response)
-                            }
-                        }
-                        task!.resume()
-                    }
-                } catch {
-                    let response = Response<ResponseType>(
-                        request: request,
-                        data: nil,
-                        error: error,
-                        urlResponse: nil,
-                        body: nil,
-                        interpreter: self.interpret
-                    )
-                    self.log(response: response)
-                    callback(response)
-                }
+        struct EncoderHint<Type, Encoder> {
+            static func getType() -> Any.Type {
+                return Type.self
             }
             
-            let cancel = { () -> Void in
-                task?.cancel()
+            static func getEncoderType() -> Any.Type {
+                return Encoder.self
             }
+        }
+        
+        typealias JSON<T> = EncoderHint<T, JSONEncoder>
+        
+        let request = make(.get("users/{id}/"), args: Path("id"), body: Void.self, response: Int.self)
+        _ = request.enqueue((Path("id"), ())) { (response) in
             
-            let capture = { self.stateToCapture }
-            
-            return self.callFactory.makeCall(capture: capture, enqueue: enqueue, cancel: cancel)
         }
     }
     
-    func applyArguments<Args, ResponseType>(
-        type: OutboundSerializerType,
-        state: RequestCapturedState,
-        endpoint: String,
-        method: HTTPMethod,
-        creation: Args,
-        starting: Args,
-        modifying request: inout URLRequest,
-        responseType: ResponseType.Type
-        ) throws
+    var depth = 0
+    open func flatten(_ args: Any, type: Any.Type) throws -> [BuilderArg?] {
+        return []
+//        depth += 1
+//        defer {
+//            depth -= 1
+//        }
+//
+//        let print = { (string: String) -> Void in
+//            var d = self.depth
+//            while d > 1 {
+//                Swift.print("  ", separator: "", terminator: "")
+//                d -= 1
+//            }
+//            Swift.print(string)
+//        }
+//
+//        let type = Swift.type(of: creation)
+//        print("type(of: creation): \(type), creation: \(creation), starting: \(starting)")
+//
+//        if creation is Void {
+//            return []
+//        }
+//        if let arg = creation as? BuilderArg {
+//            return [arg]
+//        }
+//        let mirror = Mirror(reflecting: args)
+//        print("mirror.children.count: \(mirror.children.count)")
+//        if mirror.children.isEmpty {
+//            return []
+////            throw BuilderCreationError.unsupportedBuilderArg
+//        }
+//        return try Mirror(reflecting: args).children.reduce([]) {
+//            $0 + (try flattenBuilderArgs($1.value, type: Swift.type(of: $1.value)))
+//        }
+    }
+    
+    internal func decode(from data: Data) throws -> Void {
+        return ()
+    }
+    
+    internal func decode<R>(from data: Data) throws -> R {
+        if R.self == Void.self {
+            return () as! R
+        }
+        
+        guard let decoder = decoders.first(where: { $0.supports(type: R.self) }) else {
+            fatalError() // TODO: Error message or throw exception.
+        }
+        
+        return try decoder.decode(data)
+    }
+    
+    internal func encode(using body: Void) throws -> (contentType: String, body: Data)? {
+        return nil
+    }
+    
+    internal func encode<B>(using body: B) throws -> (contentType: String, body: Data)? {
+        if B.self == Void.self {
+            return nil
+        }
+        
+        guard let encoder = encoders.first(where: { $0.supports(type: B.self) }) else {
+            throw BuilderCreationError.unsupportedBodyType
+        }
+        
+        return try encoder.encode(body: body)
+    }
+    
+    internal func parseArguments<A>(creation: A, starting: A) throws -> [(BuilderArg?, BuilderArg?)] {
+        let flattenedCreation = try flatten(creation, type: type(of: creation))
+        let flattenedStart = try flatten(starting, type: type(of: starting))
+        assert(flattenedCreation.count == flattenedStart.count)
+        let parsedArguments = Array(zip(flattenedCreation, flattenedStart))
+        return parsedArguments
+    }
+    
+    internal func applyArguments<A, B, Q>(creationArgs: A, body: B.Type, requestArgs: Q, to request: inout URLRequest) throws
     {
-        let outboundSerializers = self.outboundSerializers()
-        let normalizedCreationArgs = self.normalize(arg: creation, serializerType: type, serializers: outboundSerializers) // Args used to create this request
-        let normalizedStartingArgs = self.normalize(arg: starting, serializerType: type, serializers: outboundSerializers) // Args passed in when executing this request
+        let startingArgs: A
+        let body: B
         
-        assert(normalizedCreationArgs.count == normalizedStartingArgs.count)
-        
-        var selfApplying: [BuilderArg] = []
-        
-        var serializer: OutboundSerializer?
-        var serializerArgs: [BuilderArg] = []
-        
-        for (creation, starting) in zip(normalizedCreationArgs, normalizedStartingArgs) {
-            assert((creation.serializer != nil) == (starting.serializer != nil), "Somehow normalize failed to produce the same results on both sides.")
-            assert(creation.serializer == nil || creation.serializer === starting.serializer, "Normalize didn't produce the same serializer on both sides.")
-            
-            let arg = BuilderArg(type: creation.type, creation: creation.value, starting: starting.value)
-            
-            if creation.type is SelfApplyingArg.Type {
-                selfApplying.append(arg)
-            } else if let thisSerializer = creation.serializer {
-                if serializer == nil {
-                    serializer = thisSerializer
-                } else {
-                    // Serializer already set
-                }
-                
-                serializerArgs.append(arg)
-            } else {
-                throw BuilderError.unsupportedArgument(arg)
-            }
+        if Q.self == Void.self {
+            startingArgs = () as! A
+            body = () as! B
+        } else if A.self == Void.self && B.self == Q.self {
+            startingArgs = () as! A
+            body = requestArgs as! B
+        } else if A.self == Q.self && B.self == Void.self {
+            startingArgs = requestArgs as! A
+            body = () as! B
+        } else {
+            (startingArgs, body) = requestArgs as! (A, B)
         }
         
-        if let serializer = serializer {
-            do {
-                try serializer.apply(arguments: serializerArgs, to: &request)
-            } catch {
-                throw BuilderError.serializationError(serializer: serializer, error: error, arguments: serializerArgs)
-            }
-        }
+        // Process HTTP body first, so that arguments may override the Content-Type header if they so wish.
+        let encoded = try self.encode(using: body)
+        request.httpBody = encoded?.body
+        request.setValue(encoded?.contentType, forHTTPHeaderField: "Content-Type")
         
-        for arg in selfApplying {
-            let type = arg.type as! SelfApplyingArg.Type
-            type.apply(arg: arg, to: &request)
+        // Process non-HTTP body arguments
+        let parsedArguments = try parseArguments(creation: creationArgs, starting: startingArgs)
+        for arg in parsedArguments {
+            let (creation, starting) = arg
+            if let creation = creation, let starting = starting {
+                let type = Swift.type(of: creation)
+                assert(Swift.type(of: creation) == Swift.type(of: starting))
+                type.apply(creation: creation, starting: starting, to: &request)
+            }
         }
     }
     
-    func process<ResponseType>(immutableClientResponse: ClientResponse, request: URLRequest, responseType: ResponseType.Type) -> Response<ResponseType> {
-        var clientResponse = immutableClientResponse
-        self.responseInterceptor?(&clientResponse)
-        
-        let body: ResponseType?
-        let error: Error?
-        
-        if let error = clientResponse.error {
-            let response = Response<ResponseType>(
-                request: request,
-                data: clientResponse.data,
-                error: error,
-                urlResponse: clientResponse.response,
-                body: nil,
-                interpreter: self.interpret
-            )
-            return response
-        }
-        
-        if ResponseType.self == Void.self {
-            body = (() as! ResponseType)
-            error = nil
+    enum ProcessResponseError: Error {
+        case missingBody
+    }
+    
+    internal func process<R>(_ d: ResponseData, request: URLRequest) throws -> Response<R> {
+        if R.self == Void.self {
+            return Response(status: d.status, body: () as? R, headers: d.headers, error: d.error, request: request)
+        } else if let body = d.body {
+            let body: R = try self.decode(from: body)
+            return Response(status: d.status, body: body, headers: d.headers, error: d.error, request: request)
         } else {
-            if let serializer = inboundSerializers().first(where: { $0.supports(inboundType: ResponseType.self) }) {
+            throw ProcessResponseError.missingBody
+        }
+    }
+    
+    internal func _make<A, B, R, Q>(_ method: Method, args creationArgs: A, body: B.Type, response: R.Type, requestArgs: Q.Type) -> Request<Q, Response<R>, Call> {
+        let factory: (Request<Q, Response<R>, Call>, Q, ResponseData?, @escaping (Response<R>) -> Void) -> Call = { (r, q, s, c) -> Call in
+            var request = r.data
+            try! self.applyArguments(creationArgs: creationArgs, body: B.self, requestArgs: q, to: &request)
+            let client = s == nil ? self.client : DryClient(s!)
+            return client.start(request, { (responseData) in
+                let processed: Response<R>
                 do {
-                    body = try serializer.makeValue(from: clientResponse, type: ResponseType.self)
-                    error = nil
-                } catch let serializerError {
-                    body = nil
-                    error = BuilderResponseError.deserializationError(serializer: serializer, error: serializerError, clientResponse: clientResponse)
+                    processed = try self.process(responseData, request: request)
+                } catch {
+                    processed = Response(
+                        status: responseData.status,
+                        body: nil,
+                        headers: responseData.headers,
+                        error: responseData.error ?? error,
+                        request: request
+                    )
                 }
-            } else {
-                // This is incorrect usage of Retrolux, hence it is a fatal error.
-                fatalError("Unsupported argument type when processing request: \(ResponseType.self)")
-            }
+                c(processed)
+            })
         }
         
-        let response: Response<ResponseType> = Response(
-            request: request,
-            data: clientResponse.data,
-            error: error ?? clientResponse.error,
-            urlResponse: clientResponse.response,
-            body: body,
-            interpreter: self.interpret
-        )
-        
-        return response
+        let url = base.appendingPathComponent(method.path)
+        var request = URLRequest(url: url)
+        request.httpMethod = method.method
+        return Request(data: request, simulatedResponse: nil, factory: factory)
+    }
+    
+    open func make<A, B, R>(_ method: Method, args: A, body: B.Type, response: R.Type) -> Request<(A, B), Response<R>, Call> {
+        return _make(method, args: args, body: body, response: response, requestArgs: (A, B).self)
+    }
+
+    open func make<A, R>(_ method: Method, args: A, response: R.Type) -> Request<A, Response<R>, Call> {
+        return _make(method, args: args, body: Void.self, response: response, requestArgs: A.self)
+    }
+    
+    open func make<B, R>(_ method: Method, body: B.Type, response: R.Type) -> Request<B, Response<R>, Call> {
+        return _make(method, args: (), body: body, response: response, requestArgs: B.self)
+    }
+
+    open func make<R>(_ method: Method, response: R.Type) -> Request<Void, Response<R>, Call> {
+        return _make(method, args: (), body: Void.self, response: response, requestArgs: Void.self)
     }
 }

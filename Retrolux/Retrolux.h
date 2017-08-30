@@ -2,8 +2,8 @@
 //  Retrolux.h
 //  Retrolux
 //
-//  Created by Bryan Henderson on 2/28/17.
-//  Copyright © 2017 Bryan. All rights reserved.
+//  Created by Christopher Bryan Henderson on 8/8/17.
+//  Copyright © 2017 Christopher Bryan Henderson. All rights reserved.
 //
 
 #import <UIKit/UIKit.h>
