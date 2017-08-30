@@ -55,6 +55,17 @@ class BuilderOptionalArgsTests: XCTestCase {
             XCTFail("Incorrect number of parsed arguments.")
         }
         
+        let test1BCreation: Test = Test(nested: nil, path3: Path("3"))
+        let test1BStarting: Test = Test(nested: Test.Nested(path1: Path("one"), path2: Path("two")), path3: Path("three"))
+        let parsed1B = try! makeTestBuilder().parseArguments(creation: test1BCreation, starting: test1BStarting) as! [(Path?, Path?)]
+        if parsed1B.count == 3 {
+            XCTAssert(parsed1B[0].0 == nil && parsed1B[0].1?.value == "one")
+            XCTAssert(parsed1B[1].0 == nil && parsed1B[1].1?.value == "two")
+            XCTAssert(parsed1B[2].0?.value == "3" && parsed1B[2].1?.value == "three")
+        } else {
+            XCTFail("Incorrect number of parsed arguments.")
+        }
+        
         let test2Creation = Test(nested: Test.Nested(path1: Path("1"), path2: Path("2")), path3: Path("3"))
         let test2Starting = Test(nested: Test.Nested(path1: Path("one"), path2: nil), path3: Path("three"))
         let parsed2 = try! makeTestBuilder().parseArguments(creation: test2Creation, starting: test2Starting) as! [(Path?, Path?)]
