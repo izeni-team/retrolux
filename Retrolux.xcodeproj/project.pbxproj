@@ -20,6 +20,7 @@
 		4968F04D1F54F6F900DC43C0 /* HeaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4968F04C1F54F6F900DC43C0 /* HeaderTests.swift */; };
 		499474CA1F4B447B005F1131 /* Request.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499474C91F4B447B005F1131 /* Request.swift */; };
 		49A0FA0E1F55BCA900802ABF /* BuilderOptionalArgsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A0FA0D1F55BCA900802ABF /* BuilderOptionalArgsTests.swift */; };
+		49FA42651F60C02800383626 /* JSONDecoderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49FA42641F60C02800383626 /* JSONDecoderTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,6 +50,7 @@
 		4968F04C1F54F6F900DC43C0 /* HeaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeaderTests.swift; sourceTree = "<group>"; };
 		499474C91F4B447B005F1131 /* Request.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Request.swift; sourceTree = "<group>"; };
 		49A0FA0D1F55BCA900802ABF /* BuilderOptionalArgsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuilderOptionalArgsTests.swift; sourceTree = "<group>"; };
+		49FA42641F60C02800383626 /* JSONDecoderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONDecoderTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -120,6 +122,7 @@
 				4968F0431F54EAFF00DC43C0 /* QueryTests.swift */,
 				4968F04C1F54F6F900DC43C0 /* HeaderTests.swift */,
 				4968F0481F54F47600DC43C0 /* JSONEncoderTests.swift */,
+				49FA42641F60C02800383626 /* JSONDecoderTests.swift */,
 			);
 			path = TODO;
 			sourceTree = "<group>";
@@ -253,6 +256,7 @@
 				4968F0491F54F47600DC43C0 /* JSONEncoderTests.swift in Sources */,
 				4968F04B1F54F51600DC43C0 /* MethodTests.swift in Sources */,
 				4920F00A1F3A8AB600874AFE /* PathTests.swift in Sources */,
+				49FA42651F60C02800383626 /* JSONDecoderTests.swift in Sources */,
 				496493011F4FA6A100D4E6A7 /* BuilderTests.swift in Sources */,
 				49A0FA0E1F55BCA900802ABF /* BuilderOptionalArgsTests.swift in Sources */,
 				4968F0441F54EAFF00DC43C0 /* QueryTests.swift in Sources */,

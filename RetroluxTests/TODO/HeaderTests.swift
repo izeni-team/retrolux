@@ -13,7 +13,11 @@ import Retrolux
 class HeaderTests: XCTestCase {
     func testSingleHeader() {
         let builder = makeTestBuilder()
-        let request = builder.make(.get(""), args: Header("Custom-Header"), response: Void.self)
+        let request = builder.make(
+            .get(""),
+            args: Header("Custom-Header"),
+            response: Void.self
+        )
         let response = request.test(Header("some-value"), simulated: .empty)
         XCTAssert(response.request.value(forHTTPHeaderField: "Custom-Header") == "some-value")
         XCTAssert(response.request.allHTTPHeaderFields?.count == 1)
