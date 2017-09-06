@@ -108,6 +108,20 @@ public struct Path: BuilderArg {
     }
 }
 
+public struct Header: BuilderArg {
+    public let value: String
+    
+    public init(_ value: String) {
+        self.value = value
+    }
+    
+    public static func apply(creation: BuilderArg, starting: BuilderArg, to request: inout URLRequest) {
+        let c = creation as! Header
+        let s = starting as! Header
+        request.setValue(s.value, forHTTPHeaderField: c.value)
+    }
+}
+
 class DryClient: URLSessionClient {
     init(_ simulated: ResponseData) {
         self.simulated = simulated
