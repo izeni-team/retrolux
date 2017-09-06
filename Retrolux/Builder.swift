@@ -353,7 +353,10 @@ open class Builder {
     internal func _make<A, B, R, Q>(_ method: Method, args creationArgs: A, body: B.Type, response: R.Type, requestArgs: Q.Type) -> Request<Q, Response<R>, Call> {
         let factory: (Request<Q, Response<R>, Call>, Q, ResponseData?, @escaping (Response<R>) -> Void) -> Call = { (r, q, s, c) -> Call in
             var request = r.data
+            
+            // TODO: Catch this exception
             try! self.applyArguments(creationArgs: creationArgs, body: B.self, requestArgs: q, to: &request)
+            
             let client = s == nil ? self.client : DryClient(s!)
             return client.start(request, { (responseData) in
                 let processed: Response<R>
