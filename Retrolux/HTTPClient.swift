@@ -9,16 +9,15 @@
 import Foundation
 
 // TODO: Add support for ignoring SSL errors.
-public class HTTPClient: NSObject, Client, URLSessionDelegate, URLSessionTaskDelegate {
-    public private(set) var session: URLSession!
+open class HTTPClient: NSObject, Client, URLSessionDelegate, URLSessionTaskDelegate {
+    open var session: URLSession!
     
     public override init() {
         super.init()
-        let configuration = URLSessionConfiguration.default
-        session = URLSession(configuration: configuration, delegate: self, delegateQueue: nil)
+        session = URLSession(configuration: .default, delegate: self, delegateQueue: nil)
     }
     
-    public func makeAsynchronousRequest(
+    open func makeAsynchronousRequest(
         request: inout URLRequest,
         callback: @escaping (_ response: ClientResponse) -> Void
         ) -> Task

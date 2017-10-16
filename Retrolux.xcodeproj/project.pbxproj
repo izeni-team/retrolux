@@ -86,6 +86,7 @@
 		34F6F0601E8F0856002BA263 /* ReflectorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F6F0591E8F0856002BA263 /* ReflectorTests.swift */; };
 		34F6F0611E8F0856002BA263 /* ValueTransformerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F6F05A1E8F0856002BA263 /* ValueTransformerTests.swift */; };
 		34F6F0621E8F0856002BA263 /* PropertyTypeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F6F05B1E8F0856002BA263 /* PropertyTypeTests.swift */; };
+		D017283B1F95488000139209 /* ClientInheritanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D017283A1F95488000139209 /* ClientInheritanceTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -204,6 +205,7 @@
 		49DE43471DAAA54C00D41572 /* SelfApplyingArg.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SelfApplyingArg.swift; sourceTree = "<group>"; };
 		49DE43491DAAA57C00D41572 /* WrappedSerializerArg.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WrappedSerializerArg.swift; sourceTree = "<group>"; };
 		49DE434B1DAAD82100D41572 /* Path.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Path.swift; sourceTree = "<group>"; };
+		D017283A1F95488000139209 /* ClientInheritanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientInheritanceTests.swift; sourceTree = "<group>"; };
 		F3A3D0101D875C7A0067D03C /* Response.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Response.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -404,6 +406,7 @@
 				34B8EDAB1E664F2200030FAA /* something.jpg */,
 				4978AA8D1D35A11900E1F1A5 /* Info.plist */,
 				34926EE71E3020CE009E4E42 /* Sensitive.plist */,
+				D017283A1F95488000139209 /* ClientInheritanceTests.swift */,
 			);
 			path = RetroluxTests;
 			sourceTree = "<group>";
@@ -614,6 +617,7 @@
 				34F6F05E1E8F0856002BA263 /* PerformanceTests.swift in Sources */,
 				34B8EDAF1E664FF300030FAA /* Utils.swift in Sources */,
 				34B8ED741E664B2300030FAA /* ReflectionJSONSerializerTests.swift in Sources */,
+				D017283B1F95488000139209 /* ClientInheritanceTests.swift in Sources */,
 				34B8ED781E664B2D00030FAA /* DigestAuthTests.swift in Sources */,
 				34B8ED791E664B3300030FAA /* QueryTests.swift in Sources */,
 				34CA587A1E943EC5001F5E54 /* CustomSerializerTests.swift in Sources */,

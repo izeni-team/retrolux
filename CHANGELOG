@@ -1,3 +1,6 @@
+v0.10.4
+- Made it possible to change configuration of underlying URLSessionConfiguration
+
 v0.10.3
 - Wrap all serializer errors in a common enum
 
