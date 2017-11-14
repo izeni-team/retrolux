@@ -1,6 +1,6 @@
 Retrolux is an all in one networking framework. It is intended to become the equivalent of [Square's Retrofit for Android](http://square.github.io/retrofit/).
 
-**This framework is still in early development.**
+**This framework is still in early development, with v1.0 currently being designed and prototyped.** Retrolux versions less than 1.0 won't be fully documented.
 
 # Why?
 
