@@ -64,8 +64,53 @@ public protocol Client {
 
 // TODO: Make Path, Query, Header, etc. all conform to and implement this protocol.
 public protocol BuilderArg {
-    static func apply(creation: BuilderArg, starting: BuilderArg, to request: inout URLRequest)
+
+/// ->
+    // added throwing and removed static. (to avoid as! casting Self)
+    func apply(starting: BuilderArg?, to request: inout URLRequest) throws
 }
+extension BuilderArg {
+    // added to assert that a value cannot be nil
+    func cannotBeNil(starting: BuilderArg?) throws -> Self {
+        if let starting = starting as? Self {
+            return starting
+        } else {
+            throw Builder.ParseArgumentError.startingCannotBeNil(Self.self)
+        }
+    }
+    // added to cast to self easier.
+    func asSelf(starting: BuilderArg?) throws -> Self? {
+        if starting is Self? || starting is Self {
+            return starting as? Self
+        } else {
+            throw Builder.ParseArgumentError.mismatchTypes(creation: Self.self, starting: type(of: starting))
+        }
+    }
+}
+
+public struct Query: BuilderArg {
+    public let value: String
+    
+    public init(_ value: String) {
+        self.value = value
+    }
+    
+    public init(_ value: Int) {
+        self.value = String(value)
+    }
+    
+    public func apply(starting: BuilderArg?, to request: inout URLRequest) throws {
+        let s = try asSelf(starting: starting)
+        
+        if let url = request.url {
+            let toReplace = "%7B\(value)%7D"
+            let newURL = URL(string: url.absoluteString.replacingOccurrences(of: toReplace, with: s?.value ?? ""))
+            request.url = newURL
+        }
+    }
+}
+
+/// <-
 
 extension URLSessionTask: Call {
     public var isCancelled: Bool {
@@ -87,6 +132,7 @@ open class URLSessionClient: Client {
 }
 
 public struct Path: BuilderArg {
+    
     public let value: String
     
     public init(_ value: String) {
@@ -97,11 +143,12 @@ public struct Path: BuilderArg {
         self.value = String(value)
     }
     
-    public static func apply(creation: BuilderArg, starting: BuilderArg, to request: inout URLRequest) {
-        let c = creation as! Path
-        let s = starting as! Path
+    /// >
+    public func apply(starting: BuilderArg?, to request: inout URLRequest) throws {
+        let s = try self.cannotBeNil(starting: starting)
+        
         if let url = request.url {
-            let toReplace = "%7B\(c.value as String)%7D"
+            let toReplace = "%7B\(self.value)%7D"
             let newURL = URL(string: url.absoluteString.replacingOccurrences(of: toReplace, with: s.value))
             request.url = newURL
         }
@@ -306,13 +353,107 @@ open class Builder {
         return try encoder.encode(body: body)
     }
     
-    internal func parseArguments<A>(creation: A, starting: A) throws -> [(BuilderArg?, BuilderArg?)] {
-        let flattenedCreation = try flatten(creation, type: type(of: creation))
-        let flattenedStart = try flatten(starting, type: type(of: starting))
-        assert(flattenedCreation.count == flattenedStart.count)
-        let parsedArguments = Array(zip(flattenedCreation, flattenedStart))
-        return parsedArguments
+    enum ParseArgumentError: Error {
+        case mismatchTypes(creation: Any.Type, starting: Any.Type)
+        case valueNotBuilderArg(Any.Type)
+        case startingCannotBeNil(Any.Type)
+        case nilArgInCreation
     }
+    
+    /// ->
+    
+    func parseArguments<A>(creation: A, starting: A) throws -> [(BuilderArg, BuilderArg?)] {
+        var array = [(BuilderArg, BuilderArg?)]()
+        try _parseArguments(creation, starting, to: &array)
+        return array
+    }
+    
+    private func _parseArguments(_ creation: Any, _ starting: Any, to array: inout [(BuilderArg, BuilderArg?)]) throws {
+        
+        if isNil(creation) {
+            throw ParseArgumentError.nilArgInCreation
+        }
+        
+        if creation is Void {
+            return
+            
+        } else if creation is BuilderArg {
+            
+            // cannot return or nested args won't have a chance to prepare the request
+            if isNil(starting) {
+                array.append((creation as! BuilderArg, nil))
+                return
+            }
+            
+            if let starting = starting as? BuilderArg {
+                
+                guard type(of: creation) == type(of: starting) else {
+                    throw ParseArgumentError.mismatchTypes(creation: type(of: creation), starting: type(of: creation))
+                }
+                
+                array.append((creation as! BuilderArg, starting))
+                
+            } else {
+                throw ParseArgumentError.valueNotBuilderArg(type(of: starting))
+            }
+            
+        } else if creation as Any? is BuilderArg? {
+            
+            
+            let creation = (creation as! GetUnderyingValueFromOptional).getValue as! BuilderArg
+            let starting = (starting as! GetUnderyingValueFromOptional).getValue
+            
+            if isNil(starting) {
+                array.append((creation, nil))
+            } else {
+                guard type(of: creation) == type(of: starting) else {
+                    throw ParseArgumentError.mismatchTypes(creation: type(of: creation), starting: type(of: starting))
+                }
+                array.append((creation, starting as? BuilderArg))
+            }
+            
+        } else if let creation = creation as? [AnyHashable : Any], let starting = starting as? [AnyHashable : Any] {
+            
+            for (key, _creation) in creation {
+                if let _starting = starting[key] {
+                    try _parseArguments(_creation, _starting, to: &array)
+                } else {
+                    try _parseArguments(_creation, nil as Any? as Any, to: &array)
+                }
+            }
+            
+        } else if let creation = creation as? [Any], let starting = starting as? [Any] {
+            
+            for (index, creation) in creation.enumerated(){
+                if index < starting.count {
+                    try _parseArguments(creation, starting[index], to: &array)
+                } else {
+                    try _parseArguments(creation, nil as Any? as Any, to: &array)
+                }
+            }
+            
+        } else {
+            
+            let creationMirror = Mirror(reflecting: creation).children
+            let startingMirror = Mirror(reflecting: starting).children.map {$0}
+            
+            guard creationMirror.count != 0 else {
+                throw ParseArgumentError.valueNotBuilderArg(type(of: creation))
+            }
+            
+            for (index, creation) in creationMirror.enumerated() {
+                
+                if index < startingMirror.count {
+                    try _parseArguments(creation.value, startingMirror[index].value, to: &array)
+                } else {
+                    // still need to parse the left side arguments if the right side is nil.
+                    try _parseArguments(creation.value, nil as Any? as Any, to: &array)
+                }
+            }
+        }
+    }
+    
+    /// <-
     
     internal func applyArguments<A, B, Q>(creationArgs: A, body: B.Type, requestArgs: Q, to request: inout URLRequest) throws
     {
@@ -339,13 +480,10 @@ open class Builder {
         
         // Process non-HTTP body arguments
         let parsedArguments = try parseArguments(creation: creationArgs, starting: startingArgs)
-        for arg in parsedArguments {
-            let (creation, starting) = arg
-            if let creation = creation, let starting = starting {
-                let type = Swift.type(of: creation)
-                assert(Swift.type(of: creation) == Swift.type(of: starting))
-                type.apply(creation: creation, starting: starting, to: &request)
-            }
+        
+        /// >
+        for (creation, starting) in parsedArguments {
+            try creation.apply(starting: starting, to: &request)
         }
     }
     
@@ -411,3 +549,53 @@ open class Builder {
         return _make(method, args: (), body: Void.self, response: response, requestArgs: Void.self)
     }
 }
+
+/// ->>
+
+fileprivate protocol GetUnderyingValueFromOptional {
+    var getValue: Any {get}
+}
+
+extension Optional: GetUnderyingValueFromOptional {
+    var getValue: Any {
+        if case .some(let value) = self {
+            return value
+        } else {
+            
+            return nil as Any? as Any
+        }
+    }
+}
+
+protocol CanBeNil {
+    var isNil: Bool {get}
+}
+
+extension NSNull: CanBeNil { var isNil: Bool { return true } }
+extension Optional: CanBeNil {
+    var isNil: Bool {
+        if case .some(let wrapped) = self {
+            if let canBeNil = wrapped as? CanBeNil {
+                return canBeNil.isNil
+            } else {
+                return false
+            }
+        } else {
+            return true
+        }
+    }
+}
+
+func isNil(_ value: Any?) -> Bool {
+    return value.isNil
+}
+
+
+
+
+
+
+
+
+
+
