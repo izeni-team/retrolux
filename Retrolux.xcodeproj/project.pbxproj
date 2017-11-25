@@ -7,20 +7,20 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		49165DC01F4B392E00C65394 /* Builder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49165DBF1F4B392E00C65394 /* Builder.swift */; };
 		4920F0051F3A8AB600874AFE /* Retrolux.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4920EFFB1F3A8AB600874AFE /* Retrolux.framework */; };
-		4920F00A1F3A8AB600874AFE /* PathTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4920F0091F3A8AB600874AFE /* PathTests.swift */; };
 		4920F00C1F3A8AB600874AFE /* Retrolux.h in Headers */ = {isa = PBXBuildFile; fileRef = 4920EFFE1F3A8AB600874AFE /* Retrolux.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		4920F0161F3A8AF700874AFE /* Builder_scratchpad.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4920F0151F3A8AF700874AFE /* Builder_scratchpad.swift */; };
-		496493011F4FA6A100D4E6A7 /* BuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 496493001F4FA6A100D4E6A7 /* BuilderTests.swift */; };
-		4968F0441F54EAFF00DC43C0 /* QueryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4968F0431F54EAFF00DC43C0 /* QueryTests.swift */; };
-		4968F0471F54EB1900DC43C0 /* Common.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4968F0461F54EB1900DC43C0 /* Common.swift */; };
-		4968F0491F54F47600DC43C0 /* JSONEncoderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4968F0481F54F47600DC43C0 /* JSONEncoderTests.swift */; };
-		4968F04B1F54F51600DC43C0 /* MethodTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4968F04A1F54F51600DC43C0 /* MethodTests.swift */; };
-		4968F04D1F54F6F900DC43C0 /* HeaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4968F04C1F54F6F900DC43C0 /* HeaderTests.swift */; };
-		499474CA1F4B447B005F1131 /* Request.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499474C91F4B447B005F1131 /* Request.swift */; };
-		49A0FA0E1F55BCA900802ABF /* BuilderOptionalArgsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A0FA0D1F55BCA900802ABF /* BuilderOptionalArgsTests.swift */; };
-		49FA42651F60C02800383626 /* JSONDecoderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49FA42641F60C02800383626 /* JSONDecoderTests.swift */; };
+		D0B565EA1FC90ACC00995EEA /* RequestBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0B565E91FC90ACC00995EEA /* RequestBuilder.swift */; };
+		D0B565EC1FC90B7800995EEA /* Request.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0B565EB1FC90B7800995EEA /* Request.swift */; };
+		D0B565EF1FC90C3E00995EEA /* RequestBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0B565EE1FC90C3E00995EEA /* RequestBuilderTests.swift */; };
+		D0B565F11FC90C5300995EEA /* Call.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0B565F01FC90C5300995EEA /* Call.swift */; };
+		D0B565F31FC90C9500995EEA /* Response.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0B565F21FC90C9500995EEA /* Response.swift */; };
+		D0B565F51FC9114A00995EEA /* Field.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0B565F41FC9114A00995EEA /* Field.swift */; };
+		D0B565F71FC9119C00995EEA /* RequestBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0B565F61FC9119C00995EEA /* RequestBody.swift */; };
+		D0B565F91FC911AA00995EEA /* Part.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0B565F81FC911AA00995EEA /* Part.swift */; };
+		D0B5CB3B1FC916A90093C384 /* BodyEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0B5CB3A1FC916A90093C384 /* BodyEncoder.swift */; };
+		D0B5CB3D1FC916AF0093C384 /* BodyDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0B5CB3C1FC916AF0093C384 /* BodyDecoder.swift */; };
+		D0B5CB3F1FC916C40093C384 /* JSONBodyEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0B5CB3E1FC916C40093C384 /* JSONBodyEncoder.swift */; };
+		D0B5CB411FC916F40093C384 /* JSONBodyDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0B5CB401FC916F40093C384 /* JSONBodyDecoder.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -34,23 +34,24 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		49165DBF1F4B392E00C65394 /* Builder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Builder.swift; sourceTree = "<group>"; };
 		4920EFFB1F3A8AB600874AFE /* Retrolux.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Retrolux.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4920EFFE1F3A8AB600874AFE /* Retrolux.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Retrolux.h; sourceTree = "<group>"; };
 		4920EFFF1F3A8AB600874AFE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4920F0041F3A8AB600874AFE /* RetroluxTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RetroluxTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		4920F0091F3A8AB600874AFE /* PathTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PathTests.swift; sourceTree = "<group>"; };
 		4920F00B1F3A8AB600874AFE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		4920F0151F3A8AF700874AFE /* Builder_scratchpad.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Builder_scratchpad.swift; sourceTree = "<group>"; };
-		496493001F4FA6A100D4E6A7 /* BuilderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuilderTests.swift; sourceTree = "<group>"; };
-		4968F0431F54EAFF00DC43C0 /* QueryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QueryTests.swift; sourceTree = "<group>"; };
-		4968F0461F54EB1900DC43C0 /* Common.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Common.swift; sourceTree = "<group>"; };
-		4968F0481F54F47600DC43C0 /* JSONEncoderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONEncoderTests.swift; sourceTree = "<group>"; };
-		4968F04A1F54F51600DC43C0 /* MethodTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MethodTests.swift; sourceTree = "<group>"; };
-		4968F04C1F54F6F900DC43C0 /* HeaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeaderTests.swift; sourceTree = "<group>"; };
-		499474C91F4B447B005F1131 /* Request.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Request.swift; sourceTree = "<group>"; };
-		49A0FA0D1F55BCA900802ABF /* BuilderOptionalArgsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuilderOptionalArgsTests.swift; sourceTree = "<group>"; };
-		49FA42641F60C02800383626 /* JSONDecoderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONDecoderTests.swift; sourceTree = "<group>"; };
+		D0B565E91FC90ACC00995EEA /* RequestBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestBuilder.swift; sourceTree = "<group>"; };
+		D0B565EB1FC90B7800995EEA /* Request.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Request.swift; sourceTree = "<group>"; };
+		D0B565ED1FC90C3E00995EEA /* RetroluxTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RetroluxTests-Bridging-Header.h"; sourceTree = "<group>"; };
+		D0B565EE1FC90C3E00995EEA /* RequestBuilderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestBuilderTests.swift; sourceTree = "<group>"; };
+		D0B565F01FC90C5300995EEA /* Call.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Call.swift; sourceTree = "<group>"; };
+		D0B565F21FC90C9500995EEA /* Response.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Response.swift; sourceTree = "<group>"; };
+		D0B565F41FC9114A00995EEA /* Field.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Field.swift; sourceTree = "<group>"; };
+		D0B565F61FC9119C00995EEA /* RequestBody.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestBody.swift; sourceTree = "<group>"; };
+		D0B565F81FC911AA00995EEA /* Part.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Part.swift; sourceTree = "<group>"; };
+		D0B5CB3A1FC916A90093C384 /* BodyEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BodyEncoder.swift; sourceTree = "<group>"; };
+		D0B5CB3C1FC916AF0093C384 /* BodyDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BodyDecoder.swift; sourceTree = "<group>"; };
+		D0B5CB3E1FC916C40093C384 /* JSONBodyEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONBodyEncoder.swift; sourceTree = "<group>"; };
+		D0B5CB401FC916F40093C384 /* JSONBodyDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONBodyDecoder.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -95,9 +96,17 @@
 			children = (
 				4920EFFE1F3A8AB600874AFE /* Retrolux.h */,
 				4920EFFF1F3A8AB600874AFE /* Info.plist */,
-				4920F0151F3A8AF700874AFE /* Builder_scratchpad.swift */,
-				49165DBF1F4B392E00C65394 /* Builder.swift */,
-				499474C91F4B447B005F1131 /* Request.swift */,
+				D0B565E91FC90ACC00995EEA /* RequestBuilder.swift */,
+				D0B565EB1FC90B7800995EEA /* Request.swift */,
+				D0B565F01FC90C5300995EEA /* Call.swift */,
+				D0B565F21FC90C9500995EEA /* Response.swift */,
+				D0B565F41FC9114A00995EEA /* Field.swift */,
+				D0B565F61FC9119C00995EEA /* RequestBody.swift */,
+				D0B565F81FC911AA00995EEA /* Part.swift */,
+				D0B5CB3A1FC916A90093C384 /* BodyEncoder.swift */,
+				D0B5CB3C1FC916AF0093C384 /* BodyDecoder.swift */,
+				D0B5CB3E1FC916C40093C384 /* JSONBodyEncoder.swift */,
+				D0B5CB401FC916F40093C384 /* JSONBodyDecoder.swift */,
 			);
 			path = Retrolux;
 			sourceTree = "<group>";
@@ -105,26 +114,11 @@
 		4920F0081F3A8AB600874AFE /* RetroluxTests */ = {
 			isa = PBXGroup;
 			children = (
-				4968F0451F54EB0A00DC43C0 /* TODO */,
-				4920F0091F3A8AB600874AFE /* PathTests.swift */,
 				4920F00B1F3A8AB600874AFE /* Info.plist */,
-				496493001F4FA6A100D4E6A7 /* BuilderTests.swift */,
-				4968F0461F54EB1900DC43C0 /* Common.swift */,
-				4968F04A1F54F51600DC43C0 /* MethodTests.swift */,
-				49A0FA0D1F55BCA900802ABF /* BuilderOptionalArgsTests.swift */,
+				D0B565EE1FC90C3E00995EEA /* RequestBuilderTests.swift */,
+				D0B565ED1FC90C3E00995EEA /* RetroluxTests-Bridging-Header.h */,
 			);
 			path = RetroluxTests;
-			sourceTree = "<group>";
-		};
-		4968F0451F54EB0A00DC43C0 /* TODO */ = {
-			isa = PBXGroup;
-			children = (
-				4968F0431F54EAFF00DC43C0 /* QueryTests.swift */,
-				4968F04C1F54F6F900DC43C0 /* HeaderTests.swift */,
-				4968F0481F54F47600DC43C0 /* JSONEncoderTests.swift */,
-				49FA42641F60C02800383626 /* JSONDecoderTests.swift */,
-			);
-			path = TODO;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -196,7 +190,7 @@
 					4920F0031F3A8AB600874AFE = {
 						CreatedOnToolsVersion = 8.3.3;
 						DevelopmentTeam = GPR2QT5748;
-						LastSwiftMigration = 0900;
+						LastSwiftMigration = 0910;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -241,9 +235,17 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4920F0161F3A8AF700874AFE /* Builder_scratchpad.swift in Sources */,
-				499474CA1F4B447B005F1131 /* Request.swift in Sources */,
-				49165DC01F4B392E00C65394 /* Builder.swift in Sources */,
+				D0B5CB3F1FC916C40093C384 /* JSONBodyEncoder.swift in Sources */,
+				D0B565F51FC9114A00995EEA /* Field.swift in Sources */,
+				D0B565F31FC90C9500995EEA /* Response.swift in Sources */,
+				D0B5CB411FC916F40093C384 /* JSONBodyDecoder.swift in Sources */,
+				D0B5CB3B1FC916A90093C384 /* BodyEncoder.swift in Sources */,
+				D0B565F91FC911AA00995EEA /* Part.swift in Sources */,
+				D0B565EC1FC90B7800995EEA /* Request.swift in Sources */,
+				D0B5CB3D1FC916AF0093C384 /* BodyDecoder.swift in Sources */,
+				D0B565F11FC90C5300995EEA /* Call.swift in Sources */,
+				D0B565EA1FC90ACC00995EEA /* RequestBuilder.swift in Sources */,
+				D0B565F71FC9119C00995EEA /* RequestBody.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -251,15 +253,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4968F04D1F54F6F900DC43C0 /* HeaderTests.swift in Sources */,
-				4968F0471F54EB1900DC43C0 /* Common.swift in Sources */,
-				4968F0491F54F47600DC43C0 /* JSONEncoderTests.swift in Sources */,
-				4968F04B1F54F51600DC43C0 /* MethodTests.swift in Sources */,
-				4920F00A1F3A8AB600874AFE /* PathTests.swift in Sources */,
-				49FA42651F60C02800383626 /* JSONDecoderTests.swift in Sources */,
-				496493011F4FA6A100D4E6A7 /* BuilderTests.swift in Sources */,
-				49A0FA0E1F55BCA900802ABF /* BuilderOptionalArgsTests.swift in Sources */,
-				4968F0441F54EAFF00DC43C0 /* QueryTests.swift in Sources */,
+				D0B565EF1FC90C3E00995EEA /* RequestBuilderTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -422,11 +416,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CLANG_ENABLE_MODULES = YES;
 				DEVELOPMENT_TEAM = GPR2QT5748;
 				INFOPLIST_FILE = RetroluxTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.whatever.RetroluxTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "RetroluxTests/RetroluxTests-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_SWIFT3_OBJC_INFERENCE = On;
 				SWIFT_VERSION = 4.0;
 			};
@@ -436,11 +433,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CLANG_ENABLE_MODULES = YES;
 				DEVELOPMENT_TEAM = GPR2QT5748;
 				INFOPLIST_FILE = RetroluxTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.whatever.RetroluxTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "RetroluxTests/RetroluxTests-Bridging-Header.h";
 				SWIFT_SWIFT3_OBJC_INFERENCE = On;
 				SWIFT_VERSION = 4.0;
 			};
