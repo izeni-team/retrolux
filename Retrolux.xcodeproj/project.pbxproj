@@ -17,10 +17,8 @@
 		D0B565F51FC9114A00995EEA /* Field.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0B565F41FC9114A00995EEA /* Field.swift */; };
 		D0B565F71FC9119C00995EEA /* RequestBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0B565F61FC9119C00995EEA /* RequestBody.swift */; };
 		D0B565F91FC911AA00995EEA /* Part.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0B565F81FC911AA00995EEA /* Part.swift */; };
-		D0B5CB3B1FC916A90093C384 /* BodyEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0B5CB3A1FC916A90093C384 /* BodyEncoder.swift */; };
-		D0B5CB3D1FC916AF0093C384 /* BodyDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0B5CB3C1FC916AF0093C384 /* BodyDecoder.swift */; };
-		D0B5CB3F1FC916C40093C384 /* JSONBodyEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0B5CB3E1FC916C40093C384 /* JSONBodyEncoder.swift */; };
-		D0B5CB411FC916F40093C384 /* JSONBodyDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0B5CB401FC916F40093C384 /* JSONBodyDecoder.swift */; };
+		D0B5CB3B1FC916A90093C384 /* Converter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0B5CB3A1FC916A90093C384 /* Converter.swift */; };
+		D0B5CB411FC916F40093C384 /* JSONConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0B5CB401FC916F40093C384 /* JSONConverter.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -48,10 +46,8 @@
 		D0B565F41FC9114A00995EEA /* Field.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Field.swift; sourceTree = "<group>"; };
 		D0B565F61FC9119C00995EEA /* RequestBody.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestBody.swift; sourceTree = "<group>"; };
 		D0B565F81FC911AA00995EEA /* Part.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Part.swift; sourceTree = "<group>"; };
-		D0B5CB3A1FC916A90093C384 /* BodyEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BodyEncoder.swift; sourceTree = "<group>"; };
-		D0B5CB3C1FC916AF0093C384 /* BodyDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BodyDecoder.swift; sourceTree = "<group>"; };
-		D0B5CB3E1FC916C40093C384 /* JSONBodyEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONBodyEncoder.swift; sourceTree = "<group>"; };
-		D0B5CB401FC916F40093C384 /* JSONBodyDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONBodyDecoder.swift; sourceTree = "<group>"; };
+		D0B5CB3A1FC916A90093C384 /* Converter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Converter.swift; sourceTree = "<group>"; };
+		D0B5CB401FC916F40093C384 /* JSONConverter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONConverter.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -103,10 +99,8 @@
 				D0B565F41FC9114A00995EEA /* Field.swift */,
 				D0B565F61FC9119C00995EEA /* RequestBody.swift */,
 				D0B565F81FC911AA00995EEA /* Part.swift */,
-				D0B5CB3A1FC916A90093C384 /* BodyEncoder.swift */,
-				D0B5CB3C1FC916AF0093C384 /* BodyDecoder.swift */,
-				D0B5CB3E1FC916C40093C384 /* JSONBodyEncoder.swift */,
-				D0B5CB401FC916F40093C384 /* JSONBodyDecoder.swift */,
+				D0B5CB3A1FC916A90093C384 /* Converter.swift */,
+				D0B5CB401FC916F40093C384 /* JSONConverter.swift */,
 			);
 			path = Retrolux;
 			sourceTree = "<group>";
@@ -235,14 +229,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D0B5CB3F1FC916C40093C384 /* JSONBodyEncoder.swift in Sources */,
 				D0B565F51FC9114A00995EEA /* Field.swift in Sources */,
 				D0B565F31FC90C9500995EEA /* Response.swift in Sources */,
-				D0B5CB411FC916F40093C384 /* JSONBodyDecoder.swift in Sources */,
-				D0B5CB3B1FC916A90093C384 /* BodyEncoder.swift in Sources */,
+				D0B5CB411FC916F40093C384 /* JSONConverter.swift in Sources */,
+				D0B5CB3B1FC916A90093C384 /* Converter.swift in Sources */,
 				D0B565F91FC911AA00995EEA /* Part.swift in Sources */,
 				D0B565EC1FC90B7800995EEA /* Request.swift in Sources */,
-				D0B5CB3D1FC916AF0093C384 /* BodyDecoder.swift in Sources */,
 				D0B565F11FC90C5300995EEA /* Call.swift in Sources */,
 				D0B565EA1FC90ACC00995EEA /* RequestBuilder.swift in Sources */,
 				D0B565F71FC9119C00995EEA /* RequestBody.swift in Sources */,

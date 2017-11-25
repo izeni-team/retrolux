@@ -1,5 +1,5 @@
 //
-//  BodyDecoder.swift
+//  JSONConverter.swift
 //  Retrolux
 //
 //  Created by Christopher Bryan Henderson on 11/24/17.
@@ -8,4 +8,4 @@
 
 import Foundation
 
-protocol BodyDecoder {}
+struct JSONConverter: Converter {}

@@ -10,8 +10,7 @@ import Foundation
 
 class RequestBuilder {
     let base: URL
-    var encoders: [BodyEncoder] = []
-    var decoders: [BodyDecoder] = []
+    var converters: [Converter] = []
     
     init(base: URL) {
         self.base = base

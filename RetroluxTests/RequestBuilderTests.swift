@@ -20,7 +20,8 @@ class RequestBuilderTests: XCTestCase {
         }
         
         let service = GitHubService(base: URL(string: "https://api.github.com/")!)
-        _ = service.listRepos(for: "octocat")
+        let repos = service.listRepos(for: "octocat")
+        _ = repos
     }
     
     func testExample2() {
@@ -108,7 +109,6 @@ class RequestBuilderTests: XCTestCase {
         class GitHubService: RequestBuilder {}
         
         let service = GitHubService(base: URL(string: "https://api.github.com/")!)
-        service.encoders.append(JSONBodyEncoder())
-        service.decoders.append(JSONBodyDecoder())
+        service.converters.append(JSONConverter())
     }
 }
