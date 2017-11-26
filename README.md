@@ -8,8 +8,6 @@ Jake Wharton, the author of Retrofit, has stated that he has no plans to create 
 
 The most popular networking frameworks for iOS, as of November 2017, are Alamofire and AFNetworking, both of which have workflows that are very different than Retrofit. Considering that there is no mature open source implementation of a Retrofit-like workflow written in Swift, and that Retrofit is the most popular networking framework for Android, and that the most starred Swift project on GitHub is Alamofire, it stands to reason that a Retrofit-like framework for Swift could be a valuable contribution to the open source community.
 
-Currently, Retrolux exists as an impartial, work-in-progress prototype. It is a bit more than a proof of concept, because the old, pre-1.0 version is being used in a few apps already, but it is also a long ways away from Retrofit in terms of features and customizability.
+Currently, Retrolux exists as a prototype. It is a bit more than a proof of concept, because the pre-1.0 version is being employed in a few apps already, but it is also a long ways away from Retrofit in terms of features and customizability.
 
-Link to requirements document: [Retrolux 1.0 - Requirements Document.pdf](https://goo.gl/6f1fqf)
-
-Open the requirements document to see an API preview, as well as a roadmap for development.
+Open the [requirements document](https://goo.gl/6f1fqf) to see an API preview, as well as a roadmap for development.
