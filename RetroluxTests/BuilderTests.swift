@@ -49,17 +49,19 @@ class BuilderTests: XCTestCase {
     }
     
     func testAsyncCapturing() {
-        let builder = Builder(base: URL(string: "8.8.8.8/")!)
+        let builder = Builder.dummy()
         let request = builder.makeRequest(method: .get, endpoint: "", args: (), response: Void.self)
         let originalURL = builder.base
         let expectation = self.expectation(description: "Waiting for response.")
+        var hasRequestComeBackYet = false
         request().enqueue { response in
+            hasRequestComeBackYet = true
             XCTAssert(response.request.url == originalURL)
-            XCTAssert(response.error != nil) // Error should be non-nil, since the builder's dummy baseURL is invalid.
             expectation.fulfill()
         }
         let newURL = URL(string: "8.8.8.8/")!
         builder.base = newURL
+        XCTAssert(!hasRequestComeBackYet)
         waitForExpectations(timeout: 1) { (error) in
             if let error = error {
                 XCTFail("\(error)")
@@ -69,7 +71,6 @@ class BuilderTests: XCTestCase {
         let expectation2 = self.expectation(description: "Waiting for response.")
         request().enqueue { response in
             XCTAssert(response.request.url == newURL)
-            XCTAssert(response.error != nil) // Error should be non-nil, since the builder's dummy baseURL is invalid.
             expectation2.fulfill()
         }
         waitForExpectations(timeout: 1) { (error) in
