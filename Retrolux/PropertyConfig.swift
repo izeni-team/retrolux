@@ -39,7 +39,7 @@ public class PropertyConfig {
     public var storage: [String: [Option]] = [:]
     public var validator: (PropertyConfig, String, [Option]) throws -> Void
     
-    public init(validator: @escaping (PropertyConfig, String, [Option]) throws -> Void = { _ in }) {
+    public init(validator: @escaping (PropertyConfig, String, [Option]) throws -> Void = { _,_,_  in }) {
         self.validator = validator
     }
     

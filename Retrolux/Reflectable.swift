@@ -30,6 +30,7 @@ public func reflectable_setProperty(_ property: Property, value: Any?, instance:
     }
     
     guard let value = value, value is NSNull == false else {
+        // If you get an exception here complaining about implicit ObjC bridging, try adding @objc to your property.
         instance.setValue(nil, forKey: property.name)
         return
     }
@@ -37,6 +38,7 @@ public func reflectable_setProperty(_ property: Property, value: Any?, instance:
     if let transformer = property.transformer {
         try transformer.set(value: value, for: property, instance: instance)
     } else {
+        // If you get an exception here complaining about implicit ObjC bridging, try adding @objc to your property.
         instance.setValue(value, forKey: property.name)
     }
 }

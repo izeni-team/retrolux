@@ -174,7 +174,8 @@ open class Builder {
                     self.log(request: request)
                     
                     if self.isDryModeEnabled {
-                        let provider = testProvider ?? { _ in ClientResponse(data: nil, response: nil, error: nil) }
+                        let fallbackProvider: (Args, Args, URLRequest) -> ClientResponse = { (_, _, _) in ClientResponse(data: nil, response: nil, error: nil) }
+                        let provider = testProvider ?? fallbackProvider
                         let clientResponse = provider(creationArgs, startingArgs, request)
                         let response = self.process(immutableClientResponse: clientResponse, request: request, responseType: ResponseType.self)
                         self.log(response: response)

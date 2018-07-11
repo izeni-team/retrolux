@@ -33,7 +33,7 @@ class InterpretedResponseTests: XCTestCase {
 
     func testInvalidHttpStatusCode() {
         class Person: Reflection {
-            var name: String = ""
+            @objc var name: String = ""
             
             required init() {
                 
@@ -45,7 +45,7 @@ class InterpretedResponseTests: XCTestCase {
         }
         
         let function = Builder.dry().makeRequest(method: .post, endpoint: "whateverz", args: Person(name: "Alice"), response: Person.self, testProvider: {
-            ClientResponse(url: $0.2.url!, data: "{\"name\":null}".data(using: .utf8)!, headers: [:], status: 400, error: nil)
+            ClientResponse(url: $2.url!, data: "{\"name\":null}".data(using: .utf8)!, headers: [:], status: 400, error: nil)
         })
         switch function(Person(name: "Bob")).perform().interpreted {
         case .success(_):
@@ -65,9 +65,9 @@ class InterpretedResponseTests: XCTestCase {
         }
         
         let function = Builder.dry().makeRequest(method: .post, endpoint: "whateverz", args: (), response: Person.self) {
-            ClientResponse(url: $0.2.url!, data: "{\"name\":null}".data(using: .utf8)!, status: 200)
+            ClientResponse(url: $2.url!, data: "{\"name\":null}".data(using: .utf8)!, status: 200)
         }
-        switch function().perform().interpreted {
+        switch function(()).perform().interpreted {
         case .success(_):
             XCTFail("Should not have succeeded.")
         case .failure(let error):
@@ -86,13 +86,13 @@ class InterpretedResponseTests: XCTestCase {
     
     func testSuccess() {
         class Person: Reflection {
-            var name: String = ""
+            @objc var name: String = ""
         }
         
         let function = Builder.dry().makeRequest(method: .post, endpoint: "whateverz", args: (), response: Person.self) {
-            ClientResponse(url: $0.2.url!, data: "{\"name\":\"bobby\"}".data(using: .utf8)!, status: 200)
+            ClientResponse(url: $2.url!, data: "{\"name\":\"bobby\"}".data(using: .utf8)!, status: 200)
         }
-        switch function().perform().interpreted {
+        switch function(()).perform().interpreted {
         case .success(let person):
             XCTAssert(person.name == "bobby")
         case .failure(let error):
@@ -102,13 +102,13 @@ class InterpretedResponseTests: XCTestCase {
     
     func testHTTP400ErrorWithInvalidJSONResponse() {
         class Person: Reflection {
-            var name = ""
+            @objc var name = ""
         }
         
         let function = Builder.dry().makeRequest(method: .post, endpoint: "whatevers", args: (), response: Person.self) {
-            ClientResponse(url: $0.2.url!, data: "ERROR".data(using: .utf8)!, status: 400)
+            ClientResponse(url: $2.url!, data: "ERROR".data(using: .utf8)!, status: 400)
         }
-        switch function().perform().interpreted {
+        switch function(()).perform().interpreted {
         case .success:
             XCTFail("Should not have succeeded")
         case .failure(let error):
@@ -127,14 +127,14 @@ class InterpretedResponseTests: XCTestCase {
             endpoint: "",
             args: (),
             response: Void.self
-        ) { _ in
+        ) { (_, _, _) in
             return ClientResponse(data: nil, response: nil, error: NSError(domain: "Whatever", code: 2, userInfo: [
                 NSLocalizedDescriptionKey: "Localized Description",
                 NSLocalizedRecoverySuggestionErrorKey: "Recovery Suggestion"
                 ]))
         }
         
-        switch request().perform().interpreted {
+        switch request(()).perform().interpreted {
         case .success:
             XCTFail("Should not have succeeded.")
         case .failure(let error):

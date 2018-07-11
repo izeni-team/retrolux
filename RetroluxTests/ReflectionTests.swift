@@ -35,11 +35,11 @@ class ReflectionTests: XCTestCase {
     
     func testRLObjectBasicSerialization() {
         class Model: Reflection {
-            var name = ""
-            var age = 0
-            var whatever = false
-            var meta = [String: String]()
-            var model: Model?
+            @objc var name = ""
+            @objc var age = 0
+            @objc var whatever = false
+            @objc var meta = [String: String]()
+            @objc var model: Model?
         }
         
         let dictionary = [
@@ -130,7 +130,7 @@ class ReflectionTests: XCTestCase {
      */
     func testRLObjectInheritance() {
         class Plain: Reflection {
-            var bad = ""
+            @objc var bad = ""
             
             required init() {
                 super.init()

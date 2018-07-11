@@ -13,7 +13,7 @@ import XCTest
 class TestingTests: XCTestCase {
     func testTest1() {
         class Person: Reflection {
-            var name = ""
+            @objc var name = ""
         }
         
         let builder = Builder.dry()

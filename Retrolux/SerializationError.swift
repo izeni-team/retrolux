@@ -15,6 +15,7 @@ public enum ReflectorSerializationError: RetroluxError {
     case expectedDictionaryRootButGotArrayRoot(type: Any.Type)
     case expectedArrayRootButGotDictionaryRoot(type: Any.Type)
     case invalidJSONData(Error)
+    case missingObjcKeyword(forClass: Any.Type, propertyName: String)
     
     public var rl_error: RetroluxErrorDescription {
         switch self {
@@ -47,6 +48,11 @@ public enum ReflectorSerializationError: RetroluxError {
             return RetroluxErrorDescription(
                 description: "The JSON data was invalid: \(error.localizedDescription)",
                 suggestion: "Valid JSON is required. Check to see if the JSON is malformatted, or corrupt, or something other than JSON."
+            )
+        case .missingObjcKeyword(forClass: let type, propertyName: let name):
+            return RetroluxErrorDescription(
+                description: "The property \"\(name)\" on class \(type) is missing the @objc keyword.",
+                suggestion: "Add @objc keyword to property \"\(name)\" on type \(type)."
             )
         }
     }

@@ -306,7 +306,7 @@ class ReflectionErrorTests: XCTestCase {
     
     func testOptionalValueNotSupported() {
         class Person: Reflection {
-            var name = ""
+            @objc var name = ""
         }
         
         let object = Person()
@@ -341,7 +341,7 @@ class ReflectionErrorTests: XCTestCase {
     
     func testKeyNotFound() {
         class Person: Reflection {
-            var name = ""
+            @objc var name = ""
             
             override class func config(_ c: PropertyConfig) {
                 c["name"] = [.serializedName("not_name")]
@@ -409,5 +409,28 @@ class ReflectionErrorTests: XCTestCase {
         } catch {
             XCTFail("\(error)")
         }
+    }
+    
+    // TODO: How to detect this?
+    // For now, we'll have to be okay with the debugger stopping on every property that doesn't contain @objc.
+    func testMissingObjc() throws {
+        class ShouldWork: Reflection {
+            @objc var first_name = ""
+        }
+        _ = try Reflector().convert(fromDictionary: ["first_name": "Bob"], to: ShouldWork.self)
+        
+//        class ShouldNotWork: Reflection {
+//            var first_name = ""
+//        }
+//        do {
+//            _ = try Reflector().convert(fromDictionary: ["first_name": "Bob"], to: ShouldNotWork.self) as! ShouldNotWork
+//            XCTFail("Should not have succeeded.")
+//        } catch ReflectorSerializationError.missingObjcKeyword(forClass: let forClass, propertyName: let propertyName) {
+//            XCTAssert(forClass == ShouldNotWork.self)
+//            XCTAssert(propertyName == "first_name")
+//            // SUCCESS!
+//        } catch {
+//            XCTFail("\(error)")
+//        }
     }
 }

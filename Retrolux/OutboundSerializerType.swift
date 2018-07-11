@@ -20,7 +20,7 @@ public enum OutboundSerializerType {
         case .auto:
             return true
         case .custom(serializer: let type):
-            return type(of: serializer) == type
+            return Swift.type(of: serializer) == type
         case .json:
             return serializer is ReflectionJSONSerializer
         case .multipart:

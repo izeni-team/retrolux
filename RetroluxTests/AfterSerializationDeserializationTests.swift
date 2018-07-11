@@ -12,11 +12,11 @@ import XCTest
 
 class AfterSerializationDeserializationTests: XCTestCase {
     class Test1: Reflection {
-        var test_one = ""
+        @objc var test_one = ""
     }
     
     class Test2: Reflection {
-        var test_two = ""
+        @objc var test_two = ""
     }
     
     class ResultsResponse<T: Reflection>: Reflection {
@@ -40,7 +40,7 @@ class AfterSerializationDeserializationTests: XCTestCase {
         
         let request1 = builder.makeRequest(method: .get, endpoint: "", args: ResultsResponse<Test2>(), response: ResultsResponse<Test1>.self) {
             let data = "{\"results\":[{\"test_one\":\"SUCCESS_1\"}]}".data(using: .utf8)!
-            return ClientResponse(url: $0.2.url!, data: data, headers: [:], status: 200, error: nil)
+            return ClientResponse(url: $2.url!, data: data, headers: [:], status: 200, error: nil)
         }
         let body2 = ResultsResponse<Test2>()
         let test2 = Test2()
@@ -54,7 +54,7 @@ class AfterSerializationDeserializationTests: XCTestCase {
         
         let request2 = builder.makeRequest(method: .get, endpoint: "", args: ResultsResponse<Test1>(), response: ResultsResponse<Test2>.self) {
             let data = "{\"results\":[{\"test_two\":\"SUCCESS_2\"}]}".data(using: .utf8)!
-            return ClientResponse(url: $0.2.url!, data: data, headers: [:], status: 200, error: nil)
+            return ClientResponse(url: $2.url!, data: data, headers: [:], status: 200, error: nil)
         }
         let body1 = ResultsResponse<Test1>()
         let test1 = Test1()

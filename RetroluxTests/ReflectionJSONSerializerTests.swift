@@ -24,8 +24,8 @@ class ReflectionJSONSerializerTests: XCTestCase {
     
     func testBasicSendReceive() {
         class Person: Reflection {
-            var name = ""
-            var age = 0
+            @objc var name = ""
+            @objc var age = 0
         }
         
         let serializer = ReflectionJSONSerializer()
@@ -237,8 +237,8 @@ class ReflectionJSONSerializerTests: XCTestCase {
         
         do {
             class Person: Reflection {
-                var name = ""
-                var age = 0
+                @objc var name = ""
+                @objc var age = 0
             }
             let p1 = Person()
             let p2 = Person()

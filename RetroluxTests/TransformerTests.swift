@@ -28,7 +28,7 @@ class TransformerTests: XCTestCase {
         }
         
         class Person: NSObject, Reflectable {
-            var data = Data()
+            @objc var data = Data()
             
             static func config(_ c: PropertyConfig) {
                 c["data"] = [.transformed(BasicTransformer.shared)]
@@ -83,7 +83,7 @@ class TransformerTests: XCTestCase {
         }
         
         class Person: Reflection {
-            var custom: Person?
+            @objc var custom: Person?
             
             static var useLocalTransformer = true
             
@@ -120,7 +120,7 @@ class TransformerTests: XCTestCase {
     
     func testURLTransformer() {
         class Person: Reflection {
-            var image_url: URL?
+            @objc var image_url: URL?
         }
         
         // The escaped forwards slash is intentional, and is just NSJSONSerialization trying to conform to HTML

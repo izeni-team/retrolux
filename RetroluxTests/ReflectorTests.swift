@@ -26,8 +26,8 @@ class RetroluxReflectorTests: XCTestCase {
     
     func testSetProperty() {
         class Test: Reflection {
-            var name = ""
-            var nested: Test?
+            @objc var name = ""
+            @objc var nested: Test?
         }
         
         do {
@@ -46,8 +46,8 @@ class RetroluxReflectorTests: XCTestCase {
     
     func testNestedInDictionary() {
         class Test: Reflection {
-            var name = ""
-            var nested: [String: Test] = [:]
+            @objc var name = ""
+            @objc var nested: [String: Test] = [:]
         }
         
         let nestedDictionary: [String: Any] = [
@@ -80,8 +80,8 @@ class RetroluxReflectorTests: XCTestCase {
     
     func testNestedArrayAndDictionary() {
         class Test: Reflection {
-            var name = ""
-            var nested: [[String: Test]] = []
+            @objc var name = ""
+            @objc var nested: [[String: Test]] = []
         }
         
         let nestedArray: [[String: Any]] = [
@@ -131,10 +131,10 @@ class RetroluxReflectorTests: XCTestCase {
     
     func testBasicSerialization() {
         class Car: Reflection {
-            var make = ""
-            var model = ""
-            var year = 0
-            var dealership = false
+            @objc var make = ""
+            @objc var model = ""
+            @objc var year = 0
+            @objc var dealership = false
         }
         
         let responseData = toJSONData([
@@ -160,10 +160,10 @@ class RetroluxReflectorTests: XCTestCase {
     
     func testNullableSerialization() {
         class Car: Reflection {
-            var make: String? = "wrong"
-            var model = ""
-            var year = 0
-            var dealership = false
+            @objc var make: String? = "wrong"
+            @objc var model = ""
+            @objc var year = 0
+            @objc var dealership = false
         }
         
         let responseData = toJSONData([
@@ -188,10 +188,10 @@ class RetroluxReflectorTests: XCTestCase {
     
     func testArrayRoot() {
         class Car: Reflection {
-            var make = ""
-            var model = ""
-            var year = 0
-            var dealership = false
+            @objc var make = ""
+            @objc var model = ""
+            @objc var year = 0
+            @objc var dealership = false
         }
         
         let carData1: [String: Any] = [
@@ -250,8 +250,8 @@ class RetroluxReflectorTests: XCTestCase {
     
     func testArrayOfNestedObjects() {
         class Person: Reflection {
-            var name = ""
-            var friends: [Person] = []
+            @objc var name = ""
+            @objc var friends: [Person] = []
         }
         
         let dictionary: [String: Any] = [
@@ -298,8 +298,8 @@ class RetroluxReflectorTests: XCTestCase {
     
     func testDictionaryOfNestedObjects() {
         class Person: Reflection {
-            var name = ""
-            var friends: [String: [String: Person]] = [:]
+            @objc var name = ""
+            @objc var friends: [String: [String: Person]] = [:]
         }
         
         let dictionary: [String: Any] = [
@@ -342,12 +342,12 @@ class RetroluxReflectorTests: XCTestCase {
     
     func testSingleNestedObject() {
         class Person: Reflection {
-            var person_name = ""
-            var pet: Pet?
+            @objc var person_name = ""
+            @objc var pet: Pet?
         }
         
         class Pet: NSObject, Reflectable {
-            var pet_name = ""
+            @objc var pet_name = ""
             
             required override init() {
                 super.init()
@@ -382,10 +382,10 @@ class RetroluxReflectorTests: XCTestCase {
     
     func testMismatchedJSON() {
         class Car: Reflection {
-            var make = ""
-            var model = ""
-            var year = 0
-            var dealership = false
+            @objc var make = ""
+            @objc var model = ""
+            @objc var year = 0
+            @objc var dealership = false
         }
         
         let responseData = toJSONData([
@@ -415,8 +415,8 @@ class RetroluxReflectorTests: XCTestCase {
     
     func testSendBasicObject() {
         class Object: Reflection {
-            var name = ""
-            var age = 0
+            @objc var name = ""
+            @objc var age = 0
         }
         
         let object = Object()
@@ -440,7 +440,7 @@ class RetroluxReflectorTests: XCTestCase {
     
     func testSendAndReceiveComplexObject() {
         class Pet: Reflection {
-            var name = ""
+            @objc var name = ""
             
             convenience init(name: String) {
                 self.init()
@@ -449,13 +449,13 @@ class RetroluxReflectorTests: XCTestCase {
         }
         
         class Person: Reflection {
-            var name = ""
-            var age = 0
-            var born = Date()
-            var visitDates: [Date] = []
-            var pets: [Pet] = []
-            var bestFriend: Person?
-            var upgradedAt: Date?
+            @objc var name = ""
+            @objc var age = 0
+            @objc var born = Date()
+            @objc var visitDates: [Date] = []
+            @objc var pets: [Pet] = []
+            @objc var bestFriend: Person?
+            @objc var upgradedAt: Date?
             
             override class func config(_ c: PropertyConfig) {
                 c["born"] = [.transformed(DateTransformer())]
@@ -542,7 +542,7 @@ class RetroluxReflectorTests: XCTestCase {
     
     func testAlternativeInheritance() {
         class Test: CustomObject {
-            var name = ""
+            @objc var name = ""
         }
         let t = Test()
         do {
@@ -556,12 +556,12 @@ class RetroluxReflectorTests: XCTestCase {
     func testOptionalNested() {
         class LoginResponse: Reflection {
             class LoginSuccessResponse: Reflection {
-                var user_id = ""
-                var role = ""
+                @objc var user_id = ""
+                @objc var role = ""
             }
             
-            var success: LoginSuccessResponse?
-            var error: String?
+            @objc var success: LoginSuccessResponse?
+            @objc var error: String?
         }
         
         let builder = Builder.dry()
@@ -585,7 +585,7 @@ class RetroluxReflectorTests: XCTestCase {
                 )
             }
         )
-        let response = function().perform()
+        let response = function(()).perform()
         XCTAssert(response.body?.success?.user_id == "123")
         XCTAssert(response.body?.success?.role == "freelancer")
         XCTAssert(response.isSuccessful)
@@ -593,11 +593,11 @@ class RetroluxReflectorTests: XCTestCase {
     
     func testCopyReflection() {
         class Person: Reflection {
-            var first_name = ""
-            var last_name = ""
-            var nickname: String?
-            var image_url: URL?
-            var friends: [Person]?
+            @objc var first_name = ""
+            @objc var last_name = ""
+            @objc var nickname: String?
+            @objc var image_url: URL?
+            @objc var friends: [Person]?
         }
         
         let data = "{\"first_name\":\"Bobby\",\"last_name\":\"Jones\",\"nickname\":null,\"image_url\":\"https://upload.wikimedia.org/wikipedia/commons/4/47/PNG_transparency_demonstration_1.png\",\"friends\":[{\"first_name\":\"Alice\",\"last_name\":\"Rogers\"}]}".data(using: .utf8)!
@@ -638,12 +638,12 @@ class RetroluxReflectorTests: XCTestCase {
     
     func testDiff() {
         class Person: Reflection {
-            var first_name = ""
-            var last_name = ""
-            var nickname: String?
-            var image_url: URL?
-            var favorite_friend: Person?
-            var friends: [Person]?
+            @objc var first_name = ""
+            @objc var last_name = ""
+            @objc var nickname: String?
+            @objc var image_url: URL?
+            @objc var favorite_friend: Person?
+            @objc var friends: [Person]?
         }
         
         let p1 = Person()
@@ -780,17 +780,17 @@ class RetroluxReflectorTests: XCTestCase {
     
     func testUpdate() {
         class Person: Reflection {
-            var name = ""
-            var age = 0
+            @objc var name = ""
+            @objc var age = 0
             
-            var friend: Person?
+            @objc var friend: Person?
         }
         
         class Dog: Reflection {
-            var name: String?
-            var age: NSNumber?
+            @objc var name: String?
+            @objc var age: NSNumber?
             
-            var friend: Dog?
+            @objc var friend: Dog?
         }
         
         let person = Person()

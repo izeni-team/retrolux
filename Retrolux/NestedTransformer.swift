@@ -83,6 +83,7 @@ extension NestedTransformer {
             instance: instance,
             direction: .deserialize
         )
+        // If you get an exception here complaining about implicit ObjC bridging, try adding @objc to your property.
         instance.setValue(transformed, forKey: property.name)
     }
     
@@ -100,7 +101,7 @@ extension NestedTransformer {
             switch direction {
             case .deserialize:
                 if let cast = value as? TypeOfData {
-                    return try setter(cast, type: type(of: value))
+                    return try setter(cast, type: Swift.type(of: value))
                 }
             case .serialize:
                 if let cast = value as? TypeOfProperty {
@@ -108,10 +109,10 @@ extension NestedTransformer {
                 }
             }
             throw NestedTransformerError.typeMismatch(
-                got: type(of: value),
+                got: Swift.type(of: value),
                 expected: TypeOfProperty.self,
                 propertyName: property.name,
-                class: type(of: instance),
+                class: Swift.type(of: instance),
                 direction: direction
             )
         case .optional(let wrapped):
@@ -129,10 +130,10 @@ extension NestedTransformer {
                     return try getter(cast)
                 } else {
                     throw NestedTransformerError.typeMismatch(
-                        got: type(of: value),
+                        got: Swift.type(of: value),
                         expected: TypeOfProperty.self,
                         propertyName: property.name,
-                        class: type(of: instance),
+                        class: Swift.type(of: instance),
                         direction: direction
                     )
                 }
@@ -141,10 +142,10 @@ extension NestedTransformer {
                     return try setter(cast, type: unknownType)
                 } else {
                     throw NestedTransformerError.typeMismatch(
-                        got: type(of: value),
+                        got: Swift.type(of: value),
                         expected: TypeOfData.self,
                         propertyName: property.name,
-                        class: type(of: instance),
+                        class: Swift.type(of: instance),
                         direction: direction
                     )
                 }
@@ -152,10 +153,10 @@ extension NestedTransformer {
         case .array(let inner):
             guard let array = value as? [Any] else {
                 throw NestedTransformerError.typeMismatch(
-                    got: type(of: value),
+                    got: Swift.type(of: value),
                     expected: [Any].self,
                     propertyName: property.name,
-                    class: type(of: instance),
+                    class: Swift.type(of: instance),
                     direction: direction
                 )
             }
@@ -172,10 +173,10 @@ extension NestedTransformer {
             guard let dictionary = value as? [String: Any] else {
                 // TODO: Add a test for this.
                 throw NestedTransformerError.typeMismatch(
-                    got: type(of: value),
+                    got: Swift.type(of: value),
                     expected: [String: Any].self,
                     propertyName: property.name,
-                    class: type(of: instance),
+                    class: Swift.type(of: instance),
                     direction: direction
                 )
             }

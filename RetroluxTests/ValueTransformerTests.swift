@@ -12,8 +12,8 @@ import Retrolux
 class ValueTransformerTests: XCTestCase {
     func testForwards() {
         class Test: Reflection {
-            var name = ""
-            var test: Test?
+            @objc var name = ""
+            @objc var test: Test?
             
             override class func config(_ c: PropertyConfig) {
                 c["test"] = [.nullable]
@@ -40,8 +40,8 @@ class ValueTransformerTests: XCTestCase {
     
     func testNested() {
         class Test: Reflection {
-            var name = ""
-            var friends: [String: Test]? = nil
+            @objc var name = ""
+            @objc var friends: [String: Test]? = nil
             
             convenience init(name: String) {
                 self.init()
@@ -87,9 +87,9 @@ class ValueTransformerTests: XCTestCase {
     
     func testNestedBackwards() {
         class Test: Reflection {
-            var name = ""
-            var age = 0
-            var another: Test?
+            @objc var name = ""
+            @objc var age = 0
+            @objc var another: Test?
         }
         
         let test = Test()
@@ -122,7 +122,7 @@ class ValueTransformerTests: XCTestCase {
     
     func testErrorHandling() {
         class Test: Reflection {
-            var name = ""
+            @objc var name = ""
         }
         
         let dictionary: [String: Any] = [:] // Should trigger a key not found error.
@@ -159,7 +159,7 @@ class ValueTransformerTests: XCTestCase {
         }
         
         class Test: NSObject, Reflectable {
-            var data: Data?
+            @objc var data: Data?
             
             required override init() {
                 super.init()
@@ -205,7 +205,7 @@ class ValueTransformerTests: XCTestCase {
         }
         
         class Test: Reflection {
-            var randomize: Bool = false
+            @objc var randomize: Bool = false
             
             override class func config(_ c: PropertyConfig) {
                 c["randomize"] = [.transformed(BoolTransformer())]

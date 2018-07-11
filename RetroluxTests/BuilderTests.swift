@@ -44,7 +44,7 @@ class BuilderTests: XCTestCase {
                 status: 200
                 )
         }
-        let response = request().perform()
+        let response = request(()).perform()
         XCTAssert(response.isSuccessful)
     }
     
@@ -54,7 +54,7 @@ class BuilderTests: XCTestCase {
         let originalURL = builder.base
         let expectation = self.expectation(description: "Waiting for response.")
         var hasRequestComeBackYet = false
-        request().enqueue { response in
+        request(()).enqueue { response in
             hasRequestComeBackYet = true
             XCTAssert(response.request.url == originalURL)
             expectation.fulfill()
@@ -69,7 +69,7 @@ class BuilderTests: XCTestCase {
         }
         
         let expectation2 = self.expectation(description: "Waiting for response.")
-        request().enqueue { response in
+        request(()).enqueue { response in
             XCTAssert(response.request.url == newURL)
             expectation2.fulfill()
         }
@@ -83,7 +83,7 @@ class BuilderTests: XCTestCase {
     func testURLEscaping() {
         let builder = Builder.dry()
         let request = builder.makeRequest(method: .post, endpoint: "some_endpoint/?query=value a", args: (), response: Void.self)
-        let response = request().perform()
+        let response = request(()).perform()
         XCTAssert(response.request.url?.absoluteString == "\(builder.base.absoluteString)some_endpoint/%3Fquery=value%20a")
     }
     
@@ -143,9 +143,8 @@ class BuilderTests: XCTestCase {
     }
     
     func testDepthRecursion1() {
-        @objc(Person)
         class Person: Reflection {
-            var name = ""
+            @objc var name = ""
         }
         
         let call = Builder.dry().makeRequest(method: .post, endpoint: "login", args: Person(), response: Void.self)
@@ -248,7 +247,7 @@ class BuilderTests: XCTestCase {
         for i in 0..<1000 {
             let expectation = self.expectation(description: "request \(i)")
             expectations.append(expectation)
-            request().enqueue { response in
+            request(()).enqueue { response in
                 expectation.fulfill()
             }
         }
@@ -282,11 +281,11 @@ class BuilderTests: XCTestCase {
     
     func testCreationArgDiffTypeThanStartingArg() {
         class Base: Reflection {
-            var base = ""
+            @objc var base = ""
         }
         
         class Person: Base {
-            var person = ""
+            @objc var person = ""
         }
         
         let builder = Builder.dry()
